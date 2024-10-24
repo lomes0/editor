@@ -1,15 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import type { NextAuthOptions } from "next-auth";
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
-import GoogleProvider, { GoogleProfile } from "next-auth/providers/google";
 import { findUserByEmail, updateUser } from "@/repositories/user";
+import GithubProvide from "next-auth/providers/github"
 
 export const authOptions: NextAuthOptions = {
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-      allowDangerousEmailAccountLinking: true,
+    GithubProvide({
+      clientId: process.env.CLIENT_ID as string,
+      clientSecret: process.env.CLIENT_SECRET as string
     }),
   ],
   adapter: PrismaAdapter(prisma),
