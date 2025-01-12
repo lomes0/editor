@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import type { NextAuthOptions } from "next-auth";
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
+import GoogleProvider, { GoogleProfile } from "next-auth/providers/google"
 import { findUserByEmail, updateUser } from "@/repositories/user";
 import GithubProvide from "next-auth/providers/github"
 
@@ -18,14 +19,14 @@ export const authOptions: NextAuthOptions = {
       const unverifiedUser = await findUserByEmail(user.email!);
       if (!unverifiedUser) return true;
       if (unverifiedUser.emailVerified) return true;
-      const googleProfile = profile as GoogleProfile;
-      const now = new Date();
-      await updateUser(unverifiedUser.id, {
-        name: googleProfile.name,
-        image: googleProfile.picture,
-        emailVerified: now,
-        updatedAt: now,
-      });
+      // const googleProfile = profile as GoogleProfile;
+      // const now = new Date();
+      // await updateUser(unverifiedUser.id, {
+      //   name: googleProfile.name,
+      //   image: googleProfile.picture,
+      //   emailVerified: now,
+      //   updatedAt: now,
+      // });
       return true;
     },
     async session({ session, token }) {

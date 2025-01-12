@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #both app folders start with 'matheditor'
-LIVE_DIR_PATH=~/storyline
+LIVE_DIR_PATH=~/lomes0
 
 #add the suffixes to the app folders
 BLUE_DIR=$LIVE_DIR_PATH/blue

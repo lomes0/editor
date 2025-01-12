@@ -1,7 +1,7 @@
 "use client"
 import { usePathname } from 'next/navigation';
 import RouterLink from 'next/link'
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { ColorModeContext } from '@/components/Layout/ThemeProvider';
 import logo from "@public/logo.svg";
 import Image from 'next/image';
@@ -58,9 +58,14 @@ const TopAppBar: React.FC<{}> = () => {
   const showDrawerButton = !!['/edit', '/view'].find(path => pathname.startsWith(path));
   const initialized = useSelector(state => state.ui.initialized);
   const user = useSelector(state => state.user);
+  const [title, setTitle] = useState("");
 
   const handlePrint = () => { window.print(); }
   const toggleDrawer = () => { dispatch(actions.toggleDrawer()); }
+
+  useEffect(() => {
+    setTitle(process.env.NEXT_PUBLIC_TITLE || "ERROR TITLE");
+  }, []);
 
   useEffect(() => {
     if (!initialized) dispatch(actions.load());
@@ -69,12 +74,12 @@ const TopAppBar: React.FC<{}> = () => {
   return (
     <>
       <HideOnScroll>
-        <AppBar sx={{ displayPrint: "none" }}>
+        <AppBar sx={{ displayPrint: "none", backgroundColor: "#de5764" }}>
           <Toolbar sx={{ minHeight: 64 }} id="app-toolbar">
-            <Link component={RouterLink} prefetch={false} href="/">
+            <Link component={RouterLink} prefetch={false} href="/" sx={{ textDecoration: "none" }} >
               <Box sx={{ display: "flex" }}>
                 <Image src={logo} alt="Logo" width={32} height={32} priority />
-                <Typography variant="h6" component="h1" sx={{ marginInlineStart: 2, color: "white" }}>Prepline</Typography>
+                <Typography variant="h6" component="h1" sx={{ marginInlineStart: 2, color: "white" }}>{title}</Typography>
               </Box>
             </Link>
             <Box sx={{ flexGrow: 1 }} />

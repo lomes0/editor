@@ -138,7 +138,7 @@ const Documents: React.FC = () => {
   return (
     <>
       <Box sx={{ justifyContent: { xs: "space-around", sm: "space-between" }, alignItems: "center", gap: 1, mb: 1 }}>
-        <Typography variant="h6" component="h2" sx={{ display: { xs: 'none', sm: 'block' } }}>Documents</Typography>
+        {/*<Typography variant="h6" component="h2" sx={{ display: { xs: 'none', sm: 'block' } }}>Documents</Typography>*/}
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, justifyContent: "center", mb: 1 }}>
           <DocumentSortControl value={sort} setValue={setSort} />
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, justifyContent: "center" }}>
@@ -154,7 +154,8 @@ const Documents: React.FC = () => {
           </Box>
         </Box>
       </Box>
-      <Collapse timeout={1000} in={!(user && initialized)} unmountOnExit><Box sx={{ mb: 2 }}><UserCard user={user} /></Box></Collapse>
+	  {/*<Collapse timeout={1000} in={!(user && initialized)} unmountOnExit><Box sx={{ mb: 2 }}><UserCard user={user} /></Box></Collapse>*/}
+	  <br/>
       <DocumentsGrid documents={sortedDocuments} initialized={initialized} user={user} />
 	</>
   )

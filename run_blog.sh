@@ -1,11 +1,6 @@
 #!/bin/bash -x
 
-if [ $# -ne 1 ] ; then
-	echo "missing db.."
-	exit 0
-fi
-
-PGDATABASE=${1}
+export NODE_TLS_REJECT_UNAUTHORIZED=0
 
 source .env
 

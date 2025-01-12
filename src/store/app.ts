@@ -33,8 +33,8 @@ const initialState: AppState = {
     page: 1,
     filter: 0,
     sort: {
-      key: "updatedAt",
-      direction: "desc"
+      key: "createdAt",
+      direction: "asc"
     },
     diff: {
       open: false,
