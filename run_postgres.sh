@@ -7,4 +7,4 @@ docker run -d \
   -e POSTGRES_PASSWORD=$PGPASSWORD \
   -v ~/postgres:/var/lib/postgresql/data \
   -p $PGPORT:$PGPORT \
-  postgres
+  postgres:17.2

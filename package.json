@@ -3,10 +3,10 @@
   "private": true,
   "version": "0.7.0",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3000",
     "prebuild": "npx prisma generate",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3000",
     "lint": "next lint"
   },
   "dependencies": {
