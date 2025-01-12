@@ -14,7 +14,7 @@ const AppLayout = ({ children }: { children: React.ReactNode; }) => {
     <StoreProvider>
       <TopAppBar />
       <Suspense><ProgressBar /></Suspense>
-      <Container className='editor-container'>{children}</Container>
+      <Container maxWidth="false" className='editor-container'>{children}</Container>
       <Footer />
       <AlertDialog />
       <Announcer />
