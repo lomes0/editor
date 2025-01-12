@@ -137,11 +137,7 @@ const Documents: React.FC = () => {
 
   return (
     <>
-      <Box sx={{ display: 'flex', flexDirection: "column", alignItems: "center", my: 5 }}>
-        <Avatar sx={{ my: 2, bgcolor: 'primary.main' }}><PostAdd /></Avatar>
-        <Button variant="outlined" component={RouterLink} prefetch={false} scroll={false} href="/new">New document</Button>
-      </Box>
-      <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: { xs: "space-around", sm: "space-between" }, alignItems: "center", gap: 1, mb: 1 }}>
+      <Box sx={{ justifyContent: { xs: "space-around", sm: "space-between" }, alignItems: "center", gap: 1, mb: 1 }}>
         <Typography variant="h6" component="h2" sx={{ display: { xs: 'none', sm: 'block' } }}>Documents</Typography>
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, justifyContent: "center", mb: 1 }}>
           <DocumentSortControl value={sort} setValue={setSort} />
@@ -153,29 +149,14 @@ const Documents: React.FC = () => {
             <Button variant="outlined" startIcon={<Storage />} onClick={backup}>
               Backup
             </Button>
+		    {/*<Avatar sx={{ my: 2, bgcolor: 'primary.main' }}><PostAdd /></Avatar>*/}
+            <Button variant="outlined" component={RouterLink} prefetch={false} scroll={false} href="/new">New document</Button>
           </Box>
         </Box>
-        <DocumentFilterControl value={filter} setValue={setFilter} />
       </Box>
-      <Grid container spacing={2} sx={{ mb: 2 }}>
-        <Grid item xs={6}>
-          <Card variant="outlined">
-            <CardActionArea component={RouterLink} prefetch={false} scroll={false} href="/playground">
-              <CardHeader title="Playground" avatar={<Avatar sx={{ bgcolor: 'primary.main' }}><Science /></Avatar>} />
-            </CardActionArea>
-          </Card>
-        </Grid>
-        <Grid item xs={6}>
-          <Card variant="outlined">
-            <CardActionArea component={RouterLink} prefetch={false} scroll={false} href="/tutorial">
-              <CardHeader title="Tutorial" avatar={<Avatar sx={{ bgcolor: 'primary.main' }}><Help /></Avatar>} />
-            </CardActionArea>
-          </Card>
-        </Grid>
-      </Grid>
       <Collapse timeout={1000} in={!(user && initialized)} unmountOnExit><Box sx={{ mb: 2 }}><UserCard user={user} /></Box></Collapse>
       <DocumentsGrid documents={sortedDocuments} initialized={initialized} user={user} />
-    </>
+	</>
   )
 }
 

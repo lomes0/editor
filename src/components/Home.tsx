@@ -17,7 +17,7 @@ const Home: React.FC = () => {
   return (
     <>
       <Documents />
-      {!welcomed && (
+      {/*!welcomed && (
         <Dialog open onClose={handleClose}>
           <DialogTitle>Welcome to Math Editor</DialogTitle>
           <DialogContent>
@@ -32,7 +32,7 @@ const Home: React.FC = () => {
             </Button>
           </DialogActions>
         </Dialog>
-      )}
+      )*/}
     </>
   );
 };
