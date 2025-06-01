@@ -221,33 +221,22 @@ const DirectoryBrowser: React.FC<DirectoryBrowserProps> = ({ directoryId }) => {
         </Box>
       )}
       
-      {/* Directories section */}
-      {sortedDirectories.length > 0 && (
+      {/* Combined content section */}
+      {childItems.length > 0 && (
         <>
           <Typography variant="h5" component="h2" sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-            <Folder sx={{ mr: 1 }} /> Directories
+            Content
           </Typography>
           
           <Grid container spacing={2}>
+            {/* Display directories first */}
             {sortedDirectories.map(directory => (
               <Grid key={directory.id} size={{ xs: 12, sm: 6, md: 4 }}>
                 <DocumentCard userDocument={directory} user={user} />
               </Grid>
             ))}
-          </Grid>
-          
-          {sortedDocuments.length > 0 && <Divider sx={{ my: 2 }} />}
-        </>
-      )}
-      
-      {/* Documents section */}
-      {sortedDocuments.length > 0 && (
-        <>
-          <Typography variant="h5" component="h2" sx={{ display: 'flex', alignItems: 'center' }}>
-            <PostAdd sx={{ mr: 1 }} /> Documents
-          </Typography>
-          
-          <Grid container spacing={2}>
+            
+            {/* Then display documents */}
             {sortedDocuments.map(document => (
               <Grid key={document.id} size={{ xs: 12, sm: 6, md: 4 }}>
                 <DocumentCard userDocument={document} user={user} />

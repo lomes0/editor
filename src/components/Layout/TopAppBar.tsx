@@ -72,7 +72,7 @@ const TopAppBar: React.FC = () => {
             </Box>
           </Link>
           <Box sx={{ flexGrow: 1 }} />
-          <IconButton component={RouterLink} prefetch={false} href="/dashboard" aria-label="Dashboard">
+          <IconButton component={RouterLink} prefetch={false} href="/browse" aria-label="Document Browser">
             <Avatar alt={user?.name} src={user?.image ?? undefined} sx={{ width: 30, height: 30 }} />
           </IconButton>
           {showPrintButton && <IconButton aria-label="Print" color="inherit" onClick={handlePrint}>

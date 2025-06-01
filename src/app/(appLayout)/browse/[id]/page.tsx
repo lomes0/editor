@@ -6,14 +6,15 @@ export const metadata: Metadata = {
   description: 'Browse directory contents'
 }
 
-interface DirectoryPageProps {
+// Define the page component props
+type Props = {
   params: {
     id: string;
   }
 }
 
-const DirectoryPage = ({ params }: DirectoryPageProps) => {
+// Make the component async and properly handle params
+export default async function DirectoryPage({ params }: Props) {
+  // In Next.js, we should use the params directly in async components
   return <DirectoryBrowser directoryId={params.id} />;
-};
-
-export default DirectoryPage;
+}

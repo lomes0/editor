@@ -24,7 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
     },
     {
-      url: `${PUBLIC_URL}/dashboard`,
+      url: `${PUBLIC_URL}/browse`,
       lastModified: now,
     },
     {

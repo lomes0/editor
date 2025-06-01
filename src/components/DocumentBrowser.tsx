@@ -77,7 +77,6 @@ const DocumentBrowser: React.FC = () => {
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Page header with actions */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-        <Typography variant="h4" component="h1">Document Browser</Typography>
         
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Button 
@@ -103,40 +102,26 @@ const DocumentBrowser: React.FC = () => {
         </Box>
       </Box>
       
-      {/* Directories section */}
-      {sortedDirectories.length > 0 && (
-        <>
-          <Typography variant="h5" component="h2" sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-            <Folder sx={{ mr: 1 }} /> Directories
-          </Typography>
-          
-          <Grid container spacing={2}>
-            {sortedDirectories.map(directory => (
-              <Grid key={directory.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                <DocumentCard userDocument={directory} user={user} />
-              </Grid>
-            ))}
-          </Grid>
-          
-          <Divider sx={{ my: 2 }} />
-        </>
-      )}
+      {/* Combined content section */}
       
-      {/* Documents section */}
-      <Typography variant="h5" component="h2" sx={{ display: 'flex', alignItems: 'center', mt: sortedDirectories.length ? 0 : 2 }}>
-        <PostAdd sx={{ mr: 1 }} /> Documents
-      </Typography>
-      
-      {sortedDocuments.length === 0 ? (
+      {sortedDirectories.length === 0 && sortedDocuments.length === 0 ? (
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 4, gap: 2 }}>
           <PostAdd sx={{ width: 64, height: 64 }} />
-          <Typography variant="h6">No documents found</Typography>
+          <Typography variant="h6">No content found</Typography>
           <Typography variant="body2" color="text.secondary">
-            Create a new document to get started
+            Create a new document or directory to get started
           </Typography>
         </Box>
       ) : (
         <Grid container spacing={2}>
+          {/* Display directories first */}
+          {sortedDirectories.map(directory => (
+            <Grid key={directory.id} size={{ xs: 12, sm: 6, md: 4 }}>
+              <DocumentCard userDocument={directory} user={user} />
+            </Grid>
+          ))}
+          
+          {/* Then display documents */}
           {sortedDocuments.map(document => (
             <Grid key={document.id} size={{ xs: 12, sm: 6, md: 4 }}>
               <DocumentCard userDocument={document} user={user} />

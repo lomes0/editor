@@ -29,7 +29,7 @@ const UserCard: React.FC<{ user?: User, showActions?: boolean }> = memo(({ user,
     }
   };
 
-  const href = user ? `/user/${user.handle || user.id}` : '/dashboard';
+  const href = user ? `/user/${user.handle || user.id}` : '/browse';
 
   return (
     <Card variant='outlined' sx={{ display: 'flex', justifyContent: 'space-between', height: '100%' }}>

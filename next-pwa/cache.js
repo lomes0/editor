@@ -14,7 +14,7 @@ module.exports = [
         "playground",
         "tutorial",
         "privacy",
-        "dashboard",
+        "browse",
         "new",
         "edit",
       ].includes(pathname.split("/")[1]);

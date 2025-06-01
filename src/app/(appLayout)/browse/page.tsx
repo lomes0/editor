@@ -6,8 +6,7 @@ export const metadata: Metadata = {
   description: 'Browse documents and directories'
 }
 
-const BrowsePage = () => {
+// Use the default export async function pattern
+export default async function BrowsePage() {
   return <DocumentBrowser />;
-};
-
-export default BrowsePage;
+}

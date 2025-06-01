@@ -119,8 +119,8 @@ const DirectoryView: React.FC<DirectoryViewProps> = ({ directoryId }) => {
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 4, gap: 2 }}>
         <Folder sx={{ width: 64, height: 64 }} />
         <Typography variant="h6">Directory not found</Typography>
-        <Button component={Link} href="/dashboard" startIcon={<ArrowBack />}>
-          Back to Dashboard
+        <Button component={Link} href="/browse" startIcon={<ArrowBack />}>
+          Back to Document Browser
         </Button>
       </Box>
     );
@@ -134,7 +134,7 @@ const DirectoryView: React.FC<DirectoryViewProps> = ({ directoryId }) => {
       {/* Breadcrumb navigation */}
       <Paper sx={{ p: 1.5, mb: 2 }}>
         <Breadcrumbs aria-label="breadcrumb">
-          <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center' }}>
+          <Link href="/browse" style={{ display: 'flex', alignItems: 'center' }}>
             <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
             Home
           </Link>
@@ -152,7 +152,7 @@ const DirectoryView: React.FC<DirectoryViewProps> = ({ directoryId }) => {
             }
             
             return (
-              <Link key={crumb.id} href={`/dashboard/${crumb.id}`} style={{ display: 'flex', alignItems: 'center' }}>
+              <Link key={crumb.id} href={`/browse/${crumb.id}`} style={{ display: 'flex', alignItems: 'center' }}>
                 <Folder sx={{ mr: 0.5 }} fontSize="inherit" />
                 {crumb.name}
               </Link>

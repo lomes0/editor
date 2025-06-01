@@ -34,8 +34,8 @@ if (
       [`${origin}/new?_rsc`, { headers: { "update": "1", "RSC": "1" }, cache: "reload" }],
       [`${origin}/edit`, { headers: { "update": "1" }, cache: "reload" }],
       [`${origin}/edit?_rsc`, { headers: { "update": "1", "RSC": "1" }, cache: "reload" }],
-      [`${origin}/dashboard`, { headers: { "update": "1" }, cache: "reload" }],
-      [`${origin}/dashboard?_rsc`, { headers: { "update": "1", "RSC": "1" }, cache: "reload" }],
+      [`${origin}/browse`, { headers: { "update": "1" }, cache: "reload" }],
+      [`${origin}/browse?_rsc`, { headers: { "update": "1", "RSC": "1" }, cache: "reload" }],
       [`${origin}/privacy`, { headers: { "update": "1" }, cache: "reload" }],
       [`${origin}/privacy?_rsc`, { headers: { "update": "1", "RSC": "1" }, cache: "reload" }],
     ]

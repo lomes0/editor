@@ -33,7 +33,7 @@ const DocumentCard: React.FC<{ userDocument?: UserDocument, user?: User, sx?: Sx
   // Handle directory or document paths differently
   const isDirectory = document?.type === DocumentType.DIRECTORY;
   const href = isDirectory 
-    ? `/dashboard/${handle}` 
+    ? `/browse/${handle}` 
     : (isEditable ? `/edit/${handle}` : `/view/${handle}`);
     
   const author = cloudDocument?.author ?? user;
