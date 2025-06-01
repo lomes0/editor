@@ -1,14 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import type { NextAuthOptions } from "next-auth";
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
-import GoogleProvider, { GoogleProfile } from "next-auth/providers/google";
+import GitHubProvider from "next-auth/providers/github";
 import { findUserByEmail, updateUser } from "@/repositories/user";
 
 export const authOptions: NextAuthOptions = {
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+    GitHubProvider({
+      clientId: process.env.GITHUB_CLIENT_ID as string,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
       allowDangerousEmailAccountLinking: true,
     }),
   ],
@@ -19,11 +19,12 @@ export const authOptions: NextAuthOptions = {
       const unverifiedUser = await findUserByEmail(user.email!);
       if (!unverifiedUser) return true;
       if (unverifiedUser.emailVerified) return true;
-      const googleProfile = profile as GoogleProfile;
+      // For GitHub, profile may have different fields
+      const githubProfile = profile as any;
       const now = new Date();
       await updateUser(unverifiedUser.id, {
-        name: googleProfile.name,
-        image: googleProfile.picture,
+        name: githubProfile.name || githubProfile.login,
+        image: githubProfile.avatar_url,
         emailVerified: now,
         updatedAt: now,
       });
