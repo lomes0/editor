@@ -7,13 +7,17 @@ export const metadata: Metadata = {
 }
 
 interface DirectoryPageProps {
-  params: {
+  params: Promise<{
+    id: string;
+  }> | {
     id: string;
   }
 }
 
-const DirectoryPage = ({ params }: DirectoryPageProps) => {
-  return <DirectoryView directoryId={params.id} />;
+const DirectoryPage = async ({ params }: DirectoryPageProps) => {
+  // In Next.js 13+, params may be a Promise that needs to be awaited
+  const resolvedParams = await Promise.resolve(params);
+  return <DirectoryView directoryId={resolvedParams.id} />;
 };
 
 export default DirectoryPage;
