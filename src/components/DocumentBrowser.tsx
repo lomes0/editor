@@ -51,9 +51,22 @@ const DocumentBrowser: React.FC = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%' }}>
       {/* Page header with actions */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        flexWrap: 'wrap', 
+        gap: 2,
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+        pb: 2,
+        mb: 2
+      }}>
+        <Typography variant="h4" component="h1" sx={{ display: 'flex', alignItems: 'center' }}>
+          <Folder sx={{ mr: 1 }} /> Document Browser
+        </Typography>
         
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Button 

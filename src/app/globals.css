@@ -1,5 +1,7 @@
 :root {
   --keyboard-inset-height: 0px;
+  --sidebar-width: 72px;
+  --sidebar-width-expanded: 240px;
 }
 
 body {

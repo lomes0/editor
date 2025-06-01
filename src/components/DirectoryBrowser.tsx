@@ -139,9 +139,9 @@ const DirectoryBrowser: React.FC<DirectoryBrowserProps> = ({ directoryId }) => {
   const directoryName = currentDirectory.local?.name || currentDirectory.cloud?.name || 'Directory';
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
       {/* Breadcrumb navigation */}
-      <Paper sx={{ p: 1.5, mb: 2 }}>
+      <Paper sx={{ p: 1.5, mb: 2, borderRadius: 2 }}>
         <Breadcrumbs aria-label="breadcrumb">
           <Link href="/browse" style={{ display: 'flex', alignItems: 'center' }}>
             <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
@@ -171,7 +171,16 @@ const DirectoryBrowser: React.FC<DirectoryBrowserProps> = ({ directoryId }) => {
       </Paper>
       
       {/* Directory title and controls */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        flexWrap: 'wrap', 
+        gap: 2,
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+        pb: 2
+      }}>
         <Typography variant="h4" component="h1" sx={{ display: 'flex', alignItems: 'center' }}>
           <Folder sx={{ mr: 1 }} /> {directoryName}
         </Typography>
