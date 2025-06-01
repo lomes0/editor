@@ -52,20 +52,17 @@ export enum DocumentType {
   DIRECTORY = "DIRECTORY"
 }
 
-export type LocalDocument = Omit<EditorDocument, "data"> & {
-  revisions: LocalDocumentRevision[],
-  children?: string[]; // IDs of child documents (for directories)
-};
-export type CloudDocument = Omit<EditorDocument, "data"> & {
+export type Document = Omit<EditorDocument, "data"> & {
   author: User;
   coauthors: User[],
-  revisions: CloudDocumentRevision[],
+  revisions: DocumentRevision[],
   published?: boolean;
   collab?: boolean;
   private?: boolean;
-  children?: CloudDocument[]; // Child documents (for directories)
+  children?: Document[]; // Child documents (for directories)
 };
-export type UserDocument = { id: string; local?: LocalDocument; cloud?: CloudDocument; };
+
+export type UserDocument = { id: string; document: Document; }; // Simplified to just contain the document
 export type BackupDocument = EditorDocument & { revisions: EditorDocumentRevision[]; };
 
 export type DocumentCreateInput = EditorDocument & {
@@ -93,9 +90,8 @@ export interface EditorDocumentRevision {
   createdAt: string | Date;
 }
 
-export type LocalDocumentRevision = Omit<EditorDocumentRevision, "data">;
-export type CloudDocumentRevision = Omit<EditorDocumentRevision, "data"> & { author: User; };
-export type UserDocumentRevision = LocalDocumentRevision | CloudDocumentRevision;
+export type DocumentRevision = Omit<EditorDocumentRevision, "data"> & { author: User; };
+export type UserDocumentRevision = DocumentRevision;
 
 export interface User {
   id: string;

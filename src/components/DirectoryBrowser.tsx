@@ -97,30 +97,8 @@ const DirectoryBrowser: React.FC<DirectoryBrowserProps> = ({ directoryId }) => {
   };
 
   // Handle creating a new directory
-  const handleCreateDirectory = async () => {
-    const alert = {
-      title: "Create New Directory",
-      content: "What would you like to name your new directory?",
-      actions: [
-        { label: "Cancel", id: "cancel" },
-        { label: "Create", id: "create" }
-      ]
-    };
-    
-    const response = await dispatch(actions.alert(alert));
-    if (response.payload === "create") {
-      // Create directory document with DIRECTORY type
-      dispatch(actions.createLocalDocument({
-        id: uuid(),
-        name: "New Directory",
-        type: DocumentType.DIRECTORY,
-        parentId: directoryId,
-        head: uuid(),
-        data: { root: { children: [], direction: null, format: "", indent: 0, type: "root", version: 1 } },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }));
-    }
+  const handleCreateDirectory = () => {
+    router.push(`/new-directory/${directoryId}`);
   };
 
   // Render loading state

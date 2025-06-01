@@ -26,16 +26,15 @@ const DocumentBrowser: React.FC = () => {
     return !localParentId && !cloudParentId;
   });
   
-  // Separate directories and documents for better organization
-  const directories = rootItems.filter(doc => 
+  // Filter to ensure we don't duplicate directories and documents
+  // A document is considered a directory if either its local or cloud version is a directory
+  const isDirectory = (doc: UserDocument) => 
     (doc.local?.type === DocumentType.DIRECTORY) || 
-    (doc.cloud?.type === DocumentType.DIRECTORY)
-  );
+    (doc.cloud?.type === DocumentType.DIRECTORY);
+    
+  const directories = rootItems.filter(doc => isDirectory(doc));
   
-  const regularDocuments = rootItems.filter(doc => 
-    (doc.local?.type === DocumentType.DOCUMENT || doc.local?.type === undefined) || 
-    (doc.cloud?.type === DocumentType.DOCUMENT || doc.cloud?.type === undefined)
-  );
+  const regularDocuments = rootItems.filter(doc => !isDirectory(doc));
   
   // Apply sorting
   const sortedDirectories = sortDocuments(directories, sortValue.key, sortValue.direction);
@@ -47,30 +46,8 @@ const DocumentBrowser: React.FC = () => {
   };
 
   // Handle creating a new directory
-  const handleCreateDirectory = async () => {
-    const alert = {
-      title: "Create New Directory",
-      content: "What would you like to name your new directory?",
-      actions: [
-        { label: "Cancel", id: "cancel" },
-        { label: "Create", id: "create" }
-      ]
-    };
-    
-    const response = await dispatch(actions.alert(alert));
-    if (response.payload === "create") {
-      // Create directory document with DIRECTORY type
-      dispatch(actions.createLocalDocument({
-        id: uuid(),
-        name: "New Directory",
-        type: DocumentType.DIRECTORY,
-        parentId: null, // Root level directory
-        head: uuid(),
-        data: { root: { children: [], direction: null, format: "", indent: 0, type: "root", version: 1 } },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }));
-    }
+  const handleCreateDirectory = () => {
+    router.push('/new-directory');
   };
 
   return (
