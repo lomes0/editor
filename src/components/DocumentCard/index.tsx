@@ -1,11 +1,11 @@
 "use client"
 import * as React from 'react';
 import RouterLink from 'next/link'
-import { LocalDocumentRevision, User, UserDocument } from '@/types';
+import { DocumentType, LocalDocumentRevision, User, UserDocument } from '@/types';
 import { memo, Suspense } from 'react';
 import { SxProps, Theme } from '@mui/material/styles';
 import { Card, CardActionArea, CardHeader, Skeleton, Typography, Avatar, CardActions, Chip, Badge, IconButton } from '@mui/material';
-import { MobileFriendly, Cloud, Public, Workspaces, Security, CloudDone, CloudSync, MoreVert, Share } from '@mui/icons-material';
+import { MobileFriendly, Cloud, Public, Workspaces, Security, CloudDone, CloudSync, MoreVert, Share, Folder } from '@mui/icons-material';
 import DocumentActionMenu from './DocumentActionMenu';
 import DocumentThumbnail from './DocumentThumbnail';
 import ThumbnailSkeleton from './ThumbnailSkeleton';
@@ -29,7 +29,13 @@ const DocumentCard: React.FC<{ userDocument?: UserDocument, user?: User, sx?: Sx
   const document = isCloudOnly ? cloudDocument : localDocument;
   const handle = cloudDocument?.handle ?? localDocument?.handle ?? document?.id;
   const isEditable = isAuthor || isCoauthor || isCollab;
-  const href = isEditable ? `/edit/${handle}` : `/view/${handle}`;
+  
+  // Handle directory or document paths differently
+  const isDirectory = document?.type === DocumentType.DIRECTORY;
+  const href = isDirectory 
+    ? `/dashboard/${handle}` 
+    : (isEditable ? `/edit/${handle}` : `/view/${handle}`);
+    
   const author = cloudDocument?.author ?? user;
 
   const localDocumentRevisions = localDocument?.revisions ?? [];
@@ -80,9 +86,15 @@ const DocumentCard: React.FC<{ userDocument?: UserDocument, user?: User, sx?: Sx
           }
           avatar={
             <Badge badgeContent={revisionsBadgeContent} color="secondary">
-              <Suspense fallback={<ThumbnailSkeleton />}>
-                <DocumentThumbnail userDocument={userDocument} />
-              </Suspense>
+              {isDirectory ? (
+                <Avatar sx={{ bgcolor: 'primary.main' }}>
+                  <Folder />
+                </Avatar>
+              ) : (
+                <Suspense fallback={<ThumbnailSkeleton />}>
+                  <DocumentThumbnail userDocument={userDocument} />
+                </Suspense>
+              )}
             </Badge>
           }
         />
@@ -97,6 +109,7 @@ const DocumentCard: React.FC<{ userDocument?: UserDocument, user?: User, sx?: Sx
         {isLocalOnly && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<MobileFriendly />} label="Local" />}
         {isUploaded && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={isUpToDate ? <CloudDone /> : <CloudSync />} label={isUpToDate ? "Synced" : "Out of Sync"} />}
         {isCloudOnly && (isAuthor || isCoauthor) && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<Cloud />} label="Cloud" />}
+        {isDirectory && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<Folder />} label="Directory" />}
         {isPublished && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<Public />} label="Published" />}
         {isCollab && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<Workspaces />} label="Collab" />}
         {isPrivate && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<Security />} label="Private" />}

@@ -4,12 +4,12 @@ import RouterLink from 'next/link'
 import { useDispatch, useSelector, actions } from '@/store';
 import DocumentCard from "../DocumentCard";
 import { memo, Suspense, useEffect } from "react";
-import { BackupDocument, User, UserDocument } from '@/types';
+import { BackupDocument, DocumentType, User, UserDocument } from '@/types';
 import { validate } from "uuid";
 import documentDB, { revisionDB } from '@/indexeddb';
 import Grid from '@mui/material/Grid2';
 import { Box, Avatar, Button, Typography, Card, CardActionArea, CardHeader, Pagination } from '@mui/material';
-import { PostAdd, UploadFile, Help, Storage, Science, Pageview } from '@mui/icons-material';
+import { PostAdd, UploadFile, Help, Storage, Science, Pageview, CreateNewFolder } from '@mui/icons-material';
 import DocumentSortControl from '../DocumentControls/SortControl';
 import { sortDocuments } from "../DocumentControls/sortDocuments";
 import DocumentFilterControl, { filterDocuments } from '../DocumentControls/FilterControl';
@@ -138,11 +138,41 @@ const Documents: React.FC<{ staticDocuments: UserDocument[] }> = ({ staticDocume
 
   const hydrated = useHydration();
 
+  // Handle creating a new directory
+  const handleCreateDirectory = async () => {
+    const alert = {
+      title: "Create New Directory",
+      content: "Enter a name for the new directory:",
+      actions: [
+        { label: "Cancel", id: "cancel" },
+        { label: "Create", id: "create" }
+      ]
+    };
+    
+    const response = await dispatch(actions.alert(alert));
+    if (response.payload === "create") {
+      // Create directory document with DIRECTORY type
+      dispatch(actions.createLocalDocument({
+        id: uuid(),
+        name: "New Directory",
+        type: DocumentType.DIRECTORY,
+        parentId: null, // Root level directory
+        head: uuid(), // Provide a UUID for head even though it's not used for directories
+        data: { root: { children: [], direction: null, format: "", indent: 0, type: "root", version: 1 } }, // Empty editor state
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }));
+    }
+  };
+
   return (
     <>
       <Box sx={{ display: 'flex', flexDirection: "column", alignItems: "center", my: 5 }}>
         <Avatar sx={{ my: 2, bgcolor: 'primary.main' }}><PostAdd /></Avatar>
-        <Button variant="outlined" component={RouterLink} prefetch={false} href="/new">New document</Button>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button variant="outlined" component={RouterLink} prefetch={false} href="/new">New document</Button>
+          <Button variant="outlined" startIcon={<CreateNewFolder />} onClick={handleCreateDirectory}>New directory</Button>
+        </Box>
       </Box>
       <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: { sm: "space-between" }, alignItems: "center", position: "sticky", top: { 'xs': 55.99, 'sm': 63.99 }, backgroundColor: 'var(--mui-palette-background-default)', zIndex: 5, py: 1 }}>
         <Typography variant="h6" component="h2" sx={{ display: { xs: 'none', sm: 'block' } }}>Documents</Typography>

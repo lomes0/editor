@@ -43,10 +43,18 @@ export interface EditorDocument {
   updatedAt: string | Date;
   handle?: string | null;
   baseId?: string | null;
+  parentId?: string | null;
+  type: DocumentType;
+}
+
+export enum DocumentType {
+  DOCUMENT = "DOCUMENT",
+  DIRECTORY = "DIRECTORY"
 }
 
 export type LocalDocument = Omit<EditorDocument, "data"> & {
   revisions: LocalDocumentRevision[],
+  children?: string[]; // IDs of child documents (for directories)
 };
 export type CloudDocument = Omit<EditorDocument, "data"> & {
   author: User;
@@ -55,6 +63,7 @@ export type CloudDocument = Omit<EditorDocument, "data"> & {
   published?: boolean;
   collab?: boolean;
   private?: boolean;
+  children?: CloudDocument[]; // Child documents (for directories)
 };
 export type UserDocument = { id: string; local?: LocalDocument; cloud?: CloudDocument; };
 export type BackupDocument = EditorDocument & { revisions: EditorDocumentRevision[]; };

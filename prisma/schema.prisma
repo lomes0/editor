@@ -7,23 +7,52 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Main content model with hierarchical structure
 model Document {
-  id        String              @id @default(uuid()) @db.Uuid
-  handle    String?             @unique
+  id        String   @id @default(uuid()) @db.Uuid
+  handle    String?  @unique
   name      String
-  head      String              @db.Uuid
-  createdAt DateTime            @default(now())
-  updatedAt DateTime            @default(now())
-  authorId  String              @db.Uuid
-  published Boolean             @default(false)
-  collab    Boolean             @default(false)
-  private   Boolean             @default(false)
-  baseId    String?             @db.Uuid
-  base      Document?           @relation("BaseForks", fields: [baseId], references: [id])
-  forks     Document[]          @relation("BaseForks")
-  revisions Revision[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  authorId  String   @db.Uuid
+  published Boolean  @default(false)
+  private   Boolean  @default(false)
+
+  // Document-specific fields
+  head   String? @db.Uuid
+  collab Boolean @default(false)
+
+  // Fork relationship
+  baseId String?    @db.Uuid
+  base   Document?  @relation("BaseForks", fields: [baseId], references: [id])
+  forks  Document[] @relation("BaseForks")
+
+  // Hierarchical relationships
+  parentId String?    @db.Uuid
+  parent   Document?  @relation("DocumentHierarchy", fields: [parentId], references: [id])
+  children Document[] @relation("DocumentHierarchy")
+
+  // Type discrimination
+  type DocumentType
+
+  // Relations
   author    User                @relation(fields: [authorId], references: [id], onDelete: Cascade)
   coauthors DocumentCoauthers[]
+  revisions Revision[]
+  directory Directory?
+}
+
+enum DocumentType {
+  DOCUMENT
+  DIRECTORY
+}
+
+model Directory {
+  id         String @id @default(uuid()) @db.Uuid
+  documentId String @unique @db.Uuid
+
+  // Relations
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
 }
 
 model Revision {
