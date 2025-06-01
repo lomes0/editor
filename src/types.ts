@@ -62,6 +62,7 @@ export type Document = Omit<EditorDocument, "data"> & {
   children?: Document[]; // Child documents (for directories)
 };
 
+export type CloudDocument = Document; // Cloud documents are the same as regular documents
 export type UserDocument = { id: string; document: Document; }; // Simplified to just contain the document
 export type BackupDocument = EditorDocument & { revisions: EditorDocumentRevision[]; };
 
@@ -91,6 +92,7 @@ export interface EditorDocumentRevision {
 }
 
 export type DocumentRevision = Omit<EditorDocumentRevision, "data"> & { author: User; };
+export type CloudDocumentRevision = DocumentRevision; // Cloud document revisions are the same as regular document revisions
 export type UserDocumentRevision = DocumentRevision;
 
 export interface User {

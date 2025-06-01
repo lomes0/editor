@@ -67,6 +67,7 @@ export async function POST(request: Request) {
       published: body.published,
       collab: body.collab,
       private: body.private,
+      type: body.type || 'DOCUMENT',
       revisions: {
         create: {
           id: body.head || undefined,

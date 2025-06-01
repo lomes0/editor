@@ -2,7 +2,7 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { v4 as uuidv4, validate } from "uuid";
 import * as React from 'react';
-import { CheckHandleResponse, CloudDocument, DocumentCreateInput, User, UserDocument } from '@/types';
+import { CheckHandleResponse, CloudDocument, DocumentCreateInput, User, UserDocument, DocumentType } from '@/types';
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, actions, useSelector } from '@/store';
 import DocumentCard from './DocumentCard';
@@ -106,6 +106,7 @@ const NewDocument: React.FC<{ cloudDocument?: CloudDocument }> = ({ cloudDocumen
       head: uuidv4(),
       name,
       data,
+      type: DocumentType.DOCUMENT,
       createdAt,
       updatedAt: createdAt,
     };
