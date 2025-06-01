@@ -77,15 +77,27 @@ const DirectoryBrowser: React.FC<DirectoryBrowserProps> = ({ directoryId }) => {
   }, [directoryId, documents]);
 
   // Separate directories and documents for better organization
-  const directories = childItems.filter(doc => 
+  // Function to determine if a document is a directory
+  const isDirectory = (doc: UserDocument) => 
     (doc.local?.type === DocumentType.DIRECTORY) || 
-    (doc.cloud?.type === DocumentType.DIRECTORY)
-  );
+    (doc.cloud?.type === DocumentType.DIRECTORY);
   
-  const regularDocuments = childItems.filter(doc => 
-    (doc.local?.type === DocumentType.DOCUMENT || doc.local?.type === undefined) || 
-    (doc.cloud?.type === DocumentType.DOCUMENT || doc.cloud?.type === undefined)
-  );
+  // Use Set to track processed IDs to prevent duplicates
+  const processedIds = new Set<string>();
+  const directories: UserDocument[] = [];
+  const regularDocuments: UserDocument[] = [];
+  
+  // Process each item once, categorizing it appropriately
+  childItems.forEach(doc => {
+    if (processedIds.has(doc.id)) return;
+    processedIds.add(doc.id);
+    
+    if (isDirectory(doc)) {
+      directories.push(doc);
+    } else {
+      regularDocuments.push(doc);
+    }
+  });
   
   // Apply sorting
   const sortedDirectories = sortDocuments(directories, sortValue.key, sortValue.direction);

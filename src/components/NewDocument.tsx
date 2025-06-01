@@ -69,6 +69,7 @@ const NewDocument: React.FC<{ cloudDocument?: CloudDocument }> = ({ cloudDocumen
   const baseId = pathname.split('/')[2]?.toLowerCase();
   const searchParams = useSearchParams();
   const revisionId = searchParams.get('v');
+  const parentId = searchParams.get('parentId');
   const [base, setBase] = useState<UserDocument | undefined>(cloudDocument ? { id: cloudDocument.id, cloud: cloudDocument } : undefined);
 
   useEffect(() => {
@@ -107,6 +108,7 @@ const NewDocument: React.FC<{ cloudDocument?: CloudDocument }> = ({ cloudDocumen
       name,
       data,
       type: DocumentType.DOCUMENT,
+      parentId: parentId || null,
       createdAt,
       updatedAt: createdAt,
     };

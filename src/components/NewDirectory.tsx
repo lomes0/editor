@@ -34,7 +34,7 @@ const NewDirectory: React.FC<{ parentId?: string }> = ({ parentId }) => {
     const head = uuidv4(); // Even though directories don't use the head, it's required by the schema
     
     // Create the directory document
-    await dispatch(actions.createLocalDocument({
+    const directoryData = {
       id: directoryId,
       name: name.trim(),
       type: DocumentType.DIRECTORY,
@@ -43,7 +43,15 @@ const NewDirectory: React.FC<{ parentId?: string }> = ({ parentId }) => {
       data: { root: { children: [], direction: null, format: "", indent: 0, type: "root", version: 1 } },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
-    }));
+    };
+    
+    // Create locally
+    await dispatch(actions.createLocalDocument(directoryData));
+    
+    // Also save to cloud if user is online and authenticated
+    if (isOnline && user) {
+      dispatch(actions.createCloudDocument(directoryData));
+    }
     
     // Redirect to the appropriate location
     if (parentId) {
