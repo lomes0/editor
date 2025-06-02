@@ -1,10 +1,10 @@
 "use client"
 import { useDispatch, useSelector, actions } from '@/store';
 import { useEffect, useState } from 'react';
-import { Box, Breadcrumbs, Typography, Button, Paper, Divider } from "@mui/material";
+import { Box, Breadcrumbs, Typography, Button, Paper, Divider, Container, Fade, Tooltip } from "@mui/material";
 import Grid from '@mui/material/Grid2';
 import Link from 'next/link';
-import { CreateNewFolder, ArrowBack, Home as HomeIcon, Folder, PostAdd } from '@mui/icons-material';
+import { CreateNewFolder, ArrowBack, Home as HomeIcon, Folder, PostAdd, Article, FilterList } from '@mui/icons-material';
 import DocumentCard from './DocumentCard';
 import { DocumentType, UserDocument } from '@/types';
 import DocumentSortControl from './DocumentControls/SortControl';
@@ -116,22 +116,32 @@ const DirectoryBrowser: React.FC<DirectoryBrowserProps> = ({ directoryId }) => {
   // Render loading state
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-        <Typography>Loading directory contents...</Typography>
-      </Box>
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+          <Typography>Loading directory contents...</Typography>
+        </Box>
+      </Container>
     );
   }
 
   // Render empty state if directory not found
   if (!currentDirectory) {
     return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 4, gap: 2 }}>
-        <Folder sx={{ width: 64, height: 64 }} />
-        <Typography variant="h6">Directory not found</Typography>
-        <Button component={Link} href="/browse" startIcon={<ArrowBack />}>
-          Back to Document Browser
-        </Button>
-      </Box>
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 4, gap: 2 }}>
+          <Folder sx={{ width: 64, height: 64, color: 'text.secondary', opacity: 0.6 }} />
+          <Typography variant="h6">Directory not found</Typography>
+          <Button 
+            component={Link} 
+            href="/browse" 
+            startIcon={<ArrowBack />}
+            variant="contained"
+            sx={{ borderRadius: 1.5, mt: 2 }}
+          >
+            Back to Document Browser
+          </Button>
+        </Box>
+      </Container>
     );
   }
 
@@ -139,9 +149,11 @@ const DirectoryBrowser: React.FC<DirectoryBrowserProps> = ({ directoryId }) => {
   const directoryName = currentDirectory.local?.name || currentDirectory.cloud?.name || 'Directory';
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
-      {/* Breadcrumb navigation */}
-      <Paper sx={{ p: 1.5, mb: 2, borderRadius: 2 }}>
+    <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Fade in={true} timeout={600}>
+        <Box className="document-browser-container" sx={{ display: 'flex', flexDirection: 'column', gap: 4, width: '100%' }}>
+          {/* Breadcrumb navigation */}
+          <Paper sx={{ p: 1.5, borderRadius: 2 }}>
         <Breadcrumbs aria-label="breadcrumb">
           <Link href="/browse" style={{ display: 'flex', alignItems: 'center' }}>
             <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
@@ -171,80 +183,192 @@ const DirectoryBrowser: React.FC<DirectoryBrowserProps> = ({ directoryId }) => {
       </Paper>
       
       {/* Directory title and controls */}
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        flexWrap: 'wrap', 
-        gap: 2,
-        borderBottom: '1px solid',
-        borderColor: 'divider',
-        pb: 2
-      }}>
-        <Typography variant="h4" component="h1" sx={{ display: 'flex', alignItems: 'center' }}>
-          <Folder sx={{ mr: 1 }} /> {directoryName}
-        </Typography>
-        
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button 
-            variant="outlined" 
-            startIcon={<PostAdd />}
-            onClick={handleCreateDocument}
-          >
-            New Document
-          </Button>
-          
-          <Button 
-            variant="outlined" 
-            startIcon={<CreateNewFolder />}
-            onClick={handleCreateDirectory}
-          >
-            New Directory
-          </Button>
-          
-          <DocumentSortControl 
-            value={sortValue} 
-            setValue={setSortValue}
-          />
-        </Box>
-      </Box>
-      
-      {/* No items message */}
-      {childItems.length === 0 && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 4, gap: 2 }}>
-          <Folder sx={{ width: 64, height: 64 }} />
-          <Typography variant="h6">This directory is empty</Typography>
-          <Typography variant="body2" color="text.secondary">
-            Create a new document or directory to get started
-          </Typography>
-        </Box>
-      )}
-      
-      {/* Combined content section */}
-      {childItems.length > 0 && (
-        <>
-          <Typography variant="h5" component="h2" sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-            Content
-          </Typography>
-          
-          <Grid container spacing={2}>
-            {/* Display directories first */}
-            {sortedDirectories.map(directory => (
-              <Grid key={directory.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                <DocumentCard userDocument={directory} user={user} />
-              </Grid>
-            ))}
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            flexWrap: { xs: 'wrap', md: 'nowrap' },
+            gap: 2,
+            pb: 2,
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Folder color="primary" fontSize="large" />
+              <Typography 
+                variant="h4" 
+                component="h1" 
+                sx={{ 
+                  fontWeight: 'medium',
+                  color: 'text.primary',
+                }}
+              >
+                {directoryName}
+              </Typography>
+            </Box>
             
-            {/* Then display documents */}
-            {sortedDocuments.map(document => (
-              <Grid key={document.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                <DocumentCard userDocument={document} user={user} />
-              </Grid>
-            ))}
-          </Grid>
-        </>
-      )}
-    </Box>
+            <Box sx={{ 
+              display: 'flex', 
+              gap: 1.5,
+              flexWrap: { xs: 'wrap', sm: 'nowrap' },
+              width: { xs: '100%', md: 'auto' },
+              justifyContent: { xs: 'center', md: 'flex-end' },
+            }}>
+              <Tooltip title="Create a new document">
+                <Button 
+                  variant="contained" 
+                  color="primary"
+                  startIcon={<PostAdd />}
+                  onClick={handleCreateDocument}
+                  sx={{ 
+                    borderRadius: 1.5,
+                    px: 2,
+                    boxShadow: 1
+                  }}
+                >
+                  New Document
+                </Button>
+              </Tooltip>
+              
+              <Tooltip title="Create a new folder">
+                <Button 
+                  variant="outlined" 
+                  startIcon={<CreateNewFolder />}
+                  onClick={handleCreateDirectory}
+                  sx={{ 
+                    borderRadius: 1.5,
+                    px: 2
+                  }}
+                >
+                  New Folder
+                </Button>
+              </Tooltip>
+              
+              <Tooltip title="Sort your documents">
+                <Box sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  bgcolor: 'background.paper',
+                  borderRadius: 1.5,
+                  overflow: 'hidden',
+                  border: '1px solid',
+                  borderColor: 'divider'
+                }}>
+                  <Box sx={{ 
+                    display: { xs: 'none', sm: 'flex' }, 
+                    alignItems: 'center', 
+                    px: 1.5, 
+                    height: '100%',
+                    borderRight: '1px solid',
+                    borderColor: 'divider'
+                  }}>
+                    <FilterList fontSize="small" sx={{ mr: 0.5, color: 'text.secondary' }} />
+                    <Typography variant="body2" color="text.secondary">Sort</Typography>
+                  </Box>
+                  <DocumentSortControl 
+                    value={sortValue} 
+                    setValue={setSortValue}
+                  />
+                </Box>
+              </Tooltip>
+            </Box>
+          </Box>
+      
+          {/* Content section */}
+          {childItems.length === 0 ? (
+            <Paper 
+              elevation={0}
+              sx={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                p: 6, 
+                gap: 2,
+                borderRadius: 2,
+                border: '1px dashed',
+                borderColor: 'divider',
+                bgcolor: 'background.default'
+              }}
+            >
+              <Folder sx={{ width: 64, height: 64, color: 'text.secondary', opacity: 0.6 }} />
+              <Typography variant="h6">This folder is empty</Typography>
+              <Typography variant="body2" color="text.secondary" align="center">
+                Create a new document or folder to get started
+              </Typography>
+              <Box sx={{ mt: 2 }}>
+                <Button 
+                  variant="contained" 
+                  startIcon={<PostAdd />}
+                  onClick={handleCreateDocument}
+                  sx={{ borderRadius: 1.5, mr: 2 }}
+                >
+                  New Document
+                </Button>
+                <Button 
+                  variant="outlined" 
+                  startIcon={<CreateNewFolder />}
+                  onClick={handleCreateDirectory}
+                  sx={{ borderRadius: 1.5 }}
+                >
+                  New Folder
+                </Button>
+              </Box>
+            </Paper>
+          ) : (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {/* Display directories section */}
+              {sortedDirectories.length > 0 && (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 1,
+                    mb: 1,
+                    pl: 1
+                  }}>
+                    <Folder color="primary" />
+                    <Typography variant="h6" fontWeight="medium">Folders</Typography>
+                  </Box>
+                  <Grid container spacing={2}>
+                    {sortedDirectories.map(directory => (
+                      <Grid key={directory.id} size={{ xs: 12, sm: 6, md: 4 }}>
+                        <DocumentCard userDocument={directory} user={user} />
+                      </Grid>
+                    ))}
+                  </Grid>
+                </Box>
+              )}
+              
+              {/* Display documents section */}
+              {sortedDocuments.length > 0 && (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {sortedDirectories.length > 0 && (
+                    <Divider sx={{ my: 1 }} />
+                  )}
+                  <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 1,
+                    mb: 1,
+                    pl: 1
+                  }}>
+                    <Article color="primary" />
+                    <Typography variant="h6" fontWeight="medium">Documents</Typography>
+                  </Box>
+                  <Grid container spacing={2}>
+                    {sortedDocuments.map(document => (
+                      <Grid key={document.id} size={{ xs: 12, sm: 6, md: 4 }}>
+                        <DocumentCard userDocument={document} user={user} />
+                      </Grid>
+                    ))}
+                  </Grid>
+                </Box>
+              )}
+            </Box>
+          )}
+        </Box>
+      </Fade>
+    </Container>
   );
 };
 

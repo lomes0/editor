@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import DirectoryBrowser from "@/components/DirectoryBrowser";
 
 export const metadata: Metadata = {
-  title: 'Directory',
-  description: 'Browse directory contents'
+  title: 'Folder Contents | MathEditor',
+  description: 'Browse and manage documents and folders in this directory'
 }
 
 // Define the page component props
