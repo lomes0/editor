@@ -63,7 +63,7 @@ const NewDocument: React.FC<{ cloudDocument?: CloudDocument }> = ({ cloudDocumen
   const [validating, setValidating] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const hasErrors = Object.keys(validationErrors).length > 0;
-  const [saveToCloud, setSaveToCloud] = useState(false);
+  const [saveToCloud, setSaveToCloud] = useState(true);
   const dispatch = useDispatch();
   const pathname = usePathname();
   const baseId = pathname.split('/')[2]?.toLowerCase();
@@ -71,6 +71,14 @@ const NewDocument: React.FC<{ cloudDocument?: CloudDocument }> = ({ cloudDocumen
   const revisionId = searchParams.get('v');
   const parentId = searchParams.get('parentId');
   const [base, setBase] = useState<UserDocument | undefined>(cloudDocument ? { id: cloudDocument.id, cloud: cloudDocument } : undefined);
+
+  // Effect to handle changes in online status or authentication
+  useEffect(() => {
+    // If user goes offline or logs out, disable cloud saving
+    if (!isOnline || !user) {
+      setSaveToCloud(false);
+    }
+  }, [isOnline, user]);
 
   useEffect(() => {
     const loadDocument = async (id: string) => {
@@ -90,6 +98,7 @@ const NewDocument: React.FC<{ cloudDocument?: CloudDocument }> = ({ cloudDocumen
         }
       }
     }
+    
     baseId && loadDocument(baseId);
   }, []);
 
@@ -114,7 +123,10 @@ const NewDocument: React.FC<{ cloudDocument?: CloudDocument }> = ({ cloudDocumen
     };
     const response = await dispatch(actions.createLocalDocument(payload));
     if (response.type === actions.createLocalDocument.fulfilled.type) {
-      if (saveToCloud) dispatch(actions.createCloudDocument(payload));
+      // Only save to cloud if user is online and authenticated
+      if (saveToCloud && isOnline && user) {
+        dispatch(actions.createCloudDocument(payload));
+      }
       const href = `/edit/${payload.handle || payload.id}`;
       navigate(href);
     }
@@ -189,12 +201,13 @@ const NewDocument: React.FC<{ cloudDocument?: CloudDocument }> = ({ cloudDocumen
           />
           <FormControlLabel
             control={<Switch checked={saveToCloud} onChange={() => setSaveToCloud(!saveToCloud)} disabled={!isOnline || !user} />}
-            label="Save to Cloud"
+            label={saveToCloud ? "Save to Cloud (Default)" : "Save Locally Only"}
           />
           <FormHelperText>
-            {!isOnline ? "You are offline: Please connect to the internet to use this feature"
-              : unauthenticated ? "You are not signed in: Please sign in to use this feature"
-                : "Save to cloud to access your documents from anywhere"
+            {!isOnline ? "You are offline: Documents will be saved locally"
+              : unauthenticated ? "You are not signed in: Please sign in to save to cloud"
+                : saveToCloud ? "Document will be saved to cloud for access from anywhere" 
+                  : "Document will only be saved locally"
             }
           </FormHelperText>
           {saveToCloud && <>
