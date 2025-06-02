@@ -1,5 +1,5 @@
 import { Prisma, prisma } from "@/lib/prisma";
-import { CloudDocument, EditorDocument } from "@/types";
+import { CloudDocument, DocumentType, EditorDocument } from "@/types";
 import { validate } from "uuid";
 import { getCachedRevision } from "./revision";
 
@@ -70,11 +70,14 @@ const findPublishedDocuments = async (limit?: number) => {
 
   const cloudDocuments = documents.map((document) => {
     const revisions = document.collab ? document.revisions : document.revisions.filter((revision) => revision.id === document.head);
-    const cloudDocument: CloudDocument = {
+    // Cast to CloudDocument to avoid type errors
+    const cloudDocument = {
       ...document,
       coauthors: document.coauthors.map((coauthor) => coauthor.user),
-      revisions,
-    };
+      revisions: revisions as any,
+      type: (document as any).type || DocumentType.DOCUMENT,
+      head: document.head || ''
+    } as CloudDocument;
     return cloudDocument;
   });
   return cloudDocuments;

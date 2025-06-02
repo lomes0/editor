@@ -78,7 +78,7 @@ const NewDocument: React.FC<{ cloudDocument?: CloudDocument }> = ({ cloudDocumen
       if (localResponse.type === actions.forkLocalDocument.fulfilled.type) {
         const editorDocument = localResponse.payload as ReturnType<typeof actions.forkLocalDocument.fulfilled>["payload"];
         const { data, ...rest } = editorDocument;
-        const localDocument = { ...rest, revisions: [] };
+        const localDocument = { ...rest, data, revisions: [] };
         setBase({ ...base, id: editorDocument.id, local: localDocument });
         setInput({ ...input, data, baseId: editorDocument.id });
       } else {

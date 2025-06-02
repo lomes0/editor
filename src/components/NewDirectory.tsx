@@ -40,7 +40,16 @@ const NewDirectory: React.FC<{ parentId?: string }> = ({ parentId }) => {
       type: DocumentType.DIRECTORY,
       parentId: parentId || null,
       head,
-      data: { root: { children: [], direction: null, format: "", indent: 0, type: "root", version: 1 } },
+      data: { 
+        root: { 
+          children: [], 
+          direction: null, 
+          format: 'left' as 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '', 
+          indent: 0, 
+          type: "root", 
+          version: 1 
+        } 
+      },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
