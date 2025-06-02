@@ -155,7 +155,7 @@ const DraggableDocumentCard: React.FC<DraggableDocumentCardProps> = ({
           bottom: 0,
           zIndex: 1,
           borderRadius: theme.shape.borderRadius,
-          border: isDropTarget ? `2px dashed ${theme.palette.primary.main}` : 'none',
+          border: isDropTarget ? `2px solid ${theme.palette.primary.main}` : 'none',
           backgroundColor: isDropTarget 
             ? `${theme.palette.primary.main}20` // 20% opacity
             : 'transparent',
@@ -175,7 +175,7 @@ const DraggableDocumentCard: React.FC<DraggableDocumentCardProps> = ({
           // Add visual indicator for drop targets
           ...(canBeDropTarget && {
             '&:hover': {
-              borderStyle: 'dashed',
+              borderStyle: 'solid',
               borderColor: theme.palette.primary.main,
               backgroundColor: `${theme.palette.primary.main}10`, // 10% opacity
             }
