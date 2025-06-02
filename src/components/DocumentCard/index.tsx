@@ -60,7 +60,19 @@ const DocumentCard: React.FC<{ userDocument?: UserDocument, user?: User, sx?: Sx
   const hydrated = useHydration();
 
   return (
-    <Card variant="outlined" sx={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "100%", maxWidth: "100%", ...sx }}>
+    <Card 
+      variant="outlined" 
+      sx={{ 
+        display: "flex", 
+        flexDirection: "column", 
+        justifyContent: "space-between", 
+        height: "100%", 
+        maxWidth: "100%", 
+        borderWidth: isDirectory ? 2 : 1,
+        borderColor: isDirectory ? 'primary.main' : undefined,
+        ...sx 
+      }}
+    >
       <CardActionArea component={RouterLink} prefetch={false} href={document ? href : "/"} sx={{ flexGrow: 1 }}>
         <CardHeader sx={{ alignItems: "start", '& .MuiCardHeader-content, .MuiCardHeader-title': { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }}
           title={document ? document.name : <Skeleton variant="text" width={190} />}
