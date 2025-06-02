@@ -44,8 +44,13 @@ const DocumentCard: React.FC<{ userDocument?: UserDocument, user?: User, sx?: Sx
   const isHeadCloudRevision = cloudDocumentRevisions.some(r => r.id === localDocument?.head);
   const localOnlyRevisions = isUploaded ? localDocumentRevisions.filter(r => !cloudDocumentRevisions.some(cr => cr.id === r.id)) : [];
   const unsavedChanges = isUploaded && !isHeadLocalRevision && !isHeadCloudRevision;
-  if (unsavedChanges) {
-    const unsavedRevision = { id: localDocument?.head, documentId: localDocument?.id, createdAt: localDocument?.updatedAt } as LocalDocumentRevision;
+  if (unsavedChanges && localDocument?.head) {
+    const unsavedRevision = { 
+      id: localDocument.head, 
+      documentId: localDocument.id, 
+      createdAt: localDocument.updatedAt,
+      data: {} as any // Add data property to satisfy EditorDocumentRevision
+    };
     localOnlyRevisions.unshift(unsavedRevision);
   }
   const cloudHeadIndex = cloudDocumentRevisions.findIndex(r => r.id === cloudDocument?.head);

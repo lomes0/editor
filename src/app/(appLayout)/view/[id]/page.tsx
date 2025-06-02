@@ -8,6 +8,7 @@ import { authOptions } from "@/lib/auth";
 import SplashScreen from "@/components/SplashScreen";
 import { cache } from "react";
 import { findRevisionHtml } from "@/app/api/utils";
+import { DocumentRevision } from "@/types";
 
 const getCachedUserDocument = cache(async (id: string, revisions?: string) => await findUserDocument(id, revisions));
 const getCachedSession = cache(async () => await getServerSession(authOptions));
@@ -75,7 +76,7 @@ export default async function Page(
     const isCollab = document.collab;
     if (!session) {
       if (document.private) return <SplashScreen title="This document is private" subtitle="Please sign in to view it" />
-      if (!isCollab) document.revisions = [revision];
+      if (!isCollab) document.revisions = [{ ...revision, author: document.author }];
     }
     const user = session?.user;
     if (user) {
@@ -83,7 +84,7 @@ export default async function Page(
       const isCoauthor = document.coauthors.some(coauthor => coauthor.id === user.id);
       if (!isAuthor && !isCoauthor) {
         if (document.private) return <SplashScreen title="This document is private" subtitle="You are not authorized to view this document" />
-        if (!isCollab) document.revisions = [revision];
+        if (!isCollab) document.revisions = [{ ...revision, author: document.author }];
       }
     }
     const html = await findRevisionHtml(revisionId);

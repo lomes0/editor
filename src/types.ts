@@ -45,6 +45,7 @@ export interface EditorDocument {
   baseId?: string | null;
   parentId?: string | null;
   type: DocumentType;
+  revisions?: EditorDocumentRevision[];
 }
 
 export enum DocumentType {
@@ -63,7 +64,7 @@ export type Document = Omit<EditorDocument, "data"> & {
 };
 
 export type CloudDocument = Document; // Cloud documents are the same as regular documents
-export type UserDocument = { id: string; document: Document; }; // Simplified to just contain the document
+export type UserDocument = { id: string; local?: EditorDocument; cloud?: Document; }; // Document can be local, cloud, or both
 export type BackupDocument = EditorDocument & { revisions: EditorDocumentRevision[]; };
 
 export type DocumentCreateInput = EditorDocument & {
@@ -94,6 +95,7 @@ export interface EditorDocumentRevision {
 export type DocumentRevision = Omit<EditorDocumentRevision, "data"> & { author: User; };
 export type CloudDocumentRevision = DocumentRevision; // Cloud document revisions are the same as regular document revisions
 export type UserDocumentRevision = DocumentRevision;
+export type LocalDocumentRevision = Partial<EditorDocumentRevision>; // Allow partial for local document revisions
 
 export interface User {
   id: string;
