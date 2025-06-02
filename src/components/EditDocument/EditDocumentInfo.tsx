@@ -43,8 +43,8 @@ export default function EditDocumentInfo({ editorRef, documentId }: { editorRef:
     documentRevisions.unshift(unsavedRevision);
   }
 
-  const revisionsBadgeContent = revisions.length;
-  const showRevisionsBadge = revisionsBadgeContent > 0;
+  // Remove revisions badge content
+  const showRevisionsBadge = false;
 
   const isDiffViewOpen = useSelector(state => state.ui.diff.open);
   const toggleDiffView = async () => {
@@ -153,9 +153,7 @@ export default function EditDocumentInfo({ editorRef, documentId }: { editorRef:
           {documentRevisions.map(revision => <Grid size={{ xs: 12 }} key={revision.id}><RevisionCard revision={revision} editorRef={editorRef} /></Grid>)}
         </Grid>
       </AppDrawer>
-      {showRevisionsBadge && <Portal container={document.querySelector('#document-info')}>
-        <Badge badgeContent={revisionsBadgeContent} color="secondary"></Badge>
-      </Portal>}
+      {/* Removed revision badge */}
     </>
   );
 }

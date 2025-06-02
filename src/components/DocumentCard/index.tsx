@@ -54,8 +54,8 @@ const DocumentCard: React.FC<{ userDocument?: UserDocument, user?: User, sx?: Sx
     localOnlyRevisions.unshift(unsavedRevision);
   }
   const cloudHeadIndex = cloudDocumentRevisions.findIndex(r => r.id === cloudDocument?.head);
-  let revisionsBadgeContent = localOnlyRevisions.length;
-  if (isAuthor && isCollab && cloudHeadIndex > 0) revisionsBadgeContent++;
+  // Remove revisions badge content
+  let revisionsBadgeContent = 0;
 
   const hydrated = useHydration();
 
