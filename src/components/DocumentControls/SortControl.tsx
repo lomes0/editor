@@ -1,5 +1,5 @@
 import { ArrowUpward, ArrowDownward } from "@mui/icons-material";
-import { Box, ToggleButton, Select, MenuItem, ListItemText, SelectChangeEvent } from "@mui/material";
+import { Box, ToggleButton, Select, MenuItem, ListItemText, SelectChangeEvent, ListItemIcon } from "@mui/material";
 import type { } from '@mui/material/themeCssVarsAugmentation';
 
 const DocumentSortControl: React.FC<{
@@ -37,9 +37,10 @@ const DocumentSortControl: React.FC<{
           borderTopRightRadius: 0,
           borderBottomRightRadius: 0,
           borderRight: 'none',
-          borderColor: `rgb(from ${theme.vars.palette.primary.main} r g b / 0.5)`,
+          borderColor: 'divider',
           color: "primary.main",
-          '&:hover': { borderColor: 'primary.main' },
+          height: 40,
+          '&:hover': { borderColor: 'primary.main', bgcolor: 'rgba(var(--mui-palette-primary-mainChannel) / 0.04)' },
         })}
         aria-label="sort direction"
       >
@@ -51,17 +52,57 @@ const DocumentSortControl: React.FC<{
         sx={theme => ({
           borderTopLeftRadius: 0,
           borderBottomLeftRadius: 0,
-          '& .MuiSelect-select': { display: 'flex !important', alignItems: 'center', px: '10px', py: '6.5px', height: '0 !important' },
-          '& .MuiListItemIcon-root': {  color: 'primary.main', mr: 0.5 , minWidth: 20 },
-          '& .MuiSelect-icon': { color: 'primary.main' },
-          '& .MuiListItemText-primary': { color: 'primary.main', fontWeight: 500, textTransform: 'uppercase', fontSize: '0.875rem' },
-          '& .MuiOutlinedInput-notchedOutline': { borderWidth: 1, borderColor: `rgb(from ${theme.vars.palette.primary.main} r g b / 0.5)` },
-          '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'primary.main' }
+          height: 40,
+          '& .MuiSelect-select': { 
+            display: 'flex !important', 
+            alignItems: 'center', 
+            px: '10px', 
+            py: '6.5px', 
+            height: '0 !important' 
+          },
+          '& .MuiListItemIcon-root': { color: 'primary.main', mr: 0.5, minWidth: 20 },
+          '& .MuiSelect-icon': { color: 'text.secondary' },
+          '& .MuiListItemText-primary': { 
+            color: 'text.primary', 
+            fontWeight: 500, 
+            fontSize: '0.875rem' 
+          },
+          '& .MuiOutlinedInput-notchedOutline': { 
+            borderWidth: 1, 
+            borderColor: 'divider' 
+          },
+          '&:hover .MuiOutlinedInput-notchedOutline': { 
+            borderColor: 'primary.main',
+            bgcolor: 'rgba(var(--mui-palette-primary-mainChannel) / 0.04)'
+          }
         })}
         inputProps={{ 'aria-label': 'sort by' }}
         MenuProps={{
           slotProps: {
-            root: { sx: { '& .MuiBackdrop-root': { userSelect: 'none' }, '& .MuiMenuItem-root': { minHeight: 36 }, } }
+            root: { 
+              sx: { 
+                '& .MuiBackdrop-root': { userSelect: 'none' }, 
+                '& .MuiMenuItem-root': { 
+                  minHeight: 40,
+                  borderRadius: 1,
+                  mx: 0.5,
+                  '&:hover': {
+                    bgcolor: 'rgba(var(--mui-palette-primary-mainChannel) / 0.08)'
+                  },
+                  '&.Mui-selected': {
+                    bgcolor: 'rgba(var(--mui-palette-primary-mainChannel) / 0.12)',
+                    '&:hover': {
+                      bgcolor: 'rgba(var(--mui-palette-primary-mainChannel) / 0.16)'
+                    }
+                  }
+                },
+                '& .MuiMenu-paper': {
+                  mt: 1,
+                  borderRadius: 1.5,
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                }
+              } 
+            }
           }
         }}
       >
@@ -70,7 +111,6 @@ const DocumentSortControl: React.FC<{
             <ListItemText>{option.label}</ListItemText>
           </MenuItem>
         ))}
-
       </Select>
     </Box>
   );

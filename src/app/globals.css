@@ -254,6 +254,25 @@ body.fullscreen {
   src: url(/fonts/Cascadia/CascadiaCode-Regular.woff2);
 }
 
+/* Document browser enhancements */
+.document-browser-container {
+  transition: all 0.3s ease-in-out;
+}
+
+.document-card {
+  transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.document-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+@font-face {
+  font-family: Cascadia;
+  src: url(/fonts/Cascadia/CascadiaCode-Regular.woff2);
+}
+
 @font-face {
   font-family: Assistant;
   src: url(/fonts/Assistant/Assistant-Regular.woff2);

@@ -62,6 +62,7 @@ const DocumentCard: React.FC<{ userDocument?: UserDocument, user?: User, sx?: Sx
   return (
     <Card 
       variant="outlined" 
+      className="document-card"
       sx={{ 
         display: "flex", 
         flexDirection: "column", 
