@@ -18,7 +18,7 @@ const DocumentBrowser: React.FC = () => {
   const router = useRouter();
   const documents = useSelector(state => state.documents);
   const user = useSelector(state => state.user);
-  const [sortValue, setSortValue] = useState({ key: 'updatedAt', direction: 'desc' });
+  const [sortValue, setSortValue] = useState({ key: 'createdAt', direction: 'desc' });
   
   // Get root level documents and directories (items without a parentId)
   const rootItems = documents.filter(doc => {
