@@ -10,6 +10,7 @@ import { User, UserDocument } from '@/types';
 import ShareDocument from './Share';
 import EditDocument from './Edit';
 import RestoreDocument from './Restore';
+import MoveDocument from './Move';
 
 function DocumentActionMenu({ userDocument, user }: { userDocument: UserDocument, user?: User }) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -32,7 +33,7 @@ function DocumentActionMenu({ userDocument, user }: { userDocument: UserDocument
   const isCollab = isCloud ? cloudDocument.collab : false;
   const id = userDocument.id;
 
-  const options = ['fork', 'share'];
+  const options = ['fork', 'share', 'move'];
   if (isAuthor || isCoauthor || isLocal || isCollab) options.push('download');
   if (isAuthor || isLocal) options.push('delete');
   if (isAuthor) options.push('edit', 'upload');
@@ -68,6 +69,7 @@ function DocumentActionMenu({ userDocument, user }: { userDocument: UserDocument
           horizontal: 'right',
         }}
       >
+        {options.includes('move') && <MoveDocument userDocument={userDocument} variant="menuitem" closeMenu={closeMenu} />}
         {options.includes('download') && <DownloadDocument userDocument={userDocument} variant="menuitem" closeMenu={closeMenu} />}
         {options.includes('fork') && <ForkDocument userDocument={userDocument} variant="menuitem" closeMenu={closeMenu} />}
         {options.includes('upload') && isLocal && !isUpToDate && <UploadDocument userDocument={userDocument} variant="menuitem" closeMenu={closeMenu} />}
