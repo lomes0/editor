@@ -419,6 +419,18 @@ export const deleteCloudRevision = createAsyncThunk('app/deleteCloudRevision', a
   }
 });
 
+export const getDocumentById = createAsyncThunk('app/getDocumentById', async (id: string, thunkAPI) => {
+  try {
+    const state = thunkAPI.getState() as AppState;
+    const userDocument = state.documents.find(doc => doc.id === id);
+    if (!userDocument) return thunkAPI.rejectWithValue({ title: "Something went wrong", subtitle: "document not found" });
+    return thunkAPI.fulfillWithValue(userDocument);
+  } catch (error: any) {
+    console.error(error);
+    return thunkAPI.rejectWithValue({ title: "Something went wrong", subtitle: error.message });
+  }
+});
+
 export const updateUser = createAsyncThunk('app/updateUser', async (payloadCreator: { id: string, partial: Partial<User> }, thunkAPI) => {
   try {
     NProgress.start();

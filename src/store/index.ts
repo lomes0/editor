@@ -25,7 +25,8 @@ import {
   alert,
   getLocalStorageUsage,
   getCloudStorageUsage,
-  getCloudDocumentThumbnail
+  getCloudDocumentThumbnail,
+  getDocumentById
 } from "./app";
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 
@@ -62,6 +63,7 @@ export const actions = {
   getLocalStorageUsage,
   getCloudStorageUsage,
   getCloudDocumentThumbnail,
+  getDocumentById,
 };
 
 export const store = configureStore({ reducer: appSlice.reducer });

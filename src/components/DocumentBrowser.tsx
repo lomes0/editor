@@ -1,10 +1,11 @@
 "use client"
 import { useDispatch, useSelector, actions } from '@/store';
 import { useEffect, useState } from 'react';
-import { Box, Typography, Button, Paper, Divider, Container, Fade, Tooltip, Breadcrumbs } from "@mui/material";
+import { Box, Typography, Button, Paper, Divider, Container, Fade, Tooltip } from "@mui/material";
 import Grid from '@mui/material/Grid2';
-import { CreateNewFolder, Folder, PostAdd, Article, FilterList, Home as HomeIcon } from '@mui/icons-material';
+import { CreateNewFolder, Folder, PostAdd, Article, FilterList } from '@mui/icons-material';
 import DocumentCard from './DocumentCard';
+import DraggableDocumentCard from './DocumentCard/DraggableDocumentCard';
 import { DocumentType, UserDocument } from '@/types';
 import DocumentSortControl from './DocumentControls/SortControl';
 import { sortDocuments } from './DocumentControls/sortDocuments';
@@ -54,104 +55,6 @@ const DocumentBrowser: React.FC = () => {
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Fade in={true} timeout={600}>
         <Box className="document-browser-container" sx={{ display: 'flex', flexDirection: 'column', gap: 4, width: '100%' }}>
-          {/* Enhanced breadcrumb for root */}
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center',
-            pl: 0.5,
-            mb: 1,
-            color: 'text.secondary',
-            position: 'relative',
-            '&::after': {
-              content: '""',
-              position: 'absolute',
-              bottom: -4,
-              left: 0,
-              width: '100%',
-              height: '1px',
-              backgroundColor: 'rgba(0, 0, 0, 0.03)',
-              zIndex: 1
-            }
-          }}>
-            <Breadcrumbs 
-              aria-label="breadcrumb"
-              className="breadcrumb-animated"
-              separator={<Box component="span" sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                opacity: 0.5,
-                mx: 0.5,
-                color: 'text.disabled'
-              }}>
-                /
-              </Box>}
-              sx={{ 
-                '& .MuiBreadcrumbs-ol': { 
-                  flexWrap: { xs: 'wrap', md: 'nowrap' },
-                  padding: '4px',
-                  borderRadius: '8px',
-                  '&:hover': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.01)'
-                  }
-                },
-                '& a': { 
-                  transition: 'all 0.2s ease',
-                  fontSize: '0.875rem',
-                  color: 'text.secondary',
-                  textDecoration: 'none',
-                  padding: '4px 8px',
-                  borderRadius: '4px',
-                  '&:hover': {
-                    color: 'primary.main',
-                    backgroundColor: 'rgba(0, 0, 0, 0.03)'
-                  }
-                }
-              }}
-            >
-              <Tooltip 
-                title="Home directory"
-                arrow
-              >
-                <Typography 
-                  className="breadcrumb-item breadcrumb-active"
-                  sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center',
-                    color: 'text.primary',
-                    fontSize: '0.875rem',
-                    fontWeight: 'medium',
-                    padding: '4px 8px',
-                    borderRadius: '4px',
-                    backgroundColor: 'rgba(0, 0, 0, 0.03)',
-                    ...(sortedDirectories.length + sortedDocuments.length === 0 ? {
-                      borderBottom: '1px dashed',
-                      borderColor: 'warning.light'
-                    } : {})
-                  }}
-                >
-                  <HomeIcon sx={{ mr: 0.5, fontSize: '0.9rem' }} />
-                  Documents
-                  <Box 
-                    component="span" 
-                    sx={{ 
-                      ml: 1, 
-                      fontSize: '0.7rem', 
-                      opacity: 0.7, 
-                      backgroundColor: 'rgba(0, 0, 0, 0.04)', 
-                      px: 0.7, 
-                      py: 0.2, 
-                      borderRadius: 1,
-                      display: 'inline-flex',
-                      alignItems: 'center'
-                    }}
-                  >
-                    {sortedDirectories.length + sortedDocuments.length} item{sortedDirectories.length + sortedDocuments.length !== 1 ? 's' : ''}
-                  </Box>
-                </Typography>
-              </Tooltip>
-            </Breadcrumbs>
-          </Box>
-
           {/* Page header with modern styling */}
           <Box sx={{ 
             display: 'flex', 
@@ -301,7 +204,7 @@ const DocumentBrowser: React.FC = () => {
                   <Grid container spacing={2}>
                     {sortedDirectories.map(directory => (
                       <Grid key={directory.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                        <DocumentCard userDocument={directory} user={user} />
+                        <DraggableDocumentCard userDocument={directory} user={user} />
                       </Grid>
                     ))}
                   </Grid>
@@ -327,7 +230,7 @@ const DocumentBrowser: React.FC = () => {
                   <Grid container spacing={2}>
                     {sortedDocuments.map(document => (
                       <Grid key={document.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                        <DocumentCard userDocument={document} user={user} />
+                        <DraggableDocumentCard userDocument={document} user={user} />
                       </Grid>
                     ))}
                   </Grid>

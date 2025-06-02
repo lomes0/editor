@@ -6,6 +6,7 @@ import Grid from '@mui/material/Grid2';
 import Link from 'next/link';
 import { CreateNewFolder, ArrowBack, Home as HomeIcon, Folder, PostAdd, Article, FilterList } from '@mui/icons-material';
 import DocumentCard from './DocumentCard';
+import DraggableDocumentCard from './DocumentCard/DraggableDocumentCard';
 import { DocumentType, UserDocument } from '@/types';
 import DocumentSortControl from './DocumentControls/SortControl';
 import { sortDocuments } from './DocumentControls/sortDocuments';
@@ -373,7 +374,11 @@ const DirectoryBrowser: React.FC<DirectoryBrowserProps> = ({ directoryId }) => {
                   <Grid container spacing={2}>
                     {sortedDirectories.map(directory => (
                       <Grid key={directory.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                        <DocumentCard userDocument={directory} user={user} />
+                        <DraggableDocumentCard 
+                          userDocument={directory} 
+                          user={user} 
+                          currentDirectoryId={directoryId}
+                        />
                       </Grid>
                     ))}
                   </Grid>
@@ -399,7 +404,11 @@ const DirectoryBrowser: React.FC<DirectoryBrowserProps> = ({ directoryId }) => {
                   <Grid container spacing={2}>
                     {sortedDocuments.map(document => (
                       <Grid key={document.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                        <DocumentCard userDocument={document} user={user} />
+                        <DraggableDocumentCard 
+                          userDocument={document} 
+                          user={user}
+                          currentDirectoryId={directoryId}
+                        />
                       </Grid>
                     ))}
                   </Grid>
