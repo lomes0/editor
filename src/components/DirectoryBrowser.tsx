@@ -152,35 +152,76 @@ const DirectoryBrowser: React.FC<DirectoryBrowserProps> = ({ directoryId }) => {
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Fade in={true} timeout={600}>
         <Box className="document-browser-container" sx={{ display: 'flex', flexDirection: 'column', gap: 4, width: '100%' }}>
-          {/* Breadcrumb navigation */}
-          <Paper sx={{ p: 1.5, borderRadius: 2 }}>
-        <Breadcrumbs aria-label="breadcrumb">
-          <Link href="/browse" style={{ display: 'flex', alignItems: 'center' }}>
-            <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
-            Root
-          </Link>
-          
-          {breadcrumbs.map((crumb, index) => {
-            const isLast = index === breadcrumbs.length - 1;
-            
-            if (isLast) {
-              return (
-                <Typography key={crumb.id} color="text.primary" sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Folder sx={{ mr: 0.5 }} fontSize="inherit" />
-                  {crumb.name}
-                </Typography>
-              );
-            }
-            
-            return (
-              <Link key={crumb.id} href={`/browse/${crumb.id}`} style={{ display: 'flex', alignItems: 'center' }}>
-                <Folder sx={{ mr: 0.5 }} fontSize="inherit" />
-                {crumb.name}
+          {/* Breadcrumb navigation - subtle version with non-transparent text */}
+          <Box sx={{ 
+            mb: 3,
+            mt: -1,
+            pl: 0.5
+          }}>
+            <Breadcrumbs 
+              aria-label="breadcrumb"
+              sx={{ 
+                '& .MuiBreadcrumbs-separator': { 
+                  color: 'text.disabled',
+                  mx: 0.5,
+                  fontSize: '0.7rem'
+                }
+              }}
+            >
+              <Link 
+                href="/browse" 
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  color: 'text.primary',
+                  textDecoration: 'none',
+                  fontSize: '0.75rem'
+                }}
+              >
+                <HomeIcon sx={{ mr: 0.5, fontSize: '0.75rem', opacity: 0.7 }} />
+                Root
               </Link>
-            );
-          })}
-        </Breadcrumbs>
-      </Paper>
+              
+              {breadcrumbs.map((crumb, index) => {
+                const isLast = index === breadcrumbs.length - 1;
+                
+                if (isLast) {
+                  return (
+                    <Typography 
+                      key={crumb.id} 
+                      color="text.primary" 
+                      sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center',
+                        fontSize: '0.75rem',
+                        fontWeight: 'medium'
+                      }}
+                    >
+                      <Folder sx={{ mr: 0.5, fontSize: '0.75rem', opacity: 0.7 }} />
+                      {crumb.name}
+                    </Typography>
+                  );
+                }
+                
+                return (
+                  <Link 
+                    key={crumb.id} 
+                    href={`/browse/${crumb.id}`} 
+                    style={{ 
+                      display: 'flex', 
+                      alignItems: 'center',
+                      color: 'text.primary',
+                      textDecoration: 'none',
+                      fontSize: '0.75rem'
+                    }}
+                  >
+                    <Folder sx={{ mr: 0.5, fontSize: '0.75rem', opacity: 0.7 }} />
+                    {crumb.name}
+                  </Link>
+                );
+              })}
+            </Breadcrumbs>
+          </Box>
       
       {/* Directory title and controls */}
           <Box sx={{ 
@@ -194,7 +235,7 @@ const DirectoryBrowser: React.FC<DirectoryBrowserProps> = ({ directoryId }) => {
             borderColor: 'divider',
           }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Folder color="primary" fontSize="large" />
+              {/* <Folder color="primary" fontSize="large" /> */}
               <Typography 
                 variant="h4" 
                 component="h1" 
