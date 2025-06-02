@@ -33,9 +33,7 @@ export default function ViewDocumentInfo({ cloudDocument, user }: { cloudDocumen
   const href = isEditable ? `/edit/${handle}` : `/new/${handle}${revisionId ? `?v=${revisionId}` : ''}`;
 
   const cloudDocumentRevisions = cloudDocument?.revisions ?? [];
-  const revisionsBadgeContent = cloudDocumentRevisions.length;
-  const showRevisionsBadge = revisionsBadgeContent > 1;
-
+  
   return (
     <>
       <AppDrawer title="Document Info">
@@ -98,9 +96,6 @@ export default function ViewDocumentInfo({ cloudDocument, user }: { cloudDocumen
         sx={{ position: 'fixed', right: slideTrigger ? 64 : 24, bottom: 16, px: 2, displayPrint: 'none', transition: `right 225ms ease-in-out` }}>
         {isEditable ? <Edit sx={{ mr: 1 }} /> : <FileCopy sx={{ mr: 1 }} />}{isEditable ? 'Edit' : 'Fork'}
       </Fab>}
-      {showRevisionsBadge && <Portal container={document.querySelector('#document-info')}>
-        <Badge badgeContent={revisionsBadgeContent} color="secondary"></Badge>
-      </Portal>}
     </>
   );
 }
