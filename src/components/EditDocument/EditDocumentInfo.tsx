@@ -27,9 +27,9 @@ export default function EditDocumentInfo({ editorRef, documentId }: { editorRef:
   const isAuthor = isCloud ? cloudDocument.author.id === user?.id : true
   const isCollab = isCloud && cloudDocument.collab;
   const collaborators = isCollab ? cloudDocument.revisions.reduce((acc, rev) => {
-    if (rev.author.id !== cloudDocument.author.id &&
-      !cloudDocument.coauthors.some(u => u.id === rev.author.id) &&
-      !acc.find(u => u.id === rev.author.id)) acc.push(rev.author);
+    if ((rev as any).author?.id !== cloudDocument.author.id &&
+      !cloudDocument.coauthors.some(u => u.id === (rev as any).author?.id) &&
+      !acc.find(u => u.id === (rev as any).author?.id)) acc.push((rev as any).author);
     return acc;
   }, [] as User[]) : [];
 
@@ -39,7 +39,12 @@ export default function EditDocumentInfo({ editorRef, documentId }: { editorRef:
 
   const unsavedChanges = !isHeadLocalRevision && !isHeadCloudRevision;
   if (unsavedChanges && localDocument) {
-    const unsavedRevision = { id: localDocument.head, documentId: localDocument.id, createdAt: localDocument.updatedAt } as LocalDocumentRevision;
+    const unsavedRevision = { 
+      id: localDocument.head, 
+      documentId: localDocument.id, 
+      createdAt: localDocument.updatedAt,
+      author: user || { id: '', name: 'Local User', email: '', handle: null, image: null }
+    } as UserDocumentRevision;
     documentRevisions.unshift(unsavedRevision);
   }
 

@@ -151,6 +151,8 @@ const findDocumentsByAuthorId = async (authorId: string) => {
     const cloudDocument: CloudDocument = {
       ...document,
       coauthors: document.coauthors.map((coauthor) => coauthor.user),
+      type: DocumentType.DOCUMENT,
+      head: document.head || '',
     };
     return cloudDocument;
   });
@@ -257,7 +259,9 @@ const findPublishedDocumentsByAuthorId = async (authorId: string) => {
     const cloudDocument: CloudDocument = {
       ...document,
       coauthors: document.coauthors.map((coauthor) => coauthor.user),
-      revisions,
+      revisions: revisions as any,
+      type: DocumentType.DOCUMENT,
+      head: document.head || '',
     };
     return cloudDocument;
   });
@@ -342,6 +346,9 @@ const findDocumentsByCoauthorId = async (authorId: string) => {
     const cloudDocument: CloudDocument = {
       ...document,
       coauthors: document.coauthors.map((coauthor) => coauthor.user),
+      type: DocumentType.DOCUMENT,
+      head: document.head || '',
+      revisions: document.revisions as any,
     };
     return cloudDocument;
   });
@@ -417,6 +424,9 @@ const findDocumentsByCollaboratorId = async (authorId: string) => {
     const cloudDocument: CloudDocument = {
       ...document,
       coauthors: document.coauthors.map((coauthor) => coauthor.user),
+      type: DocumentType.DOCUMENT,
+      head: document.head || '',
+      revisions: document.revisions as any,
     };
     return cloudDocument;
   });
@@ -442,12 +452,14 @@ const findEditorDocument = async (handle: string) => {
   });
 
   if (!document) return null;
-  const revision = await getCachedRevision(document.head);
+  const revision = await getCachedRevision(document.head || '');
   if (!revision) return null;
 
   const editorDocument: EditorDocument = {
     ...document,
     data: revision.data as unknown as EditorDocument['data'],
+    type: DocumentType.DOCUMENT,
+    head: document.head || '',
   };
 
   return editorDocument;
@@ -520,12 +532,15 @@ const findUserDocument = async (handle: string, revisions?: "all" | string | nul
   const cloudDocument: CloudDocument = {
     ...document,
     coauthors: document.coauthors.map((coauthor) => coauthor.user),
+    type: DocumentType.DOCUMENT,
+    head: document.head || '',
+    revisions: document.revisions as any,
   };
   if (revisions !== "all") {
-    const revisionId = revisions ?? document.head;
+    const revisionId = revisions ?? (document.head || '');
     const revision = cloudDocument.revisions.find((revision) => revision.id === revisionId);
     if (!revision) return null;
-    cloudDocument.revisions = [revision];
+    cloudDocument.revisions = [revision as any];
     cloudDocument.updatedAt = revision.createdAt;
   }
   return cloudDocument;

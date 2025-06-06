@@ -22,9 +22,9 @@ export default function ViewDocumentInfo({ cloudDocument, user }: { cloudDocumen
   const isEditable = isAuthor || isCoauthor || isCollab;
   const showFork = isPublished || isEditable;
   const collaborators = isCollab ? cloudDocument.revisions.reduce((acc, rev) => {
-    if (rev.author.id !== cloudDocument.author.id &&
-      !cloudDocument.coauthors.some(u => u.id === rev.author.id) &&
-      !acc.find(u => u.id === rev.author.id)) acc.push(rev.author);
+    if ((rev as any).author?.id !== cloudDocument.author.id &&
+      !cloudDocument.coauthors.some(u => u.id === (rev as any).author?.id) &&
+      !acc.find(u => u.id === (rev as any).author?.id)) acc.push((rev as any).author);
     return acc;
   }, [] as User[]) : [];
 
@@ -89,7 +89,7 @@ export default function ViewDocumentInfo({ cloudDocument, user }: { cloudDocumen
             <History sx={{ mr: 1 }} />
             <Typography variant="h6">Revisions</Typography>
           </Grid>
-          {cloudDocument.revisions.map(revision => <Grid size={{ xs: 12 }} key={revision.id}><ViewRevisionCard cloudDocument={cloudDocument} revision={revision} /></Grid>)}
+          {cloudDocument.revisions.map(revision => <Grid size={{ xs: 12 }} key={revision.id}><ViewRevisionCard cloudDocument={cloudDocument} revision={revision as any} /></Grid>)}
         </Grid>
       </AppDrawer>
       {showFork && <Fab variant="extended" size='medium' component={RouterLink} prefetch={false} href={href}

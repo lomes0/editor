@@ -15,7 +15,7 @@ export const filterDocuments = (documents: UserDocument[], user: User | undefine
     const isOutofSync = localDocument && cloudDocument && localDocument.head !== cloudDocument.head;
     const isAuthor = cloudDocument?.author.id === user?.id;
     const isCoauthor = cloudDocument?.coauthors.some(coauthor => coauthor.id === user?.id);
-    const isCollaborator = cloudDocument?.revisions.some(revision => revision.author.id === user?.id);
+    const isCollaborator = cloudDocument?.revisions.some(revision => (revision as any).author?.id === user?.id);
     const isOthers = !isLocalOnly && !isAuthor && !isCoauthor && !isCollaborator;
     const showLocal = !!(value & (1 << 0)) && !!localDocument;
     const showCloud = !!(value & (1 << 1)) && !!isCloudOnly;

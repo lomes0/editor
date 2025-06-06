@@ -41,9 +41,9 @@ export default function UsersAutocomplete({
     });
     const revisions = document.revisions;
     const collaborators = revisions.reduce((acc, rev) => {
-      if (rev.author.id !== author.id &&
-        !coauthors.some(u => u.id === rev.author.id) &&
-        !acc.find(u => u.id === rev.author.id)) acc.push(rev.author);
+      if ((rev as any).author?.id !== author.id &&
+        !coauthors.some(u => u.id === (rev as any).author?.id) &&
+        !acc.find(u => u.id === (rev as any).author?.id)) acc.push((rev as any).author);
       return acc;
     }, [] as User[]);
     collaborators.forEach(collaborator => {
@@ -119,4 +119,3 @@ export default function UsersAutocomplete({
     />
   );
 }
-
