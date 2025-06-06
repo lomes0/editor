@@ -12,10 +12,10 @@ const withBundleAnalyzerConfig = {
 const withPWAConfig = {
   dest: "public",
   disable: !IS_PRODUCTION,
-  register: false,
+  register: true,
   buildExcludes: ["app-build-manifest.json"],
-  skipWaiting: false,
-  cacheStartUrl: false,
+  skipWaiting: true,
+  cacheStartUrl: true,
   dynamicStartUrl: false,
   reloadOnOnline: false,
   fallbacks: {
