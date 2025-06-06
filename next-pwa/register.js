@@ -22,29 +22,26 @@ if (
   });
 
   window.workbox.addEventListener("controlling", async () => {
+    // Only cache the essential resources
     const origin = location.origin;
     const urlsToCache = [
-      [`${origin}/`, { headers: { "update": "1" }, cache: "reload" }],
-      [`${origin}/?_rsc`, { headers: { "update": "1", "RSC": "1" }, cache: "reload" }],
-      [`${origin}/playground`, { headers: { "update": "1" }, cache: "reload" }],
-      [`${origin}/playground?_rsc`, { headers: { "update": "1", "RSC": "1" }, cache: "reload" }],
-      [`${origin}/tutorial`, { headers: { "update": "1" }, cache: "reload" }],
-      [`${origin}/tutorial?_rsc`, { headers: { "update": "1", "RSC": "1" }, cache: "reload" }],
-      [`${origin}/new`, { headers: { "update": "1" }, cache: "reload" }],
-      [`${origin}/new?_rsc`, { headers: { "update": "1", "RSC": "1" }, cache: "reload" }],
-      [`${origin}/edit`, { headers: { "update": "1" }, cache: "reload" }],
-      [`${origin}/edit?_rsc`, { headers: { "update": "1", "RSC": "1" }, cache: "reload" }],
-      [`${origin}/browse`, { headers: { "update": "1" }, cache: "reload" }],
-      [`${origin}/browse?_rsc`, { headers: { "update": "1", "RSC": "1" }, cache: "reload" }],
-      [`${origin}/privacy`, { headers: { "update": "1" }, cache: "reload" }],
-      [`${origin}/privacy?_rsc`, { headers: { "update": "1", "RSC": "1" }, cache: "reload" }],
-    ]
-    const cache = await caches.open("pages");
-    urlsToCache.forEach(([url, options]) => {
-      fetch(url, options).then((response) => {
-        cache.put(url, response);
-      });
-    });
+      // Cache home page and offline page only
+      [`${origin}/`, { headers: { "RSC": "1" }, cache: "reload" }],
+      [`${origin}/offline`, { headers: { "RSC": "1" }, cache: "reload" }]
+    ];
+    
+    try {
+      const cache = await caches.open("pages");
+      for (const [url, options] of urlsToCache) {
+        fetch(url, options).then((response) => {
+          if (response.ok) {
+            cache.put(url, response);
+          }
+        }).catch(err => console.log('Failed to cache:', url, err));
+      }
+    } catch (error) {
+      console.log('Cache failed:', error);
+    }
   });
 
   if (__PWA_START_URL__) {
