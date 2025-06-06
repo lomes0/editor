@@ -153,6 +153,7 @@ const findDocumentsByAuthorId = async (authorId: string) => {
       coauthors: document.coauthors.map((coauthor) => coauthor.user),
       type: DocumentType.DOCUMENT,
       head: document.head || '',
+      revisions: document.revisions as any,
     };
     return cloudDocument;
   });

@@ -34,7 +34,7 @@ export default function EditDocumentInfo({ editorRef, documentId }: { editorRef:
   }, [] as User[]) : [];
 
   const revisions: UserDocumentRevision[] = [...cloudDocumentRevisions];
-  localDocumentRevisions.forEach(revision => { if (!cloudDocumentRevisions.some(r => r.id === revision.id)) revisions.push(revision); });
+  localDocumentRevisions.forEach(revision => { if (!cloudDocumentRevisions.some(r => r.id === revision.id)) revisions.push(revision as any); });
   const documentRevisions = [...revisions].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   const unsavedChanges = !isHeadLocalRevision && !isHeadCloudRevision;
