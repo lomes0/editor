@@ -5,7 +5,7 @@ import {
   AppState,
   Announcement,
   Alert,
-  LocalDocument,
+  EditorDocument,
   User,
   PatchUserResponse,
   GetSessionResponse,
@@ -71,13 +71,14 @@ export const loadLocalDocuments = createAsyncThunk('app/loadLocalDocuments', asy
   try {
     const documents = await documentDB.getAll();
     const revisions = await revisionDB.getAll();
-    const localDocuments: LocalDocument[] = await Promise.all(documents.map(async (document) => {
+    const localDocuments: EditorDocument[] = await Promise.all(documents.map(async (document) => {
       const { data, ...rest } = document;
       const backupDocument: BackupDocument = { ...document, revisions: revisions.filter(revision => revision.documentId === document.id) };
       const localRevisions = backupDocument.revisions.map(({ data, ...rest }) => rest);
-      const localDocument: LocalDocument = {
+      const localDocument: EditorDocument = {
         ...rest,
-        revisions: localRevisions,
+        data: {} as any, // Add missing data property
+        revisions: localRevisions as any,
       };
       return localDocument;
     }));
@@ -265,7 +266,7 @@ export const createLocalDocument = createAsyncThunk('app/createLocalDocument', a
     const { data, ...rest } = document;
     if (revisions) await revisionDB.addMany(revisions)
     const localDocumentRevisions = (revisions ?? []).map(({ data, ...rest }) => rest);
-    const localDocument: LocalDocument = { ...rest, revisions: localDocumentRevisions };
+    const localDocument: EditorDocument = { ...rest, data: {} as any, revisions: localDocumentRevisions as any };
     return thunkAPI.fulfillWithValue(localDocument);
   } catch (error: any) {
     console.error(error);
@@ -331,11 +332,11 @@ export const updateLocalDocument = createAsyncThunk('app/updateLocalDocument', a
     const { coauthors, published, collab, private: isPrivate, revisions, ...document } = partial;
     const result = await documentDB.patch(id, document);
     if (!result) return thunkAPI.rejectWithValue({ title: "Something went wrong", subtitle: "failed to update document" });
-    const payload: { id: string, partial: Partial<LocalDocument> } = { id, partial: { ...document } };
+    const payload: { id: string, partial: Partial<EditorDocument> } = { id, partial: { ...document } };
     if (revisions) {
       await revisionDB.addMany(revisions);
       const localDocumentRevisions = (revisions ?? []).map(({ data, ...rest }) => rest);
-      payload.partial.revisions = localDocumentRevisions;
+      payload.partial.revisions = localDocumentRevisions as any;
     }
 
     return thunkAPI.fulfillWithValue(payload);
@@ -558,7 +559,8 @@ export const appSlice = createSlice({
         if (!userDocument) return;
         const localDocument = userDocument.local;
         if (!localDocument) return;
-        localDocument.revisions.unshift(revision);
+        if (!localDocument.revisions) localDocument.revisions = [];
+        (localDocument.revisions as any).unshift({...revision, data: {} as any});
       })
       .addCase(createCloudDocument.fulfilled, (state, action) => {
         const document = action.payload;
@@ -574,7 +576,7 @@ export const appSlice = createSlice({
         const revision = action.payload;
         const document = state.documents.find(doc => doc.id === revision.documentId);
         if (!document?.cloud) return;
-        document.cloud.revisions.unshift(revision);
+        (document.cloud.revisions as any).unshift(revision);
       })
       .addCase(createCloudRevision.rejected, (state, action) => {
         const message = action.payload as { title: string, subtitle: string };
@@ -611,9 +613,10 @@ export const appSlice = createSlice({
         if (!userDocument) return;
         const localDocument = userDocument.local;
         if (!localDocument) return;
-        const revision = localDocument.revisions.find(revision => revision.id === id);
+        if (!localDocument.revisions) return;
+        const revision = (localDocument.revisions as any).find((revision: any) => revision.id === id);
         if (!revision) return;
-        localDocument.revisions = localDocument.revisions.filter(revision => revision.id !== id);
+        localDocument.revisions = (localDocument.revisions as any).filter((revision: any) => revision.id !== id);
       })
       .addCase(deleteCloudDocument.fulfilled, (state, action) => {
         const id = action.payload;
@@ -633,9 +636,9 @@ export const appSlice = createSlice({
         if (!userDocument) return;
         const cloudDocument = userDocument.cloud;
         if (!cloudDocument) return;
-        const revision = cloudDocument.revisions.find(revision => revision.id === id);
+        const revision = (cloudDocument.revisions as any).find((revision: any) => revision.id === id);
         if (!revision) return;
-        cloudDocument.revisions = cloudDocument.revisions.filter(revision => revision.id !== id);
+        cloudDocument.revisions = (cloudDocument.revisions as any).filter((revision: any) => revision.id !== id);
       })
       .addCase(deleteCloudRevision.rejected, (state, action) => {
         const message = action.payload as { title: string, subtitle: string };
