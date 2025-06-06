@@ -607,10 +607,38 @@ iframe {
 .LexicalTheme__layoutItem {
   min-width: 0;
   max-width: 100%;
+  position: relative;
 }
 
+/* Add right padding to all layout items except the last one for separation from divider */
 .LexicalTheme__layoutItem:not(:last-child) {
-  margin-inline-end: 0.5rem;
+  padding-right: 10px;
+}
+
+/* Add divider between layout items except for the last one */
+.LexicalTheme__layoutItem:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -0.25rem; /* Position in the middle of the gap */
+  height: 100%;
+  width: 2px; /* Wider divider */
+  background-color: #ccc; /* Light gray divider */
+  margin-right: 8px; /* Add more space between divider and content */
+}
+
+/* For dark mode, adjust divider color */
+@media screen and (prefers-color-scheme: dark) {
+  .LexicalTheme__layoutItem:not(:last-child)::after {
+    background-color: #444; /* Darker gray for dark mode */
+  }
+}
+
+/* Don't show divider in print */
+@media print {
+  .LexicalTheme__layoutItem:not(:last-child)::after {
+    display: none;
+  }
 }
 
 .details__container {
