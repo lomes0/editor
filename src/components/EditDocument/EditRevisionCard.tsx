@@ -39,7 +39,7 @@ const RevisionCard: React.FC<{
   const unsavedChanges = !isHeadLocalRevision && !isHeadCloudRevision;
 
   const isDocumentAuthor = isCloudDocument ? user?.id === cloudDocument.author.id : true;
-  const isRevisionAuthor = isCloudRevision ? user?.id === cloudRevision.author.id : true;
+  const isRevisionAuthor = isCloudRevision ? user?.id === (cloudRevision as any).author?.id : true;
   const diff = useSelector(state => state.ui.diff);
   const showLocal = !diff.open && (isLocalRevision || isLocalHead);
   const showCloud = !diff.open && isCloudRevision;
@@ -179,8 +179,8 @@ const RevisionCard: React.FC<{
       <CardActionArea sx={{ flexGrow: 1 }} onClick={viewRevision}>
         <CardHeader sx={{ alignItems: "start", '& .MuiCardHeader-content': { overflow: "hidden", textOverflow: "ellipsis" } }}
           title={new Date(revision.createdAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
-          subheader={(cloudRevision?.author ?? user)?.name ?? "Local User"}
-          avatar={<Avatar sx={{ bgcolor: 'primary.main' }} src={(cloudRevision?.author ?? user)?.image ?? undefined} alt={(cloudRevision?.author ?? user)?.name}></Avatar>}
+          subheader={((cloudRevision as any)?.author ?? user)?.name ?? "Local User"}
+          avatar={<Avatar sx={{ bgcolor: 'primary.main' }} src={((cloudRevision as any)?.author ?? user)?.image ?? undefined} alt={((cloudRevision as any)?.author ?? user)?.name}></Avatar>}
         />
       </CardActionArea>
       <CardActions sx={{ "& button:first-of-type": { ml: "auto !important" }, '& .MuiChip-root:last-of-type': { mr: 1 } }}>
