@@ -59,6 +59,14 @@ const Move: React.FC<MoveProps> = ({ userDocument, variant = "menuitem", closeMe
     return isLocalDir || isCloudDir;
   };
   
+  // Function to determine if a document is at the root level
+  const isRootLevel = (doc: UserDocument) => {
+    const localParentId = doc.local?.parentId;
+    const cloudParentId = doc.cloud?.parentId;
+    return localParentId === null || localParentId === undefined || 
+           cloudParentId === null || cloudParentId === undefined;
+  };
+  
   // Initialize directories when popover opens
   useEffect(() => {
     if (open) {
@@ -100,7 +108,9 @@ const Move: React.FC<MoveProps> = ({ userDocument, variant = "menuitem", closeMe
       // Filter directories at the current level
       const directoriesAtLevel = allDirectories.filter(dir => {
         const parentId = dir.local?.parentId || dir.cloud?.parentId;
-        return parentId === directoryId;
+        // When at the root level, show all directories without a parent
+        // Otherwise, show only directories with parentId matching the current directoryId
+        return directoryId === null ? isRootLevel(dir) : parentId === directoryId;
       });
       
       setDirectories(directoriesAtLevel);

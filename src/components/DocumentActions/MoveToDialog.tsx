@@ -48,6 +48,14 @@ const MoveToDialog: React.FC<MoveToDialogProps> = ({ open, onClose, userDocument
   const documentType = document?.type || DocumentType.DOCUMENT;
   const currentParentId = document?.parentId || null;
   
+  // Function to determine if a document is at the root level
+  const isRootLevel = (doc: UserDocument) => {
+    const localParentId = doc.local?.parentId;
+    const cloudParentId = doc.cloud?.parentId;
+    return localParentId === null || localParentId === undefined || 
+           cloudParentId === null || cloudParentId === undefined;
+  };
+  
   // Initialize directories when dialog opens
   useEffect(() => {
     if (open) {
@@ -96,7 +104,9 @@ const MoveToDialog: React.FC<MoveToDialogProps> = ({ open, onClose, userDocument
       // Filter directories at the current level
       const directoriesAtLevel = allDirectories.filter(dir => {
         const parentId = dir.local?.parentId || dir.cloud?.parentId;
-        return parentId === directoryId;
+        // When at the root level, show all directories without a parent (parentId is null or undefined)
+        // Otherwise, show only directories with parentId matching the current directoryId
+        return directoryId === null ? parentId === null || parentId === undefined : parentId === directoryId;
       });
       
       console.log('Directories at this level:', directoriesAtLevel.length);
