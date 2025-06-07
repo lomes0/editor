@@ -1,10 +1,10 @@
 import NewDocument from "@/components/NewDocument";
-import type { OgMetadata } from "@/app/api/og/route";
+import type { OgMetadata } from "@/lib/og-types";
 import { findUserDocument } from "@/repositories/document";
 import type { Metadata } from "next";
 import { cache } from "react";
 import { ThumbnailProvider } from "@/app/context/ThumbnailContext";
-import { findRevisionThumbnail } from "@/app/api/utils";
+import { findRevisionThumbnail } from "@/lib/document-utils";
 import SplashScreen from "@/components/SplashScreen";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";

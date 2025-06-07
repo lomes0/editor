@@ -3,7 +3,8 @@ import { createRevision } from "@/repositories/revision";
 import { EditorDocumentRevision, PostRevisionResponse } from "@/types";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/prisma"
+import { Prisma } from "@prisma/client"
 import { findUserDocument } from "@/repositories/document";
 
 export const dynamic = "force-dynamic";

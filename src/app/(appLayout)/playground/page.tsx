@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Playground from "@/components/Playground";
 import htmr from "htmr";
 import { findUserDocument } from "@/repositories/document";
-import { findRevisionHtml } from "@/app/api/utils";
+import { findRevisionHtml } from "@/lib/document-utils";
 
 export const metadata: Metadata = {
   title: "Playground",

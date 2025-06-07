@@ -1,4 +1,4 @@
-import { OgMetadata } from "@/app/api/og/route";
+import { OgMetadata } from "@/lib/og-types";
 import type { Metadata } from "next";
 import { findPublishedDocumentsByAuthorId } from "@/repositories/document";
 import { notFound } from "next/navigation";
@@ -6,7 +6,7 @@ import { findUser } from "@/repositories/user";
 import { cache, Suspense } from "react";
 import UserCard from "@/components/User/UserCard";
 import UserDocuments from "@/components/User/UserDocuments";
-import { findRevisionThumbnail } from "@/app/api/utils";
+import { findRevisionThumbnail } from "@/lib/document-utils";
 import { ThumbnailProvider } from "@/app/context/ThumbnailContext";
 import { sortDocuments } from "@/components/DocumentControls/sortDocuments";
 

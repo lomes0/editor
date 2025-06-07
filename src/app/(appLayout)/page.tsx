@@ -2,7 +2,7 @@ import Home from "@/components/Home";
 import { findPublishedDocuments } from "@/repositories/document";
 import { UserDocument } from "@/types";
 import type { Metadata } from "next";
-import { findRevisionThumbnail } from "../api/utils";
+import { findRevisionThumbnail } from "@/lib/document-utils";
 import { ThumbnailProvider } from "@/app/context/ThumbnailContext";
 
 export const metadata: Metadata = {

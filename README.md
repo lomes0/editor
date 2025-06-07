@@ -12,6 +12,7 @@ The project aims to make writing publication-quality documents easy and accessib
 - Math: Integrates with [Mathlive](https://cortexjs.io/mathlive) for writing LaTeX with a Virtual Keyboard.
 - Graph: Integrates with [Geogebra](https://www.geogebra.org) for graphing functions and shapes.
 - Sketch: Integrates with [Excalidraw](https://excalidraw.com/) for hand-drawn like sketches.
+- Static Blog Export: Generate static HTML files for your blog posts that can be hosted anywhere.
 
 ## Getting Started
 
@@ -21,3 +22,21 @@ cd matheditor
 npm install
 npm run dev
 ```
+
+## Static Blog Export
+
+Export your blog posts as static HTML files that can be hosted on any web server without requiring the full application:
+
+```
+npm run export-blog            # Export blog to static HTML
+npm run serve-blog             # Test the exported blog locally (auto-selects port)
+npm run serve-blog -- 8080     # Test with a specific port
+```
+
+This feature:
+- Converts Lexical editor content to clean HTML
+- Properly renders math formulas using MathJax
+- Handles complex structures like tables and code blocks
+- Creates a responsive, mobile-friendly blog
+
+See [static-blog-export.md](docs/static-blog-export.md) for more details.

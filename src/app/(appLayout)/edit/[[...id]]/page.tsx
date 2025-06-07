@@ -1,4 +1,4 @@
-import type { OgMetadata } from "@/app/api/og/route";
+import type { OgMetadata } from "@/lib/og-types";
 import EditDocument from "@/components/EditDocument";
 import { findUserDocument } from "@/repositories/document";
 import type { Metadata } from "next";
