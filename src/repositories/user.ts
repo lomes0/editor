@@ -1,4 +1,5 @@
-import { Prisma, prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { CloudDocument } from "@/types";
 import { validate } from "uuid";
 

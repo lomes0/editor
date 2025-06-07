@@ -1,4 +1,5 @@
-import { Prisma, prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { EditorDocumentRevision } from "@/types";
 import { unstable_cache } from "next/cache";
 

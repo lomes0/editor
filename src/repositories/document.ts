@@ -1,4 +1,5 @@
-import { Prisma, prisma } from "@/lib/prisma";
+import { Prisma, PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { CloudDocument, DocumentType, EditorDocument } from "@/types";
 import { validate } from "uuid";
 import { getCachedRevision } from "./revision";

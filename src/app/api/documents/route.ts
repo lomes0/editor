@@ -3,7 +3,7 @@ import { createDocument, findDocumentsByAuthorId, findPublishedDocuments, findUs
 import { DocumentCreateInput, GetDocumentsResponse, PostDocumentsResponse } from "@/types";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
-import { Prisma } from "@/lib/prisma"
+import { Prisma } from "@prisma/client";
 import { validateHandle } from "./utils";
 
 export const dynamic = "force-dynamic";
