@@ -167,14 +167,7 @@ const Documents: React.FC<{ staticDocuments: UserDocument[] }> = ({ staticDocume
 
   return (
     <>
-      <Box sx={{ display: 'flex', flexDirection: "column", alignItems: "center", my: 5 }}>
-        <Avatar sx={{ my: 2, bgcolor: 'primary.main' }}><PostAdd /></Avatar>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button variant="outlined" component={RouterLink} prefetch={false} href="/new">New document</Button>
-          <Button variant="outlined" startIcon={<CreateNewFolder />} onClick={handleCreateDirectory}>New directory</Button>
-        </Box>
-      </Box>
-      <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: { sm: "space-between" }, alignItems: "center", position: "sticky", top: { 'xs': 55.99, 'sm': 63.99 }, backgroundColor: 'var(--mui-palette-background-default)', zIndex: 5, py: 1 }}>
+      <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: { sm: "space-between" }, alignItems: "center", position: "sticky", top: { 'xs': 55.99, 'sm': 63.99 }, backgroundColor: 'var(--mui-palette-background-default)', zIndex: 5, py: 1, mb: 4 }}>
         <Typography variant="h6" component="h2" sx={{ display: { xs: 'none', sm: 'block' } }}>Documents</Typography>
         <Box sx={{ display: "flex", gap: 0.5, width: ["100%","auto"], justifyContent: "center", mb: 1 }}>
           <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
@@ -194,22 +187,10 @@ const Documents: React.FC<{ staticDocuments: UserDocument[] }> = ({ staticDocume
           <DocumentFilterControl value={filter} setValue={setFilter} />
         </Suspense>
       </Box>
-      <Grid container spacing={2} sx={{ mb: 2 }}>
-        <Grid size={{ xs: 6 }}>
-          <Card variant="outlined">
-            <CardActionArea component={RouterLink} prefetch={false} href="/playground">
-              <CardHeader title="Playground" avatar={<Avatar sx={{ bgcolor: 'primary.main' }}><Science /></Avatar>} />
-            </CardActionArea>
-          </Card>
-        </Grid>
-        <Grid size={{ xs: 6 }}>
-          <Card variant="outlined">
-            <CardActionArea component={RouterLink} prefetch={false} href="/tutorial">
-              <CardHeader title="Tutorial" avatar={<Avatar sx={{ bgcolor: 'primary.main' }}><Help /></Avatar>} />
-            </CardActionArea>
-          </Card>
-        </Grid>
-      </Grid>
+      
+      {/* Add a divider with extra spacing for better separation */}
+      <Box sx={{ my: 5, borderBottom: 1, borderColor: 'divider' }} />
+      
       <DocumentsGrid documents={documents.length ? sortedDocuments : staticDocuments} initialized={initialized} user={user} />
     </>
   )
