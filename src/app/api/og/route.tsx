@@ -1,8 +1,19 @@
 /* eslint-disable @next/next/no-img-element */
 import { ImageResponse } from 'next/og';
-import { OgMetadata } from '@/lib/og-types';
 
 export const runtime = 'edge';
+
+export interface OgMetadata {
+  id: string;
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  user?: {
+    name: string;
+    image: string;
+    email: string;
+  };
+}
 
 export async function GET(request: Request) {
   try {

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Tutorial from "@/components/Tutorial";
 import htmr from "htmr";
-import { findRevisionHtml } from "@/lib/document-utils";
+import { findRevisionHtml } from "@/app/api/utils";
 import { findUserDocument } from "@/repositories/document";
 
 export const metadata: Metadata = {

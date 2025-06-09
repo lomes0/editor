@@ -4,7 +4,6 @@ import withPWA from './next-pwa'
 
 const IS_VERCEL = !!process.env.NEXT_PUBLIC_VERCEL_URL;
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-const IS_BLOG_EXPORT = process.env.BLOG_EXPORT === 'true';
 
 const withBundleAnalyzerConfig = {
   enabled: process.env.ANALYZE === 'true',
@@ -142,17 +141,6 @@ const withPWAConfig = {
 const nextConfig: NextConfig = {
   reactStrictMode: false,
   distDir: process.env.BUILD_DIR || '.next',
-  // Handle static export for blog
-  output: IS_BLOG_EXPORT ? 'export' : undefined,
-  // Configure static export for blog
-  ...(IS_BLOG_EXPORT && {
-    // With App Router, we don't need exportPathMap
-    // The generateStaticParams in each route handles this
-    images: {
-      unoptimized: true, // Required for static export
-    },
-    trailingSlash: true, // Helps with static hosting
-  }),
   webpack: (config, { isServer }) => {
     if (isServer) {
       config.externals.push('canvas');

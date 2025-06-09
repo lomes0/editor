@@ -4,7 +4,6 @@ import { DeleteUserResponse, GetUserResponse, PatchUserResponse, UserUpdateInput
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { validate } from "uuid";
-import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { validateHandle } from "../utils";
 

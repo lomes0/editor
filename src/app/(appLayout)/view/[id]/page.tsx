@@ -1,4 +1,4 @@
-import type { OgMetadata } from "@/lib/og-types";
+import type { OgMetadata } from "@/app/api/og/route";
 import { findUserDocument } from "@/repositories/document";
 import ViewDocument from "@/components/ViewDocument";
 import htmr from 'htmr';
@@ -7,7 +7,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import SplashScreen from "@/components/SplashScreen";
 import { cache } from "react";
-import { findRevisionHtml } from "@/lib/document-utils";
+import { findRevisionHtml } from "@/app/api/utils";
 import { DocumentRevision } from "@/types";
 
 const getCachedUserDocument = cache(async (id: string, revisions?: string) => await findUserDocument(id, revisions));

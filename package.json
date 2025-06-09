@@ -7,9 +7,7 @@
     "dev": "next dev --turbo",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "export-blog": "./scripts/export-blog.sh",
-    "serve-blog": "./scripts/serve-blog.sh"
+    "lint": "next lint"
   },
   "dependencies": {
     "@ai-sdk/google": "^1.1.27",
@@ -64,7 +62,6 @@
     "babel-loader": "^10.0.0",
     "clean-webpack-plugin": "^4.0.0",
     "fast-glob": "^3.3.3",
-    "jsdom": "^26.1.0",
     "prisma": "^6.5.0",
     "terser-webpack-plugin": "^5.3.14",
     "workbox-webpack-plugin": "^7.3.0",
