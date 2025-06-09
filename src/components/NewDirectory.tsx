@@ -57,9 +57,10 @@ const NewDirectory: React.FC<{ parentId?: string }> = ({ parentId }) => {
     // Create locally
     await dispatch(actions.createLocalDocument(directoryData));
     
-    // Also save to cloud if user is online and authenticated
+    // Save to cloud by default if user is online and authenticated
+    // If user is not signed in (not online), no need to do anything different
     if (isOnline && user) {
-      dispatch(actions.createCloudDocument(directoryData));
+      await dispatch(actions.createCloudDocument(directoryData));
     }
     
     // Redirect to the appropriate location
