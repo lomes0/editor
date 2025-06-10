@@ -18,7 +18,7 @@ const UserCard: React.FC<{ user?: User, showActions?: boolean }> = memo(({ user,
 
   const handleShare = async () => {
     const shareData = {
-      title: `${user?.name}'s profile on Math Editor`,
+      title: `${user?.name}'s profile on Editor`,
       url: window.location.origin + "/user/" + (user?.handle || user?.id)
     }
     try {

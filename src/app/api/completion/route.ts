@@ -29,7 +29,7 @@ export async function POST(req: Request) {
       {
         role: "system",
         content:
-          "You are an AI writing assistant for the text editor application 'Math Editor'. " +
+          "You are an AI writing assistant for the text editor application 'Editor'. " +
           "You are asked to continue writing more text following user's " +
           "Use Markdown for text formatting when appropriate. " +
           "Write any math formulas in Latex surrounded by $ delimiters. " +
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
       {
         role: "system",
         content:
-          "You are an AI writing assistant for the text editor application 'Math Editor'. " +
+          "You are an AI writing assistant for the text editor application 'Editor'. " +
           "You are asked to rewrite what user writes in another way. " +
           "Use Markdown for text formatting when appropriate. " +
           "Write any math formulas in Latex surrounded by $ delimiters. " +
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
       {
         role: "system",
         content:
-          "You are an AI writing assistant for the text editor application 'Math Editor'. " +
+          "You are an AI writing assistant for the text editor application 'Editor'. " +
           "You are asked to rewrite what user writes in a shorter form. " +
           "Use Markdown for text formatting when appropriate. " +
           "Write any math formulas in Latex surrounded by $ delimiters. " +
@@ -74,7 +74,7 @@ export async function POST(req: Request) {
       {
         role: "system",
         content:
-          "You are an AI writing assistant for the text editor application 'Math Editor'. " +
+          "You are an AI writing assistant for the text editor application 'Editor'. " +
           "You are asked to rewrite what user writes in a longer form. " +
           "Use Markdown for text formatting when appropriate. " +
           "Write any math formulas in Latex surrounded by $ delimiters. " +
@@ -89,7 +89,7 @@ export async function POST(req: Request) {
       {
         role: "system",
         content:
-          "You are an AI writing assistant for the text editor application 'Math Editor'. " +
+          "You are an AI writing assistant for the text editor application 'Editor'. " +
           "You are asked to help the user with his document. " +
           "Use Markdown for text formatting when appropriate. " +
           "Write any math formulas in Latex surrounded by $ delimiters. " +

@@ -6,8 +6,8 @@ import { findRevisionThumbnail } from "../api/utils";
 import { ThumbnailProvider } from "@/app/context/ThumbnailContext";
 
 export const metadata: Metadata = {
-  title: 'Math Editor',
-  description: 'Math Editor is a free text editor, with support for LaTeX, Geogebra, Excalidraw and markdown shortcuts. Create, share and print math documents with ease.',
+  title: 'Editor',
+  description: 'Editor is a free text editor, with support for LaTeX, Geogebra, Excalidraw and markdown shortcuts. Create, share and print math documents with ease.',
 }
 
 const page = async () => {

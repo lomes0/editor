@@ -20,7 +20,7 @@ export async function generateMetadata(
   const params = await props.params;
   if (!params.id) return {
     title: "View Document",
-    description: "View a document on Math Editor",
+    description: "View a document on Editor",
   };
   const metadata: OgMetadata = { id: params.id, title: 'View Document' };
   const document = await getCachedUserDocument(params.id, "all");

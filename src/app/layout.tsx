@@ -11,12 +11,12 @@ import './globals.css';
 const PUBLIC_URL = process.env.PUBLIC_URL;
 
 export const metadata: Metadata = {
-  title: 'Math Editor',
-  description: 'Math Editor is a free text editor, with support for LaTeX, Geogebra, Excalidraw and markdown shortcuts. Create, share and print math documents with ease.',
-  applicationName: "Math Editor",
+  title: 'Editor',
+  description: 'Editor is a free text editor, with support for LaTeX, Geogebra, Excalidraw and markdown shortcuts. Create, share and print math documents with ease.',
+  applicationName: "Editor",
   appleWebApp: {
     capable: true,
-    title: "Math Editor",
+    title: "Editor",
     statusBarStyle: "default",
   },
   formatDetection: {
@@ -24,17 +24,17 @@ export const metadata: Metadata = {
   },
   manifest: "/manifest.json",
   icons: "/favicon.ico",
-  keywords: ["Math Editor", "Online Math Editor", "Matheditor", "Math", "Editor", "Latex", "Geogebra", "Excalidraw", "Markdown"],
+  keywords: ["Editor", "Online Editor", "Latex", "Geogebra", "Excalidraw", "Markdown"],
   metadataBase: PUBLIC_URL ? new URL(PUBLIC_URL) : undefined,
   openGraph: {
-    title: "Math Editor",
-    description: "Math Editor is a free text editor, with support for LaTeX, Geogebra, Excalidraw and markdown shortcuts. Create, share and print math documents with ease.",
+    title: "Editor",
+    description: "Editor is a free text editor, with support for LaTeX, Geogebra, Excalidraw and markdown shortcuts. Create, share and print math documents with ease.",
     images: [
       {
         url: "/feature.png",
         width: 1024,
         height: 500,
-        alt: "Math Editor Feature Image",
+        alt: "Editor Feature Image",
       },
     ],
   },

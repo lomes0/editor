@@ -106,14 +106,14 @@ const SideBar: React.FC = () => {
             textDecoration: "none", 
             color: "inherit" 
           }}>
-            <Image src={logo} alt="Math Editor Logo" width={32} height={32} priority />
-            <Box sx={{ ml: 1, fontWeight: 'bold', fontSize: '1.2rem' }}>Math Editor</Box>
+            <Image src={logo} alt="Editor Logo" width={32} height={32} priority />
+            <Box sx={{ ml: 1, fontWeight: 'bold', fontSize: '1.2rem' }}>Editor</Box>
           </Box>
         )}
         {!open && (
-          <Tooltip title="Math Editor">
+          <Tooltip title="Editor">
             <Box component={RouterLink} href="/" sx={{ display: "flex", justifyContent: "center" }}>
-              <Image src={logo} alt="Math Editor Logo" width={32} height={32} priority />
+              <Image src={logo} alt="Editor Logo" width={32} height={32} priority />
             </Box>
           </Tooltip>
         )}

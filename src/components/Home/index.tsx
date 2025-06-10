@@ -21,7 +21,7 @@ const Home: React.FC<{ staticDocuments: UserDocument[] }> = ({ staticDocuments }
       <Documents staticDocuments={staticDocuments} />
       {!welcomed && (
         <Dialog open onClose={handleClose}>
-          <DialogTitle>Welcome to Math Editor</DialogTitle>
+          <DialogTitle>Welcome to Editor</DialogTitle>
           <DialogContent>
             <DialogContentText>
               It seems like you are new here. Would you like to take a tour?

@@ -15,7 +15,7 @@ const getCachedUserDocuments = cache(async (id: string) => await findPublishedDo
 
 export async function generateMetadata(props: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const params = await props.params;
-  const metadata: OgMetadata = { id: params.id, title: 'Math Editor' };
+  const metadata: OgMetadata = { id: params.id, title: 'Editor' };
   const user = await getCachedUser(params.id);
   if (user) {
     metadata.title = user.name;

@@ -6,7 +6,7 @@ import { findUserDocument } from "@/repositories/document";
 
 export const metadata: Metadata = {
   title: 'Tutorial',
-  description: 'Learn how to use Math Editor',
+  description: 'Learn how to use Editor',
 }
 
 const page = async () => {

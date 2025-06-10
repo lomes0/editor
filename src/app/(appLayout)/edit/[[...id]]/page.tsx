@@ -6,10 +6,10 @@ import type { Metadata } from "next";
 export async function generateMetadata(props: { params: Promise<{ id?: string[] }> }): Promise<Metadata> {
   const params = await props.params;
   if (!(params.id && params.id[0])) return {
-    title: "Math Editor",
-    description: "Edit a document on Math Editor",
+    title: "Editor",
+    description: "Edit a document on Editor",
   };
-  const metadata: OgMetadata = { id: params.id[0], title: 'Math Editor' };
+  const metadata: OgMetadata = { id: params.id[0], title: 'Editor' };
   const document = await findUserDocument(params.id[0]);
   if (document) {
     if (document.private) {

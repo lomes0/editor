@@ -3,7 +3,7 @@ import Privacy from "@/components/Privacy";
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
-  description: 'Math Editor Privacy Policy',
+  description: 'Editor Privacy Policy',
 }
 
 const page = () => <Privacy />;

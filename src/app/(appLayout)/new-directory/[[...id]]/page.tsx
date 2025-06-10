@@ -8,7 +8,7 @@ const getCachedSession = cache(async () => await getServerSession(authOptions));
 
 export const metadata: Metadata = {
   title: "New Directory",
-  description: "Create a new directory on Math Editor"
+  description: "Create a new directory on Editor"
 };
 
 export default async function Page(

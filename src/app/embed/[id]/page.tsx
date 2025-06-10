@@ -17,9 +17,9 @@ export async function generateMetadata(
   const params = await props.params;
   if (!params.id) return {
     title: "Embed Document",
-    description: "Embed a document on Math Editor",
+    description: "Embed a document on Editor",
   };
-  const metadata: OgMetadata = { id: params.id, title: 'Math Editor' };
+  const metadata: OgMetadata = { id: params.id, title: 'Editor' };
   const document = await getCachedUserDocument(params.id, searchParams.v);
   if (document) {
     const revisionId = searchParams.v ?? document.head;
