@@ -71,18 +71,38 @@ const DocumentCard: React.FC<{ userDocument?: UserDocument, user?: User, sx?: Sx
         maxWidth: "100%", 
         borderWidth: isDirectory ? 2 : 1,
         borderColor: isDirectory ? 'primary.main' : undefined,
+        position: "relative",
         ...sx 
       }}
     >
-      <CardActionArea component={RouterLink} prefetch={false} href={document ? href : "/"} sx={{ flexGrow: 1 }}>
+      <CardActionArea 
+        component={RouterLink} 
+        prefetch={false} 
+        href={document ? href : "/"} 
+        sx={{ 
+          flexGrow: 1,
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 1
+        }}
+      />
+      <div style={{ position: "relative", zIndex: 2, pointerEvents: "none" }}>
         <CardHeader sx={{ alignItems: "start", '& .MuiCardHeader-content, .MuiCardHeader-title': { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }}
           title={document ? document.name : <Skeleton variant="text" width={190} />}
           subheader={
             <>
-              <Chip size='small' sx={{ my: 1 }} avatar={
-                document ? <Avatar alt={author?.name ?? "Local User"} src={author?.image ?? undefined} />
-                  : <Skeleton variant="circular" width={24} height={24} />}
-                label={document ? author?.name ?? "Local User" : <Skeleton variant="text" width={100} />} />
+              <Chip 
+                size='small' 
+                sx={{ my: 1, pointerEvents: "auto" }} 
+                avatar={
+                  document ? <Avatar alt={author?.name ?? "Local User"} src={author?.image ?? undefined} />
+                    : <Skeleton variant="circular" width={24} height={24} />
+                }
+                label={document ? author?.name ?? "Local User" : <Skeleton variant="text" width={100} />} 
+              />
               <Typography variant="overline" color="text.secondary"
                 sx={{ display: "block", lineHeight: 1.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                 {document ? <Suspense key={hydrated ? 'local' : 'utc'}>
@@ -116,8 +136,17 @@ const DocumentCard: React.FC<{ userDocument?: UserDocument, user?: User, sx?: Sx
             </Badge>
           }
         />
-      </CardActionArea>
-      <CardActions sx={{ height: 50, "& button:first-of-type": { ml: "auto !important" }, '& .MuiChip-root:last-of-type': { mr: 1 } }}>
+      </div>
+      <CardActions 
+        sx={{ 
+          height: 50, 
+          "& button:first-of-type": { ml: "auto !important" }, 
+          '& .MuiChip-root:last-of-type': { mr: 1 },
+          position: "relative", 
+          zIndex: 2,
+          pointerEvents: "auto"
+        }}
+      >
         {!userDocument && <>
           <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} label={<Skeleton variant="text" width={50} />} />
           <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} label={<Skeleton variant="text" width={70} />} />
