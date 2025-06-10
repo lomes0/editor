@@ -1,41 +1,116 @@
 "use client"
-import { useDispatch, useSelector, actions } from '@/store';
+import { useDispatch, useSelector } from '@/store';
 import { useEffect, useState } from 'react';
-import { Box, Typography, Button, Paper, Divider, Container, Fade, Tooltip, Breadcrumbs } from "@mui/material";
+import { Box, Breadcrumbs, Typography, Button, Paper, Divider, Container, Fade, Tooltip } from "@mui/material";
 import Grid from '@mui/material/Grid2';
-import { CreateNewFolder, Folder, PostAdd, Article, FilterList, Home as HomeIcon } from '@mui/icons-material';
-import DocumentCard from './DocumentCard';
-import DraggableDocumentCard from './DocumentCard/DraggableDocumentCard';
-import { DocumentType, UserDocument } from '@/types';
-import DocumentSortControl from './DocumentControls/SortControl';
-import { sortDocuments } from './DocumentControls/sortDocuments';
 import Link from 'next/link';
-import { v4 as uuid } from 'uuid';
+import { CreateNewFolder, ArrowBack, Home as HomeIcon, Folder, PostAdd, Article, FilterList } from '@mui/icons-material';
+import DraggableDocumentCard from '../DocumentCard/DraggableDocumentCard';
+import { DocumentType, UserDocument } from '@/types';
+import DocumentSortControl from '../DocumentControls/SortControl';
+import { sortDocuments } from '../DocumentControls/sortDocuments';
 import { useRouter } from 'next/navigation';
 
-const DocumentBrowser: React.FC = () => {
+interface DocumentBrowserProps {
+  directoryId?: string;
+}
+
+const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
   const dispatch = useDispatch();
   const router = useRouter();
   const documents = useSelector(state => state.documents);
   const user = useSelector(state => state.user);
-  const [sortValue, setSortValue] = useState({ key: 'createdAt', direction: 'desc' });
+  const [loading, setLoading] = useState(directoryId ? true : false);
+  const [currentDirectory, setCurrentDirectory] = useState<UserDocument | null>(null);
+  const [childItems, setChildItems] = useState<UserDocument[]>([]);
+  const [breadcrumbs, setBreadcrumbs] = useState<{ id: string; name: string; }[]>([]);
+  const [sortValue, setSortValue] = useState({ key: 'updatedAt', direction: 'desc' });
   
-  // Get root level documents and directories (items without a parentId)
-  const rootItems = documents.filter(doc => {
-    const localParentId = doc.local?.parentId;
-    const cloudParentId = doc.cloud?.parentId;
-    return !localParentId && !cloudParentId;
-  });
-  
-  // Filter to ensure we don't duplicate directories and documents
-  // A document is considered a directory if either its local or cloud version is a directory
+  // Load directory and its contents if directoryId is provided
+  useEffect(() => {
+    if (!directoryId) return;
+    
+    const loadDirectory = async () => {
+      setLoading(true);
+      
+      // Find the current directory
+      const directory = documents.find(doc => 
+        (doc.local?.id === directoryId || doc.cloud?.id === directoryId) && 
+        ((doc.local?.type === DocumentType.DIRECTORY) || (doc.cloud?.type === DocumentType.DIRECTORY))
+      );
+      
+      if (directory) {
+        setCurrentDirectory(directory);
+        
+        // Build breadcrumb trail
+        const buildBreadcrumbs = (docId: string, trail: { id: string; name: string; }[] = []) => {
+          const doc = documents.find(d => d.local?.id === docId || d.cloud?.id === docId);
+          if (!doc) return trail;
+          
+          const name = doc.local?.name || doc.cloud?.name || '';
+          const parentId = doc.local?.parentId || doc.cloud?.parentId;
+          
+          const newTrail = [{ id: docId, name }, ...trail];
+          
+          if (parentId) {
+            return buildBreadcrumbs(parentId, newTrail);
+          }
+          
+          return newTrail;
+        };
+        
+        setBreadcrumbs(buildBreadcrumbs(directoryId));
+      }
+      
+      setLoading(false);
+    };
+    
+    loadDirectory();
+  }, [directoryId, documents]);
+
+  // Get items to display - either from a specific directory or root items
+  useEffect(() => {
+    if (directoryId) {
+      // Find child documents and directories
+      const children = documents.filter(doc => {
+        const localParentId = doc.local?.parentId;
+        const cloudParentId = doc.cloud?.parentId;
+        return localParentId === directoryId || cloudParentId === directoryId;
+      });
+      
+      setChildItems(children);
+    } else {
+      // Get root level documents (items without a parentId)
+      const rootItems = documents.filter(doc => {
+        const localParentId = doc.local?.parentId;
+        const cloudParentId = doc.cloud?.parentId;
+        return !localParentId && !cloudParentId;
+      });
+      
+      setChildItems(rootItems);
+    }
+  }, [directoryId, documents]);
+
+  // Function to determine if a document is a directory
   const isDirectory = (doc: UserDocument) => 
     (doc.local?.type === DocumentType.DIRECTORY) || 
     (doc.cloud?.type === DocumentType.DIRECTORY);
-    
-  const directories = rootItems.filter(doc => isDirectory(doc));
   
-  const regularDocuments = rootItems.filter(doc => !isDirectory(doc));
+  // Process and categorize items
+  const processedIds = new Set<string>();
+  const directories: UserDocument[] = [];
+  const regularDocuments: UserDocument[] = [];
+  
+  childItems.forEach(doc => {
+    if (processedIds.has(doc.id)) return;
+    processedIds.add(doc.id);
+    
+    if (isDirectory(doc)) {
+      directories.push(doc);
+    } else {
+      regularDocuments.push(doc);
+    }
+  });
   
   // Apply sorting
   const sortedDirectories = sortDocuments(directories, sortValue.key, sortValue.direction);
@@ -43,19 +118,64 @@ const DocumentBrowser: React.FC = () => {
 
   // Handle creating a new document
   const handleCreateDocument = () => {
-    router.push('/new');
+    if (directoryId) {
+      router.push(`/new?parentId=${directoryId}`);
+    } else {
+      router.push('/new');
+    }
   };
 
   // Handle creating a new directory
   const handleCreateDirectory = () => {
-    router.push('/new-directory');
+    if (directoryId) {
+      router.push(`/new-directory/${directoryId}`);
+    } else {
+      router.push('/new-directory');
+    }
   };
+
+  // Render loading state for directory browsing
+  if (loading) {
+    return (
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+          <Typography>Loading directory contents...</Typography>
+        </Box>
+      </Container>
+    );
+  }
+
+  // Render error state if specified directory not found
+  if (directoryId && !currentDirectory) {
+    return (
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 4, gap: 2 }}>
+          <Folder sx={{ width: 64, height: 64, color: 'text.secondary', opacity: 0.6 }} />
+          <Typography variant="h6">Directory not found</Typography>
+          <Button 
+            component={Link} 
+            href="/browse" 
+            startIcon={<ArrowBack />}
+            variant="contained"
+            sx={{ borderRadius: 1.5, mt: 2 }}
+          >
+            Back to Document Browser
+          </Button>
+        </Box>
+      </Container>
+    );
+  }
+
+  // Get page title - either directory name or "Home"
+  const pageTitle = directoryId 
+    ? (currentDirectory?.local?.name || currentDirectory?.cloud?.name || 'Directory')
+    : 'Home';
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Fade in={true} timeout={600}>
         <Box className="document-browser-container" sx={{ display: 'flex', flexDirection: 'column', gap: 4, width: '100%' }}>
-          {/* Breadcrumb navigation - root only */}
+          {/* Breadcrumb navigation */}
           <Box sx={{ 
             mb: 3,
             mt: -1,
@@ -79,16 +199,56 @@ const DocumentBrowser: React.FC = () => {
                   color: 'text.primary',
                   textDecoration: 'none',
                   fontSize: '0.75rem',
-                  fontWeight: 'medium'
+                  fontWeight: !directoryId ? 'medium' : 'normal'
                 }}
               >
                 <HomeIcon sx={{ mr: 0.5, fontSize: '0.75rem', opacity: 0.7 }} />
                 Root
               </Link>
+              
+              {/* Display directory breadcrumbs if we're in a directory */}
+              {breadcrumbs.map((crumb, index) => {
+                const isLast = index === breadcrumbs.length - 1;
+                
+                if (isLast) {
+                  return (
+                    <Typography 
+                      key={crumb.id} 
+                      color="text.primary" 
+                      sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center',
+                        fontSize: '0.75rem',
+                        fontWeight: 'medium'
+                      }}
+                    >
+                      <Folder sx={{ mr: 0.5, fontSize: '0.75rem', opacity: 0.7 }} />
+                      {crumb.name}
+                    </Typography>
+                  );
+                }
+                
+                return (
+                  <Link 
+                    key={crumb.id} 
+                    href={`/browse/${crumb.id}`} 
+                    style={{ 
+                      display: 'flex', 
+                      alignItems: 'center',
+                      color: 'text.primary',
+                      textDecoration: 'none',
+                      fontSize: '0.75rem'
+                    }}
+                  >
+                    <Folder sx={{ mr: 0.5, fontSize: '0.75rem', opacity: 0.7 }} />
+                    {crumb.name}
+                  </Link>
+                );
+              })}
             </Breadcrumbs>
           </Box>
-          
-          {/* Page header with modern styling */}
+      
+          {/* Page title and controls */}
           <Box sx={{ 
             display: 'flex', 
             justifyContent: 'space-between', 
@@ -108,7 +268,7 @@ const DocumentBrowser: React.FC = () => {
                   color: 'text.primary',
                 }}
               >
-                Home
+                {pageTitle}
               </Typography>
             </Box>
             
@@ -176,9 +336,9 @@ const DocumentBrowser: React.FC = () => {
               </Tooltip>
             </Box>
           </Box>
-          
+      
           {/* Content section */}
-          {sortedDirectories.length === 0 && sortedDocuments.length === 0 ? (
+          {childItems.length === 0 ? (
             <Paper 
               elevation={0}
               sx={{ 
@@ -193,8 +353,14 @@ const DocumentBrowser: React.FC = () => {
                 bgcolor: 'background.default'
               }}
             >
-              <PostAdd sx={{ width: 64, height: 64, color: 'text.secondary', opacity: 0.6 }} />
-              <Typography variant="h6">No content found</Typography>
+              {directoryId ? (
+                <Folder sx={{ width: 64, height: 64, color: 'text.secondary', opacity: 0.6 }} />
+              ) : (
+                <PostAdd sx={{ width: 64, height: 64, color: 'text.secondary', opacity: 0.6 }} />
+              )}
+              <Typography variant="h6">
+                {directoryId ? 'This folder is empty' : 'No content found'}
+              </Typography>
               <Typography variant="body2" color="text.secondary" align="center">
                 Create a new document or folder to get started
               </Typography>
@@ -235,7 +401,11 @@ const DocumentBrowser: React.FC = () => {
                   <Grid container spacing={2}>
                     {sortedDirectories.map(directory => (
                       <Grid key={directory.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                        <DraggableDocumentCard userDocument={directory} user={user} />
+                        <DraggableDocumentCard 
+                          userDocument={directory} 
+                          user={user} 
+                          currentDirectoryId={directoryId}
+                        />
                       </Grid>
                     ))}
                   </Grid>
@@ -261,7 +431,11 @@ const DocumentBrowser: React.FC = () => {
                   <Grid container spacing={2}>
                     {sortedDocuments.map(document => (
                       <Grid key={document.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                        <DraggableDocumentCard userDocument={document} user={user} />
+                        <DraggableDocumentCard 
+                          userDocument={document} 
+                          user={user}
+                          currentDirectoryId={directoryId}
+                        />
                       </Grid>
                     ))}
                   </Grid>
