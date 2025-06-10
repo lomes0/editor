@@ -258,14 +258,12 @@ const DirectoryBrowser: React.FC<DirectoryBrowserProps> = ({ directoryId }) => {
             }}>
               <Tooltip title="Create a new document">
                 <Button 
-                  variant="contained" 
-                  color="primary"
+                  variant="outlined" 
                   startIcon={<PostAdd />}
                   onClick={handleCreateDocument}
                   sx={{ 
                     borderRadius: 1.5,
                     px: 2,
-                    boxShadow: 1
                   }}
                 >
                   New Document
