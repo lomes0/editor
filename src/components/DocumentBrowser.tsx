@@ -1,9 +1,9 @@
 "use client"
 import { useDispatch, useSelector, actions } from '@/store';
 import { useEffect, useState } from 'react';
-import { Box, Typography, Button, Paper, Divider, Container, Fade, Tooltip } from "@mui/material";
+import { Box, Typography, Button, Paper, Divider, Container, Fade, Tooltip, Breadcrumbs } from "@mui/material";
 import Grid from '@mui/material/Grid2';
-import { CreateNewFolder, Folder, PostAdd, Article, FilterList } from '@mui/icons-material';
+import { CreateNewFolder, Folder, PostAdd, Article, FilterList, Home as HomeIcon } from '@mui/icons-material';
 import DocumentCard from './DocumentCard';
 import DraggableDocumentCard from './DocumentCard/DraggableDocumentCard';
 import { DocumentType, UserDocument } from '@/types';
@@ -55,6 +55,39 @@ const DocumentBrowser: React.FC = () => {
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Fade in={true} timeout={600}>
         <Box className="document-browser-container" sx={{ display: 'flex', flexDirection: 'column', gap: 4, width: '100%' }}>
+          {/* Breadcrumb navigation - root only */}
+          <Box sx={{ 
+            mb: 3,
+            mt: -1,
+            pl: 0.5
+          }}>
+            <Breadcrumbs 
+              aria-label="breadcrumb"
+              sx={{ 
+                '& .MuiBreadcrumbs-separator': { 
+                  color: 'text.disabled',
+                  mx: 0.5,
+                  fontSize: '0.7rem'
+                }
+              }}
+            >
+              <Link 
+                href="/browse" 
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  color: 'text.primary',
+                  textDecoration: 'none',
+                  fontSize: '0.75rem',
+                  fontWeight: 'medium'
+                }}
+              >
+                <HomeIcon sx={{ mr: 0.5, fontSize: '0.75rem', opacity: 0.7 }} />
+                Root
+              </Link>
+            </Breadcrumbs>
+          </Box>
+          
           {/* Page header with modern styling */}
           <Box sx={{ 
             display: 'flex', 
