@@ -169,7 +169,7 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
   // Get page title - either directory name or "Home"
   const pageTitle = directoryId 
     ? (currentDirectory?.local?.name || currentDirectory?.cloud?.name || 'Directory')
-    : 'Home';
+    : 'Root';
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
