@@ -44,8 +44,8 @@ function LinkDialog({ editor, node }: { editor: LexicalEditor, node: LinkNode | 
   }, [node]);
 
   const updateUrl = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value.trim().toLowerCase();
-    const url = rel === 'bookmark' ? value.padStart(1, '#') : value;
+    const value = event.target.value.trim();
+    const url = rel === 'bookmark' ? value.toLowerCase().padStart(1, '#') : value;
     setUrl(url);
   }
 
@@ -101,7 +101,7 @@ function LinkDialog({ editor, node }: { editor: LexicalEditor, node: LinkNode | 
       const selection = $getSelection();
       if (!$isRangeSelection(selection)) return '#';
       const textContent = selection.isCollapsed() ? selection.focus.getNode().getTextContent() : selection.getTextContent();
-      return `#${textContent.trim().toLowerCase()}`;
+      return `#${textContent.trim()}`;
     });
   }, [editor, node]);
 
