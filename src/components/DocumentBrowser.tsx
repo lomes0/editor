@@ -108,7 +108,7 @@ const DocumentBrowser: React.FC = () => {
                   color: 'text.primary',
                 }}
               >
-                Document Library
+                Home
               </Typography>
             </Box>
             

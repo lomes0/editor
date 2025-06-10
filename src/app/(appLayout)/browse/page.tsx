@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import DocumentBrowser from "@/components/DocumentBrowser";
 
 export const metadata: Metadata = {
-  title: 'Document Library | MathEditor',
+  title: 'Home | Editor',
   description: 'Browse, organize, and manage your documents and folders'
 }
 
