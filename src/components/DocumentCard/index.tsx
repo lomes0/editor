@@ -4,14 +4,175 @@ import RouterLink from 'next/link'
 import { DocumentType, LocalDocumentRevision, User, UserDocument } from '@/types';
 import { memo, Suspense } from 'react';
 import { SxProps, Theme } from '@mui/material/styles';
-import { Card, CardActionArea, CardHeader, Skeleton, Typography, Avatar, CardActions, Chip, Badge, IconButton } from '@mui/material';
-import { MobileFriendly, Cloud, Public, Workspaces, Security, CloudDone, CloudSync, MoreVert, Share, Folder } from '@mui/icons-material';
+import { Card, CardActionArea, CardHeader, Skeleton, Typography, Avatar, CardActions, Chip, Badge, IconButton, Box } from '@mui/material';
+import { MobileFriendly, Cloud, Public, Workspaces, Security, CloudDone, CloudSync, MoreVert, Share, Folder, Article } from '@mui/icons-material';
 import DocumentActionMenu from './DocumentActionMenu';
 import DocumentThumbnail from './DocumentThumbnail';
 import ThumbnailSkeleton from './ThumbnailSkeleton';
 import { useHydration } from '@/hooks/useHydration';
 
-const DocumentCard: React.FC<{ userDocument?: UserDocument, user?: User, sx?: SxProps<Theme> | undefined }> = memo(({ userDocument, user, sx }) => {
+// Base Card component that handles common functionality
+const BaseCard: React.FC<{
+  userDocument?: UserDocument,
+  user?: User,
+  sx?: SxProps<Theme>,
+  href: string,
+  title: React.ReactNode,
+  subheader: React.ReactNode,
+  avatar: React.ReactNode,
+  actions: React.ReactNode
+}> = memo(({ userDocument, user, sx, href, title, subheader, avatar, actions }) => {
+  return (
+    <Card 
+      variant="outlined" 
+      className="document-card"
+      sx={{ 
+        display: "flex", 
+        flexDirection: "column", 
+        justifyContent: "space-between", 
+        height: "100%", 
+        maxWidth: "100%", 
+        position: "relative",
+        ...sx 
+      }}
+    >
+      <CardActionArea 
+        component={RouterLink} 
+        prefetch={false} 
+        href={href} 
+        sx={{ 
+          flexGrow: 1,
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 1
+        }}
+      />
+      <div style={{ position: "relative", zIndex: 2, pointerEvents: "none" }}>
+        <CardHeader 
+          sx={{ alignItems: "start", '& .MuiCardHeader-content, .MuiCardHeader-title': { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }}
+          title={title}
+          subheader={subheader}
+          avatar={avatar}
+        />
+      </div>
+      <CardActions 
+        sx={{ 
+          height: 50, 
+          "& button:first-of-type": { ml: "auto !important" }, 
+          '& .MuiChip-root:last-of-type': { mr: 1 },
+          position: "relative", 
+          zIndex: 2,
+          pointerEvents: "auto"
+        }}
+      >
+        {actions}
+      </CardActions>
+    </Card>
+  );
+});
+
+// Directory-specific card component
+const DirectoryCard: React.FC<{ userDocument?: UserDocument, user?: User, sx?: SxProps<Theme> }> = memo(({ userDocument, user, sx }) => {
+  const localDocument = userDocument?.local;
+  const cloudDocument = userDocument?.cloud;
+  const isLocal = !!localDocument;
+  const isCloud = !!cloudDocument;
+  const isLocalOnly = isLocal && !isCloud;
+  const isCloudOnly = !isLocal && isCloud;
+  const isUploaded = isLocal && isCloud;
+  const isUpToDate = isUploaded && localDocument.head === cloudDocument.head;
+  
+  const document = isCloudOnly ? cloudDocument : localDocument;
+  const handle = cloudDocument?.handle ?? localDocument?.handle ?? document?.id;
+  const href = document ? `/browse/${handle}` : "/";
+  
+  const author = cloudDocument?.author ?? user;
+  const hydrated = useHydration();
+
+  // Create subheader content
+  const subheaderContent = document ? (
+    <>
+      <Chip 
+        size='small' 
+        sx={{ my: 1, pointerEvents: "auto" }} 
+        avatar={
+          document ? <Avatar alt={author?.name ?? "Local User"} src={author?.image ?? undefined} />
+            : <Skeleton variant="circular" width={24} height={24} />
+        }
+        label={document ? author?.name ?? "Local User" : <Skeleton variant="text" width={100} />} 
+      />
+      <Typography variant="overline" color="text.secondary"
+        sx={{ display: "block", lineHeight: 1.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        {document ? <Suspense key={hydrated ? 'local' : 'utc'}>
+          <time dateTime={new Date(document.createdAt).toISOString()}>
+            Created: {new Date(document.createdAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+          </time>
+        </Suspense> : <Skeleton variant="text" width={150} />}
+      </Typography>
+      <Typography variant="overline" color="text.secondary"
+        sx={{ display: "block", lineHeight: 1.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+      >
+        {document ? <Suspense key={hydrated ? 'local' : 'utc'}>
+          <time dateTime={new Date(document.updatedAt).toISOString()}>
+            Updated: {new Date(document.updatedAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+          </time>
+        </Suspense> : <Skeleton variant="text" width={150} />}
+      </Typography>
+    </>
+  ) : (
+    <Skeleton variant="text" width={150} />
+  );
+
+  // Create avatar content
+  const avatarContent = (
+    <Badge badgeContent={0} color="secondary">
+      <Avatar sx={{ bgcolor: 'primary.main' }}>
+        <Folder />
+      </Avatar>
+    </Badge>
+  );
+
+  // Create actions content
+  const actionsContent = !userDocument ? (
+    <>
+      <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} label={<Skeleton variant="text" width={50} />} />
+      <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} label={<Skeleton variant="text" width={70} />} />
+      <IconButton aria-label="Share Directory" size="small" disabled><Share /></IconButton>
+      <IconButton aria-label='Directory Actions' size="small" disabled><MoreVert /></IconButton>
+    </>
+  ) : (
+    <>
+      {isLocalOnly && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<MobileFriendly />} label="Local" />}
+      {isUploaded && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={isUpToDate ? <CloudDone /> : <CloudSync />} label={isUpToDate ? "Synced" : "Out of Sync"} />}
+      {isCloudOnly && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<Cloud />} label="Cloud" />}
+      <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<Folder />} label="Directory" />
+      {userDocument && <DocumentActionMenu userDocument={userDocument} user={user} />}
+    </>
+  );
+
+  return (
+    <BaseCard
+      userDocument={userDocument}
+      user={user}
+      sx={{ 
+        borderWidth: 2,
+        borderColor: 'primary.main',
+        ...sx 
+      }}
+      href={href}
+      title={document ? document.name : <Skeleton variant="text" width={190} />}
+      subheader={subheaderContent}
+      avatar={avatarContent}
+      actions={actionsContent}
+    />
+  );
+});
+
+// Document-specific card component
+const DocumentCard: React.FC<{ userDocument?: UserDocument, user?: User, sx?: SxProps<Theme> }> = memo(({ userDocument, user, sx }) => {
   const localDocument = userDocument?.local;
   const cloudDocument = userDocument?.cloud;
   const isLocal = !!localDocument;
@@ -29,141 +190,117 @@ const DocumentCard: React.FC<{ userDocument?: UserDocument, user?: User, sx?: Sx
   const document = isCloudOnly ? cloudDocument : localDocument;
   const handle = cloudDocument?.handle ?? localDocument?.handle ?? document?.id;
   const isEditable = isAuthor || isCoauthor || isCollab;
+  const href = document ? (isEditable ? `/edit/${handle}` : `/view/${handle}`) : "/";
   
-  // Handle directory or document paths differently
-  const isDirectory = document?.type === DocumentType.DIRECTORY;
-  const href = isDirectory 
-    ? `/browse/${handle}` 
-    : (isEditable ? `/edit/${handle}` : `/view/${handle}`);
-    
   const author = cloudDocument?.author ?? user;
+  const hydrated = useHydration();
 
+  // Create subheader content
+  const subheaderContent = document ? (
+    <>
+      <Chip 
+        size='small' 
+        sx={{ my: 1, pointerEvents: "auto" }} 
+        avatar={
+          document ? <Avatar alt={author?.name ?? "Local User"} src={author?.image ?? undefined} />
+            : <Skeleton variant="circular" width={24} height={24} />
+        }
+        label={document ? author?.name ?? "Local User" : <Skeleton variant="text" width={100} />} 
+      />
+      <Typography variant="overline" color="text.secondary"
+        sx={{ display: "block", lineHeight: 1.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        {document ? <Suspense key={hydrated ? 'local' : 'utc'}>
+          <time dateTime={new Date(document.createdAt).toISOString()}>
+            Created: {new Date(document.createdAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+          </time>
+        </Suspense> : <Skeleton variant="text" width={150} />}
+      </Typography>
+      <Typography variant="overline" color="text.secondary"
+        sx={{ display: "block", lineHeight: 1.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+      >
+        {document ? <Suspense key={hydrated ? 'local' : 'utc'}>
+          <time dateTime={new Date(document.updatedAt).toISOString()}>
+            Updated: {new Date(document.updatedAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+          </time>
+        </Suspense> : <Skeleton variant="text" width={150} />}
+      </Typography>
+    </>
+  ) : (
+    <Skeleton variant="text" width={150} />
+  );
+
+  // Determine local revisions and badge content
   const localDocumentRevisions = localDocument?.revisions ?? [];
   const cloudDocumentRevisions = cloudDocument?.revisions ?? [];
   const isHeadLocalRevision = localDocumentRevisions.some(r => r.id === localDocument?.head);
   const isHeadCloudRevision = cloudDocumentRevisions.some(r => r.id === localDocument?.head);
   const localOnlyRevisions = isUploaded ? localDocumentRevisions.filter(r => !cloudDocumentRevisions.some(cr => cr.id === r.id)) : [];
   const unsavedChanges = isUploaded && !isHeadLocalRevision && !isHeadCloudRevision;
-  if (unsavedChanges && localDocument?.head) {
-    const unsavedRevision = { 
-      id: localDocument.head, 
-      documentId: localDocument.id, 
-      createdAt: localDocument.updatedAt,
-      data: {} as any // Add data property to satisfy EditorDocumentRevision
-    };
-    localOnlyRevisions.unshift(unsavedRevision);
-  }
-  const cloudHeadIndex = cloudDocumentRevisions.findIndex(r => r.id === cloudDocument?.head);
-  // Remove revisions badge content
+  
   let revisionsBadgeContent = 0;
+  // Badge calculation logic would go here if needed
 
-  const hydrated = useHydration();
+  // Create avatar content
+  const avatarContent = (
+    <Badge badgeContent={revisionsBadgeContent} color="secondary">
+      <Suspense fallback={<ThumbnailSkeleton />}>
+        <DocumentThumbnail userDocument={userDocument} />
+      </Suspense>
+    </Badge>
+  );
+
+  // Create actions content
+  const actionsContent = !userDocument ? (
+    <>
+      <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} label={<Skeleton variant="text" width={50} />} />
+      <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} label={<Skeleton variant="text" width={70} />} />
+      <IconButton aria-label="Share Document" size="small" disabled><Share /></IconButton>
+      <IconButton aria-label='Document Actions' size="small" disabled><MoreVert /></IconButton>
+    </>
+  ) : (
+    <>
+      {isLocalOnly && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<MobileFriendly />} label="Local" />}
+      {isUploaded && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={isUpToDate ? <CloudDone /> : <CloudSync />} label={isUpToDate ? "Synced" : "Out of Sync"} />}
+      {isCloudOnly && (isAuthor || isCoauthor) && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<Cloud />} label="Cloud" />}
+      {isPublished && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<Public />} label="Published" />}
+      {isCollab && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<Workspaces />} label="Collab" />}
+      {isPrivate && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<Security />} label="Private" />}
+      {userDocument && <DocumentActionMenu userDocument={userDocument} user={user} />}
+    </>
+  );
 
   return (
-    <Card 
-      variant="outlined" 
-      className="document-card"
+    <BaseCard
+      userDocument={userDocument}
+      user={user}
       sx={{ 
-        display: "flex", 
-        flexDirection: "column", 
-        justifyContent: "space-between", 
-        height: "100%", 
-        maxWidth: "100%", 
-        borderWidth: isDirectory ? 2 : 1,
-        borderColor: isDirectory ? 'primary.main' : undefined,
-        position: "relative",
+        borderWidth: 1,
         ...sx 
       }}
-    >
-      <CardActionArea 
-        component={RouterLink} 
-        prefetch={false} 
-        href={document ? href : "/"} 
-        sx={{ 
-          flexGrow: 1,
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          zIndex: 1
-        }}
-      />
-      <div style={{ position: "relative", zIndex: 2, pointerEvents: "none" }}>
-        <CardHeader sx={{ alignItems: "start", '& .MuiCardHeader-content, .MuiCardHeader-title': { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }}
-          title={document ? document.name : <Skeleton variant="text" width={190} />}
-          subheader={
-            <>
-              <Chip 
-                size='small' 
-                sx={{ my: 1, pointerEvents: "auto" }} 
-                avatar={
-                  document ? <Avatar alt={author?.name ?? "Local User"} src={author?.image ?? undefined} />
-                    : <Skeleton variant="circular" width={24} height={24} />
-                }
-                label={document ? author?.name ?? "Local User" : <Skeleton variant="text" width={100} />} 
-              />
-              <Typography variant="overline" color="text.secondary"
-                sx={{ display: "block", lineHeight: 1.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                {document ? <Suspense key={hydrated ? 'local' : 'utc'}>
-                  <time dateTime={new Date(document.createdAt).toISOString()}>
-                    Created: {new Date(document.createdAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
-                  </time>
-                </Suspense> : <Skeleton variant="text" width={150} />}
-              </Typography>
-              <Typography variant="overline" color="text.secondary"
-                sx={{ display: "block", lineHeight: 1.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
-              >
-                {document ? <Suspense key={hydrated ? 'local' : 'utc'}>
-                  <time dateTime={new Date(document.updatedAt).toISOString()}>
-                    Updated: {new Date(document.updatedAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
-                  </time>
-                </Suspense> : <Skeleton variant="text" width={150} />}
-              </Typography>
-            </>
-          }
-          avatar={
-            <Badge badgeContent={revisionsBadgeContent} color="secondary">
-              {isDirectory ? (
-                <Avatar sx={{ bgcolor: 'primary.main' }}>
-                  <Folder />
-                </Avatar>
-              ) : (
-                <Suspense fallback={<ThumbnailSkeleton />}>
-                  <DocumentThumbnail userDocument={userDocument} />
-                </Suspense>
-              )}
-            </Badge>
-          }
-        />
-      </div>
-      <CardActions 
-        sx={{ 
-          height: 50, 
-          "& button:first-of-type": { ml: "auto !important" }, 
-          '& .MuiChip-root:last-of-type': { mr: 1 },
-          position: "relative", 
-          zIndex: 2,
-          pointerEvents: "auto"
-        }}
-      >
-        {!userDocument && <>
-          <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} label={<Skeleton variant="text" width={50} />} />
-          <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} label={<Skeleton variant="text" width={70} />} />
-          <IconButton aria-label="Share Document" size="small" disabled><Share /></IconButton>
-          <IconButton aria-label='Document Actions' size="small" disabled><MoreVert /></IconButton>
-        </>}
-        {isLocalOnly && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<MobileFriendly />} label="Local" />}
-        {isUploaded && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={isUpToDate ? <CloudDone /> : <CloudSync />} label={isUpToDate ? "Synced" : "Out of Sync"} />}
-        {isCloudOnly && (isAuthor || isCoauthor) && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<Cloud />} label="Cloud" />}
-        {isDirectory && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<Folder />} label="Directory" />}
-        {isPublished && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<Public />} label="Published" />}
-        {isCollab && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<Workspaces />} label="Collab" />}
-        {isPrivate && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<Security />} label="Private" />}
-        {userDocument && <DocumentActionMenu userDocument={userDocument} user={user} />}
-      </CardActions>
-    </Card >
+      href={href}
+      title={document ? document.name : <Skeleton variant="text" width={190} />}
+      subheader={subheaderContent}
+      avatar={avatarContent}
+      actions={actionsContent}
+    />
   );
 });
 
-export default DocumentCard;
+// Main component that decides whether to render a document or directory card
+const CardSelector: React.FC<{ userDocument?: UserDocument, user?: User, sx?: SxProps<Theme> }> = memo(({ userDocument, user, sx }) => {
+  // Early return for loading state
+  if (!userDocument) {
+    return <DocumentCard userDocument={undefined} user={user} sx={sx} />;
+  }
+
+  const document = userDocument.local || userDocument.cloud;
+  const isDirectory = document?.type === DocumentType.DIRECTORY;
+
+  if (isDirectory) {
+    return <DirectoryCard userDocument={userDocument} user={user} sx={sx} />;
+  } else {
+    return <DocumentCard userDocument={userDocument} user={user} sx={sx} />;
+  }
+});
+
+export default CardSelector;
