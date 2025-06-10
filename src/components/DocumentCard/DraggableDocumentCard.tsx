@@ -168,16 +168,18 @@ const DraggableDocumentCard: React.FC<DraggableDocumentCardProps> = ({
         user={user} 
         sx={{
           ...sx,
-          // Add visual indicator for draggable items
-          '&:hover': !isCurrentDirectory ? {
+          // Add consistent hover effect for all cards
+          '&:hover': {
             boxShadow: 3,
-          } : {},
-          // Add visual indicator for drop targets
+          },
+          // Add visual indicator only for drop targets
           ...(canBeDropTarget && {
-            '&:hover': {
+            '&:hover': isDropTarget ? {
               borderStyle: 'solid',
               borderColor: theme.palette.primary.main,
-              backgroundColor: `${theme.palette.primary.main}10`, // 10% opacity
+              backgroundColor: `${theme.palette.primary.main}20`, // 20% opacity for active drop targets
+            } : {
+              boxShadow: 3,
             }
           })
         }} 

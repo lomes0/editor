@@ -31,8 +31,18 @@ const BaseCard: React.FC<{
         flexDirection: "column", 
         justifyContent: "space-between", 
         height: "100%", 
+        minHeight: "200px", 
         maxWidth: "100%", 
         position: "relative",
+        borderRadius: "8px",
+        borderColor: "divider",
+        transition: "all 0.2s ease-in-out",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+        "&:hover": {
+          boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+          borderColor: "primary.light",
+          transform: "translateY(-2px)"
+        },
         ...sx 
       }}
     >
@@ -47,12 +57,36 @@ const BaseCard: React.FC<{
           left: 0,
           right: 0,
           bottom: 0,
-          zIndex: 1
+          zIndex: 1,
+          borderRadius: "8px",
+          "&:hover": {
+            backgroundColor: "transparent" // Remove default hover background
+          }
         }}
       />
       <div style={{ position: "relative", zIndex: 2, pointerEvents: "none" }}>
         <CardHeader 
-          sx={{ alignItems: "start", '& .MuiCardHeader-content, .MuiCardHeader-title': { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }}
+          sx={{ 
+            alignItems: "start", 
+            px: 2.5,
+            pt: 2.5,
+            pb: 1.5,
+            '& .MuiCardHeader-content': { 
+              whiteSpace: "nowrap", 
+              overflow: "hidden", 
+              textOverflow: "ellipsis",
+              ml: 0.5
+            },
+            '& .MuiCardHeader-title': { 
+              whiteSpace: "nowrap", 
+              overflow: "hidden", 
+              textOverflow: "ellipsis",
+              fontSize: "1.05rem",
+              fontWeight: 500,
+              letterSpacing: "0.01em",
+              color: "text.primary"
+            }
+          }}
           title={title}
           subheader={subheader}
           avatar={avatar}
@@ -61,6 +95,12 @@ const BaseCard: React.FC<{
       <CardActions 
         sx={{ 
           height: 50, 
+          minHeight: 50,
+          px: 2,
+          py: 1,
+          backgroundColor: "rgba(0,0,0,0.01)",
+          borderTop: "1px solid",
+          borderColor: "divider",
           "& button:first-of-type": { ml: "auto !important" }, 
           '& .MuiChip-root:last-of-type': { mr: 1 },
           position: "relative", 
@@ -92,36 +132,9 @@ const DirectoryCard: React.FC<{ userDocument?: UserDocument, user?: User, sx?: S
   const author = cloudDocument?.author ?? user;
   const hydrated = useHydration();
 
-  // Create subheader content
+  // Create subheader content - without created/updated date information
   const subheaderContent = document ? (
-    <>
-      <Chip 
-        size='small' 
-        sx={{ my: 1, pointerEvents: "auto" }} 
-        avatar={
-          document ? <Avatar alt={author?.name ?? "Local User"} src={author?.image ?? undefined} />
-            : <Skeleton variant="circular" width={24} height={24} />
-        }
-        label={document ? author?.name ?? "Local User" : <Skeleton variant="text" width={100} />} 
-      />
-      <Typography variant="overline" color="text.secondary"
-        sx={{ display: "block", lineHeight: 1.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-        {document ? <Suspense key={hydrated ? 'local' : 'utc'}>
-          <time dateTime={new Date(document.createdAt).toISOString()}>
-            Created: {new Date(document.createdAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
-          </time>
-        </Suspense> : <Skeleton variant="text" width={150} />}
-      </Typography>
-      <Typography variant="overline" color="text.secondary"
-        sx={{ display: "block", lineHeight: 1.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
-      >
-        {document ? <Suspense key={hydrated ? 'local' : 'utc'}>
-          <time dateTime={new Date(document.updatedAt).toISOString()}>
-            Updated: {new Date(document.updatedAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
-          </time>
-        </Suspense> : <Skeleton variant="text" width={150} />}
-      </Typography>
-    </>
+    <div style={{ height: "8px" }}></div> // Spacer to maintain consistent card height
   ) : (
     <Skeleton variant="text" width={150} />
   );
@@ -148,7 +161,18 @@ const DirectoryCard: React.FC<{ userDocument?: UserDocument, user?: User, sx?: S
       {isLocalOnly && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<MobileFriendly />} label="Local" />}
       {isUploaded && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={isUpToDate ? <CloudDone /> : <CloudSync />} label={isUpToDate ? "Synced" : "Out of Sync"} />}
       {isCloudOnly && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<Cloud />} label="Cloud" />}
-      <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<Folder />} label="Directory" />
+      {/* Add invisible placeholders for consistency with DocumentCard which has more chips */}
+      <div style={{ display: "none", width: 0, flex: 1, maxWidth: "fit-content" }}></div>
+      <div style={{ display: "none", width: 0, flex: 1, maxWidth: "fit-content" }}></div>
+      <div style={{ display: "none", width: 0, flex: 1, maxWidth: "fit-content" }}></div>
+      <Chip 
+        sx={{ width: 0, flex: 1, maxWidth: "fit-content", pointerEvents: "auto" }} 
+        avatar={
+          document ? <Avatar alt={author?.name ?? "Local User"} src={author?.image ?? undefined} />
+            : <Skeleton variant="circular" width={24} height={24} />
+        }
+        label={document ? author?.name ?? "Local User" : <Skeleton variant="text" width={100} />} 
+      />
       {userDocument && <DocumentActionMenu userDocument={userDocument} user={user} />}
     </>
   );
@@ -158,8 +182,7 @@ const DirectoryCard: React.FC<{ userDocument?: UserDocument, user?: User, sx?: S
       userDocument={userDocument}
       user={user}
       sx={{ 
-        borderWidth: 2,
-        borderColor: 'primary.main',
+        borderWidth: 1,
         ...sx 
       }}
       href={href}
@@ -195,36 +218,9 @@ const DocumentCard: React.FC<{ userDocument?: UserDocument, user?: User, sx?: Sx
   const author = cloudDocument?.author ?? user;
   const hydrated = useHydration();
 
-  // Create subheader content
+  // Create subheader content - without created/updated date information
   const subheaderContent = document ? (
-    <>
-      <Chip 
-        size='small' 
-        sx={{ my: 1, pointerEvents: "auto" }} 
-        avatar={
-          document ? <Avatar alt={author?.name ?? "Local User"} src={author?.image ?? undefined} />
-            : <Skeleton variant="circular" width={24} height={24} />
-        }
-        label={document ? author?.name ?? "Local User" : <Skeleton variant="text" width={100} />} 
-      />
-      <Typography variant="overline" color="text.secondary"
-        sx={{ display: "block", lineHeight: 1.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-        {document ? <Suspense key={hydrated ? 'local' : 'utc'}>
-          <time dateTime={new Date(document.createdAt).toISOString()}>
-            Created: {new Date(document.createdAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
-          </time>
-        </Suspense> : <Skeleton variant="text" width={150} />}
-      </Typography>
-      <Typography variant="overline" color="text.secondary"
-        sx={{ display: "block", lineHeight: 1.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
-      >
-        {document ? <Suspense key={hydrated ? 'local' : 'utc'}>
-          <time dateTime={new Date(document.updatedAt).toISOString()}>
-            Updated: {new Date(document.updatedAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
-          </time>
-        </Suspense> : <Skeleton variant="text" width={150} />}
-      </Typography>
-    </>
+    <div style={{ height: "8px" }}></div> // Spacer to maintain consistent card height
   ) : (
     <Skeleton variant="text" width={150} />
   );
@@ -265,6 +261,14 @@ const DocumentCard: React.FC<{ userDocument?: UserDocument, user?: User, sx?: Sx
       {isPublished && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<Public />} label="Published" />}
       {isCollab && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<Workspaces />} label="Collab" />}
       {isPrivate && <Chip sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<Security />} label="Private" />}
+      <Chip 
+        sx={{ width: 0, flex: 1, maxWidth: "fit-content", pointerEvents: "auto" }} 
+        avatar={
+          document ? <Avatar alt={author?.name ?? "Local User"} src={author?.image ?? undefined} />
+            : <Skeleton variant="circular" width={24} height={24} />
+        }
+        label={document ? author?.name ?? "Local User" : <Skeleton variant="text" width={100} />} 
+      />
       {userDocument && <DocumentActionMenu userDocument={userDocument} user={user} />}
     </>
   );
