@@ -93,6 +93,7 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
       published: body.published,
       collab: body.collab,
       private: body.private,
+      parentId: body.parentId,
     };
 
     if (body.handle && body.handle !== userDocument.handle) {
