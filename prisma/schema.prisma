@@ -50,6 +50,7 @@ enum DocumentType {
 model Directory {
   id         String @id @default(uuid()) @db.Uuid
   documentId String @unique @db.Uuid
+  sort_order Float?  @db.DoublePrecision
 
   // Relations
   document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)

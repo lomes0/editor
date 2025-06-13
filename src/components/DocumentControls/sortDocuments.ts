@@ -10,8 +10,42 @@ function compareObjectsByKey(key: string, ascending = true) {
 }
 
 export const sortDocuments = (documents: UserDocument[], sortkey: string, sortDirection: string) => {
-  const data = documents.map(d => (d.local ?? d.cloud)!);
-  const sortedData = [...data].sort(compareObjectsByKey(sortkey, sortDirection === 'asc'));
-  const sortedDocuments = sortedData.map(localDocument => documents.find(d => d.id === localDocument.id)!);
+  // Convert to document data representation for sorting
+  const data = documents.map(d => {
+    const docData = (d.local ?? d.cloud)!;
+    // Check if the document has a directory with a sort_order
+    const hasSortOrder = d.cloud?.directory?.sort_order !== undefined || 
+                         d.local?.directory?.sort_order !== undefined;
+    const sortOrder = d.cloud?.directory?.sort_order ?? d.local?.directory?.sort_order ?? null;
+    
+    return {
+      ...docData,
+      _hasSortOrder: hasSortOrder,
+      _sortOrder: sortOrder
+    };
+  });
+
+  // First, separate documents with and without sort_order
+  const withSortOrder = data.filter(doc => doc._hasSortOrder);
+  const withoutSortOrder = data.filter(doc => !doc._hasSortOrder);
+
+  // Sort documents with sort_order by their sort_order value (always ascending)
+  const sortedWithSortOrder = [...withSortOrder].sort((a, b) => {
+    return (a._sortOrder ?? 0) - (b._sortOrder ?? 0);
+  });
+
+  // Sort the remaining documents by the specified key and direction
+  const sortedWithoutSortOrder = [...withoutSortOrder].sort(
+    compareObjectsByKey(sortkey, sortDirection === 'asc')
+  );
+
+  // Combine the two sorted arrays: first those with sort_order, then the rest
+  const sortedData = [...sortedWithSortOrder, ...sortedWithoutSortOrder];
+  
+  // Map back to the original UserDocument objects
+  const sortedDocuments = sortedData.map(docData => 
+    documents.find(d => d.id === docData.id)!
+  );
+  
   return sortedDocuments;
 };

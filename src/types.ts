@@ -46,11 +46,18 @@ export interface EditorDocument {
   parentId?: string | null;
   type: DocumentType;
   revisions?: EditorDocumentRevision[];
+  directory?: Directory;
 }
 
 export enum DocumentType {
   DOCUMENT = "DOCUMENT",
   DIRECTORY = "DIRECTORY"
+}
+
+export interface Directory {
+  id: string;
+  documentId: string;
+  sort_order?: number | null;
 }
 
 export type Document = Omit<EditorDocument, "data"> & {
@@ -61,6 +68,7 @@ export type Document = Omit<EditorDocument, "data"> & {
   collab?: boolean;
   private?: boolean;
   children?: Document[]; // Child documents (for directories)
+  directory?: Directory;
 };
 
 export type CloudDocument = Document; // Cloud documents are the same as regular documents
