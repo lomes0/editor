@@ -22,8 +22,9 @@ model Document {
   head   String? @db.Uuid
   collab Boolean @default(false)
   
-  // Directory-specific field (used when type is DIRECTORY)
+  // Directory-specific fields (used when type is DIRECTORY)
   sort_order Float?  @db.DoublePrecision
+  background_image String?
 
   // Fork relationship
   baseId String?    @db.Uuid

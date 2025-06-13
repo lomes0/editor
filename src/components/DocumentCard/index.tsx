@@ -131,6 +131,7 @@ const DirectoryCard: React.FC<{ userDocument?: UserDocument, user?: User, sx?: S
   
   const author = cloudDocument?.author ?? user;
   const hydrated = useHydration();
+  const backgroundImage = document?.background_image;
 
   // Create subheader content - without created/updated date information
   const subheaderContent = document ? (
@@ -183,6 +184,15 @@ const DirectoryCard: React.FC<{ userDocument?: UserDocument, user?: User, sx?: S
       user={user}
       sx={{ 
         borderWidth: 1,
+        ...(backgroundImage && {
+          backgroundImage: `url(${backgroundImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          '& .MuiCardHeader-title': { 
+            textShadow: '0px 1px 3px rgba(0,0,0,0.7)',
+            color: 'white' 
+          }
+        }),
         ...sx 
       }}
       href={href}

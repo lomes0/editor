@@ -34,7 +34,7 @@ export interface DocumentStorageUsage {
   size: number;
 }
 
-export interface EditorDocument {
+export type EditorDocument = {
   id: string;
   name: string;
   head: string;
@@ -47,12 +47,22 @@ export interface EditorDocument {
   type: DocumentType;
   revisions?: EditorDocumentRevision[];
   sort_order?: number | null;
+  background_image?: string | null;
 }
 
 export enum DocumentType {
   DOCUMENT = "DOCUMENT",
   DIRECTORY = "DIRECTORY"
 }
+
+// Helper functions for checking document types
+export const isDirectory = (document: EditorDocument | Document | null | undefined): boolean => {
+  return document?.type === DocumentType.DIRECTORY;
+};
+
+export const isRegularDocument = (document: EditorDocument | Document | null | undefined): boolean => {
+  return document?.type === DocumentType.DOCUMENT;
+};
 
 export type Document = Omit<EditorDocument, "data"> & {
   author: User;
@@ -93,6 +103,7 @@ export type DocumentUpdateInput = Partial<EditorDocument> & {
   private?: boolean;
   baseId?: string | null;
   revisions?: EditorDocumentRevision[];
+  background_image?: string | null;
 };
 
 export interface EditorDocumentRevision {
@@ -169,6 +180,14 @@ export interface GetDocumentThumbnailResponse {
 
 export interface PatchDocumentResponse {
   data?: CloudDocument | null;
+  error?: { title: string, subtitle?: string }
+}
+
+export interface UploadBackgroundImageResponse {
+  data?: {
+    background_image: string;
+    document: CloudDocument;
+  };
   error?: { title: string, subtitle?: string }
 }
 

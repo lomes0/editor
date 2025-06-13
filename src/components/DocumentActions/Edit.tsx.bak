@@ -1,5 +1,16 @@
-"use client"
 import { useDispatch, actions, useSelector } from "@/store";
+import { UserDocument, CheckHandleResponse, DocumentUpdateInput, User, DocumentType } from "@/types";
+import { CloudOff, Settings } from "@mui/icons-material";
+import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, FormControlLabel, Checkbox, FormHelperText, useMediaQuery, ListItemIcon, ListItemText, MenuItem, TextField, Box, Typography } from "@mui/material";
+import { useCallback, useEffect, useState } from "react";
+import { useTheme } from "@mui/material/styles";
+import useFixedBodyScroll from "@/hooks/useFixedBodyScroll";
+import { validate } from "uuid";
+import { debounce } from '@mui/material/utils';
+import UploadDocument from "./Upload";
+import UsersAutocomplete from "../User/UsersAutocomplete";
+import useOnlineStatus from "@/hooks/useOnlineStatus";
+import BackgroundImageUploader from "../BackgroundImageUploader";Dispatch, actions, useSelector } from "@/store";
 import { UserDocument, CheckHandleResponse, DocumentUpdateInput, User, DocumentType } from "@/types";
 import { CloudOff, Settings } from "@mui/icons-material";
 import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, FormControlLabel, Checkbox, FormHelperText, useMediaQuery, ListItemIcon, ListItemText, MenuItem, TextField, Box, Typography, Divider } from "@mui/material";
@@ -11,7 +22,9 @@ import { debounce } from '@mui/material/utils';
 import UploadDocument from "./Upload";
 import UsersAutocomplete from "../User/UsersAutocomplete";
 import useOnlineStatus from "@/hooks/useOnlineStatus";
-import BackgroundImageUploader from "../BackgroundImageUploader";
+import dynamic from "next/dynamic";
+
+const BackgroundImageUploader = dynamic(() => import('../BackgroundImageUploader'), { ssr: false });
 
 const EditDocument: React.FC<{ userDocument: UserDocument, variant?: 'menuitem' | 'iconbutton', closeMenu?: () => void }> = ({ userDocument, variant = 'iconbutton', closeMenu }) => {
   const dispatch = useDispatch();
@@ -29,18 +42,8 @@ const EditDocument: React.FC<{ userDocument: UserDocument, variant?: 'menuitem' 
   const id = userDocument.id;
   const name = cloudDocument?.name ?? localDocument?.name ?? "Untitled Document";
   const handle = cloudDocument?.handle ?? localDocument?.handle ?? null;
-  const isCloudOnly = !isLocal && isCloud;
-  const document = isCloudOnly ? cloudDocument : localDocument;
-  // Make sure we properly check if it's a directory
-  const isDirectory = document?.type === DocumentType.DIRECTORY;
-  
-  console.log("Document types:", {
-    cloudType: cloudDocument?.type,
-    localType: localDocument?.type,
-    isDirectory,
-    documentType: document?.type,
-    rawDocumentType: typeof document?.type === 'string' ? document?.type : 'not a string'
-  });
+  const background_image = cloudDocument?.background_image ?? localDocument?.background_image ?? null;
+  const isDirectory = (cloudDocument?.type ?? localDocument?.type) === DocumentType.DIRECTORY;
   
   const [input, setInput] = useState<Partial<DocumentUpdateInput>>({
     name,
@@ -49,7 +52,7 @@ const EditDocument: React.FC<{ userDocument: UserDocument, variant?: 'menuitem' 
     private: isPrivate,
     published: isPublished,
     collab: isCollab,
-    background_image: document?.background_image || null,
+    background_image,
   });
 
   const [validating, setValidating] = useState(false);
@@ -65,7 +68,7 @@ const EditDocument: React.FC<{ userDocument: UserDocument, variant?: 'menuitem' 
       private: isPrivate,
       published: isPublished,
       collab: isCollab,
-      background_image: document?.background_image || null,
+      background_image,
     });
     setValidating(false);
     setValidationErrors({});
@@ -80,6 +83,7 @@ const EditDocument: React.FC<{ userDocument: UserDocument, variant?: 'menuitem' 
     setEditDialogOpen(false);
   };
 
+
   const updateInput = (partial: Partial<DocumentUpdateInput>) => {
     setInput(input => ({ ...input, ...partial }));
   }
@@ -87,10 +91,6 @@ const EditDocument: React.FC<{ userDocument: UserDocument, variant?: 'menuitem' 
   const updateCoauthors = (users: (User | string)[]) => {
     const coauthors = users.map(u => typeof u === "string" ? u : u.email);
     updateInput({ coauthors });
-  }
-
-  const updateBackgroundImage = (imagePath: string | null) => {
-    updateInput({ background_image: imagePath });
   }
 
   const updateHandle = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -145,8 +145,7 @@ const EditDocument: React.FC<{ userDocument: UserDocument, variant?: 'menuitem' 
     if (input.collab !== isCollab) {
       partial.collab = input.collab;
     }
-    // Add background_image to the update if it has changed
-    if (input.background_image !== document?.background_image) {
+    if (input.background_image !== background_image) {
       partial.background_image = input.background_image;
     }
     if (Object.keys(partial).length === 0) return;
@@ -178,16 +177,16 @@ const EditDocument: React.FC<{ userDocument: UserDocument, variant?: 'menuitem' 
     </MenuItem> : <IconButton aria-label="Edit Document" onClick={openEditDialog} size="small"><Settings /></IconButton>}
     <Dialog open={editDialogOpen} onClose={closeEditDialog} fullWidth maxWidth="xs" fullScreen={fullScreen}>
       <Box component="form" onSubmit={handleSubmit} noValidate autoComplete="off" spellCheck="false" sx={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "100%" }}>
-        <DialogTitle>Edit {isDirectory ? "Directory" : "Document"}</DialogTitle>
+        <DialogTitle>Edit Document</DialogTitle>
         <DialogContent sx={{ "& .MuiFormHelperText-root": { overflow: "hidden", textOverflow: "ellipsis" } }}>
           <TextField margin="normal" size="small" fullWidth autoFocus
-            label={isDirectory ? "Directory Name" : "Document Name"}
+            label="Document Name"
             value={input.name || ""}
             onChange={e => updateInput({ name: e.target.value })}
             sx={{ '& .MuiInputBase-root': { height: 40 } }}
           />
           <TextField margin="normal" size="small" fullWidth
-            label={isDirectory ? "Directory Handle" : "Document Handle"}
+            label="Document Handle"
             disabled={!isOnline}
             value={input.handle || ""}
             onChange={updateHandle}
@@ -199,22 +198,6 @@ const EditDocument: React.FC<{ userDocument: UserDocument, variant?: 'menuitem' 
                     : "This will be used in the URL of your document"
             }
           />
-          
-          {/* Background image uploader for directories */}
-          {isDirectory && isAuthor && (
-            <>
-              <Divider sx={{ my: 2 }} />
-              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                Directory Options
-              </Typography>
-              <BackgroundImageUploader 
-                userDocument={userDocument}
-                onChange={updateBackgroundImage}
-                currentImage={document?.background_image || null}
-              />
-            </>
-          )}
-          
           {!cloudDocument && <Box sx={{ display: 'flex', flexDirection: "column", alignItems: "center", my: 1, gap: 1 }}>
             <FormHelperText>
               Save the document to cloud to unlock the following options
@@ -228,6 +211,19 @@ const EditDocument: React.FC<{ userDocument: UserDocument, variant?: 'menuitem' 
           <FormHelperText>
             Private documents are only accessible to authors and coauthors.
           </FormHelperText>
+          
+          {isDirectory && isAuthor && (
+            <>
+              <Divider sx={{ my: 2 }} />
+              <Typography variant="subtitle1">Directory Settings</Typography>
+              <BackgroundImageUploader 
+                userDocument={userDocument} 
+                currentImage={input.background_image || null}
+                onChange={(imagePath) => updateInput({ background_image: imagePath })}
+              />
+            </>
+          )}
+
           {isAuthor && <FormControlLabel label="Published"
             control={<Checkbox checked={input.published} disabled={!isOnline || !isCloud || input.private} onChange={() => updateInput({ published: !input.published })} />}
           />}

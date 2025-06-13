@@ -94,6 +94,7 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
       collab: body.collab,
       private: body.private,
       parentId: body.parentId,
+      background_image: body.background_image,
     };
 
     if (body.handle && body.handle !== userDocument.handle) {
