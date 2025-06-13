@@ -13,10 +13,19 @@ export const sortDocuments = (documents: UserDocument[], sortkey: string, sortDi
   // Convert to document data representation for sorting
   const data = documents.map(d => {
     const docData = (d.local ?? d.cloud)!;
-    // Check if the document has a directory with a sort_order
-    const hasSortOrder = d.cloud?.directory?.sort_order !== undefined || 
-                         d.local?.directory?.sort_order !== undefined;
-    const sortOrder = d.cloud?.directory?.sort_order ?? d.local?.directory?.sort_order ?? null;
+    
+    // Check if the document has a sort_order (directly on local/cloud document or via directory property on cloud doc)
+    const hasSortOrder = 
+      d.cloud?.sort_order !== undefined || 
+      d.local?.sort_order !== undefined ||
+      d.cloud?.directory?.sort_order !== undefined;
+      
+    // Get sort_order with precedence: direct field first, then legacy directory property
+    const sortOrder = 
+      d.cloud?.sort_order ?? 
+      d.local?.sort_order ??
+      d.cloud?.directory?.sort_order ?? 
+      null;
     
     return {
       ...docData,

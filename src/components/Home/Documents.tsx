@@ -160,7 +160,8 @@ const Documents: React.FC<{ staticDocuments: UserDocument[] }> = ({ staticDocume
         head: uuid(), // Provide a UUID for head even though it's not used for directories
         data: { root: { children: [], direction: null, format: "", indent: 0, type: "root", version: 1 } }, // Empty editor state
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        sort_order: 0 // Default sort order
       }));
     }
   };

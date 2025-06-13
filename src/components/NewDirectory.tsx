@@ -40,6 +40,7 @@ const NewDirectory: React.FC<{ parentId?: string }> = ({ parentId }) => {
       type: DocumentType.DIRECTORY,
       parentId: parentId || null,
       head,
+      sort_order: 0, // Default sort order
       data: { 
         root: { 
           children: [], 
