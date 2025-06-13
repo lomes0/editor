@@ -2,7 +2,6 @@
 import { usePathname, useRouter } from 'next/navigation';
 import RouterLink from 'next/link'
 import { useEffect, useState } from 'react';
-import logo from "@public/logo.svg";
 import Image from 'next/image';
 import { useDispatch, actions, useSelector } from '@/store';
 import { 
@@ -106,14 +105,14 @@ const SideBar: React.FC = () => {
             textDecoration: "none", 
             color: "inherit" 
           }}>
-            <Image src={logo} alt="Editor Logo" width={32} height={32} priority />
+            <Image src="/logo.svg" alt="Editor Logo" width={32} height={32} />
             <Box sx={{ ml: 1, fontWeight: 'bold', fontSize: '1.2rem' }}>Editor</Box>
           </Box>
         )}
         {!open && (
           <Tooltip title="Editor">
             <Box component={RouterLink} href="/" sx={{ display: "flex", justifyContent: "center" }}>
-              <Image src={logo} alt="Editor Logo" width={32} height={32} priority />
+              <Image src="/logo.svg" alt="Editor Logo" width={32} height={32} />
             </Box>
           </Tooltip>
         )}

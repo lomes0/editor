@@ -1,9 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter';
 import ThemeProvider from '@/components/Layout/ThemeProvider';
-import RobotoLatin400 from '@fontsource/roboto/files/roboto-latin-400-normal.woff2?url';
-import RobotoLatin500 from '@fontsource/roboto/files/roboto-latin-500-normal.woff2?url';
-import RobotoLatin700 from '@fontsource/roboto/files/roboto-latin-700-normal.woff2?url';
 import 'mathlive/static.css';
 import '@/editor/theme.css';
 import './globals.css';
@@ -59,11 +56,6 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preload" as="font" type="font/woff2" href={RobotoLatin400} crossOrigin="anonymous" />
-        <link rel="preload" as="font" type="font/woff2" href={RobotoLatin500} crossOrigin="anonymous" />
-        <link rel="preload" as="font" type="font/woff2" href={RobotoLatin700} crossOrigin="anonymous" />
-      </head>
       <body>
         <AppRouterCacheProvider>
           <ThemeProvider>

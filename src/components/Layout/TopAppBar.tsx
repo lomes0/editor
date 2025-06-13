@@ -2,7 +2,6 @@
 import { usePathname } from 'next/navigation';
 import RouterLink from 'next/link'
 import { useEffect } from 'react';
-import logo from "@public/logo.svg";
 import Image from 'next/image';
 import { useDispatch, actions, useSelector } from '@/store';
 import { useScrollTrigger, Zoom, Box, AppBar, Toolbar, Typography, IconButton, Avatar, Fab, Link } from '@mui/material';
@@ -67,7 +66,7 @@ const TopAppBar: React.FC = () => {
         <Toolbar id="app-toolbar">
           <Link component={RouterLink} prefetch={false} href="/" sx={{ textDecoration: "none" }}>
             <Box sx={{ display: "flex" }}>
-              <Image src={logo} alt="Logo" width={32} height={32} priority />
+              <Image src="/logo.svg" alt="Logo" width={32} height={32} />
               <Typography variant="h6" component="h1" sx={{ marginInlineStart: 2, color: "white" }}>Math Editor</Typography>
             </Box>
           </Link>
