@@ -213,7 +213,8 @@ const DocumentCard: React.FC<{ userDocument?: UserDocument, user?: User, sx?: Sx
   const document = isCloudOnly ? cloudDocument : localDocument;
   const handle = cloudDocument?.handle ?? localDocument?.handle ?? document?.id;
   const isEditable = isAuthor || isCoauthor || isCollab;
-  const href = document ? (isEditable ? `/edit/${handle}` : `/view/${handle}`) : "/";
+  // Direct document cards to view route
+  const href = document ? `/view/${handle}` : "/";
   
   const author = cloudDocument?.author ?? user;
   const hydrated = useHydration();
