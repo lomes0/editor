@@ -39,16 +39,16 @@ const AppLayout = ({ children }: { children: React.ReactNode; }) => {
               sx={{
                 display: 'flex',
                 flexDirection: 'column',
-                mx: 'auto',
+                mx: 'auto', /* Reset to center horizontally */
                 my: 2,
                 flex: 1,
                 position: 'relative',
                 maxWidth: {
                   xs: '100% !important',
                   sm: '100% !important',
-                  md: '1200px !important',
+                  md: '1400px !important',
                 },
-                px: { xs: 1, sm: 2 }
+                px: { xs: 1, sm: 1 } /* Reduced horizontal padding */
               }}>
               {children}
             </Container>
