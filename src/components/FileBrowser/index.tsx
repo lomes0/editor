@@ -70,6 +70,41 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
         
         expandParents(dirId);
       }
+    } else if (pathname.startsWith('/view/') || pathname.startsWith('/edit/')) {
+      // For view and edit routes, highlight the current document and expand its parent directories
+      const docId = pathname.replace(/^\/(view|edit)\//, '');
+      
+      if (docId) {
+        // Find the document and its parent
+        const doc = documents.find(d => d.id === docId);
+        if (doc) {
+          const parentId = doc.local?.parentId || doc.cloud?.parentId;
+          if (parentId) {
+            setCurrentDirectory(parentId);
+            
+            // Auto-expand parent directories
+            const expandParents = (id: string) => {
+              setExpandedNodes(prev => {
+                const newSet = new Set(prev);
+                newSet.add(id);
+                return newSet;
+              });
+              
+              const parent = documents.find(d => d.id === id);
+              if (parent) {
+                const grandParentId = parent.local?.parentId || parent.cloud?.parentId;
+                if (grandParentId) {
+                  expandParents(grandParentId);
+                }
+              }
+            };
+            
+            expandParents(parentId);
+          } else {
+            setCurrentDirectory(null); // Root directory
+          }
+        }
+      }
     } else {
       setCurrentDirectory(null);
     }
@@ -179,11 +214,15 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
       const isDirectory = item.type === DocumentType.DIRECTORY;
       const isCurrentDirectory = item.id === currentDirectory;
       
+      // Check if this is the current document (when in view/edit mode)
+      const isCurrentDocument = !isDirectory && 
+        (pathname === `/view/${item.id}` || pathname === `/edit/${item.id}`);
+      
       return (
         <Box key={item.id}>
           <ListItemButton
             onClick={() => handleItemClick(item)}
-            selected={isCurrentDirectory}
+            selected={isCurrentDirectory || isCurrentDocument}
             sx={{
               pl: level * 1.5 + 1,
               py: 0.5,
@@ -196,7 +235,7 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
             <ListItemIcon
               sx={{
                 minWidth: 30,
-                color: isCurrentDirectory ? 'primary.main' : 'inherit',
+                color: (isCurrentDirectory || isCurrentDocument) ? 'primary.main' : 'inherit',
               }}
             >
               {isDirectory ? (
@@ -213,8 +252,8 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
                   primaryTypographyProps={{
                     noWrap: true,
                     fontSize: 14,
-                    fontWeight: isCurrentDirectory ? 'medium' : 'normal',
-                    color: isCurrentDirectory ? 'primary.main' : 'text.primary',
+                    fontWeight: (isCurrentDirectory || isCurrentDocument) ? 'medium' : 'normal',
+                    color: (isCurrentDirectory || isCurrentDocument) ? 'primary.main' : 'text.primary',
                   }}
                 />
                 
@@ -237,11 +276,6 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
       );
     });
   };
-
-  // Only render this component when we're in the browse route
-  if (!pathname.startsWith('/browse')) {
-    return null;
-  }
 
   return (
     <>

@@ -49,7 +49,7 @@ const SideBar: React.FC = () => {
   
   const showPrintButton = !!['/edit', '/view', '/playground'].find(path => pathname.startsWith(path));
   const showInfoButton = !!['/edit', '/view'].find(path => pathname.startsWith(path));
-  const showFileBrowser = pathname.startsWith('/browse');
+  const showFileBrowser = !!['/browse', '/view', '/edit'].find(path => pathname.startsWith(path));
 
   const handlePrint = () => { window.print(); }
   const toggleDrawer = () => { dispatch(actions.toggleDrawer()); }
@@ -91,6 +91,9 @@ const SideBar: React.FC = () => {
             duration: theme.transitions.duration.enteringScreen,
           }),
           overflowX: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
         },
       }}
     >
@@ -125,139 +128,163 @@ const SideBar: React.FC = () => {
       
       <Divider />
       
-      <List>
-        {navigationItems.map((item) => (
-          <ListItem key={item.text} disablePadding sx={{ display: 'block' }}>
-            <Tooltip title={open ? "" : item.text} placement="right">
-              <ListItemButton
-                component={RouterLink}
-                href={item.path}
-                selected={pathname === item.path || pathname.startsWith(`${item.path}/`)}
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? 'initial' : 'center',
-                  px: 2.5,
-                }}
-              >
-                <ListItemIcon
+      {/* Top section - Main navigation - 1/3 of height */}
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        height: '33%',
+        overflow: 'auto'
+      }}>
+        <List>
+          {navigationItems.map((item) => (
+            <ListItem key={item.text} disablePadding sx={{ display: 'block' }}>
+              <Tooltip title={open ? "" : item.text} placement="right">
+                <ListItemButton
+                  component={RouterLink}
+                  href={item.path}
+                  selected={pathname === item.path || pathname.startsWith(`${item.path}/`)}
                   sx={{
-                    minWidth: 0,
-                    mr: open ? 2 : 'auto',
-                    justifyContent: 'center',
+                    minHeight: 48,
+                    justifyContent: open ? 'initial' : 'center',
+                    px: 2.5,
                   }}
                 >
-                  {item.icon}
-                </ListItemIcon>
-                {open && <ListItemText primary={item.text} />}
-              </ListItemButton>
-            </Tooltip>
-          </ListItem>
-        ))}
-      </List>
+                  <ListItemIcon
+                    sx={{
+                      minWidth: 0,
+                      mr: open ? 2 : 'auto',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {item.icon}
+                  </ListItemIcon>
+                  {open && <ListItemText primary={item.text} />}
+                </ListItemButton>
+              </Tooltip>
+            </ListItem>
+          ))}
+        </List>
+      </Box>
       
       <Divider />
       
-      <List>
-        {showPrintButton && (
-          <ListItem disablePadding sx={{ display: 'block' }}>
-            <Tooltip title={open ? "" : "Print"} placement="right">
-              <ListItemButton
-                onClick={handlePrint}
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? 'initial' : 'center',
-                  px: 2.5,
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 2 : 'auto',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Print />
-                </ListItemIcon>
-                {open && <ListItemText primary="Print" />}
-              </ListItemButton>
-            </Tooltip>
-          </ListItem>
-        )}
-        
-        {showInfoButton && (
-          <ListItem disablePadding sx={{ display: 'block' }}>
-            <Tooltip title={open ? "" : "Document Info"} placement="right">
-              <ListItemButton
-                id="document-info"
-                onClick={toggleDrawer}
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? 'initial' : 'center',
-                  px: 2.5,
-                  '& >.MuiBadge-root': { 
-                    height: '1em', 
-                    userSelect: 'none', 
-                    zIndex: -1 
-                  }
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 2 : 'auto',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Info />
-                </ListItemIcon>
-                {open && <ListItemText primary="Document Info" />}
-              </ListItemButton>
-            </Tooltip>
-          </ListItem>
-        )}
-      </List>
-      
-      {showFileBrowser && (
-        <Box sx={{ mt: 1 }}>
+      {/* Middle section - File browser - 1/3 of height */}
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        height: '33%',
+        overflow: 'auto'
+      }}>
+        {showFileBrowser && (
           <FileBrowser open={open} />
+        )}
+      </Box>
+      
+      {(showPrintButton || showInfoButton) && <Divider />}
+      
+      {/* Bottom section - Actions and user - 1/3 of height */}
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        height: '33%',
+        justifyContent: 'space-between'
+      }}>
+        <List>
+          {showPrintButton && (
+            <ListItem disablePadding sx={{ display: 'block' }}>
+              <Tooltip title={open ? "" : "Print"} placement="right">
+                <ListItemButton
+                  onClick={handlePrint}
+                  sx={{
+                    minHeight: 48,
+                    justifyContent: open ? 'initial' : 'center',
+                    px: 2.5,
+                  }}
+                >
+                  <ListItemIcon
+                    sx={{
+                      minWidth: 0,
+                      mr: open ? 2 : 'auto',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Print />
+                  </ListItemIcon>
+                  {open && <ListItemText primary="Print" />}
+                </ListItemButton>
+              </Tooltip>
+            </ListItem>
+          )}
+          
+          {showInfoButton && (
+            <ListItem disablePadding sx={{ display: 'block' }}>
+              <Tooltip title={open ? "" : "Document Info"} placement="right">
+                <ListItemButton
+                  id="document-info"
+                  onClick={toggleDrawer}
+                  sx={{
+                    minHeight: 48,
+                    justifyContent: open ? 'initial' : 'center',
+                    px: 2.5,
+                    '& >.MuiBadge-root': { 
+                      height: '1em', 
+                      userSelect: 'none', 
+                      zIndex: -1 
+                    }
+                  }}
+                >
+                  <ListItemIcon
+                    sx={{
+                      minWidth: 0,
+                      mr: open ? 2 : 'auto',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Info />
+                  </ListItemIcon>
+                  {open && <ListItemText primary="Document Info" />}
+                </ListItemButton>
+              </Tooltip>
+            </ListItem>
+          )}
+        </List>
+        
+        <Box sx={{ mt: 'auto' }}>
+          <List>
+            <ListItem disablePadding sx={{ display: 'block' }}>
+              <Tooltip title={open ? "" : (user ? user.name : "Sign In")} placement="right">
+                <ListItemButton
+                  component={RouterLink}
+                  href={user ? "/browse" : "/api/auth/signin"}
+                  sx={{
+                    minHeight: 48,
+                    justifyContent: open ? 'initial' : 'center',
+                    px: 2.5,
+                  }}
+                >
+                  <ListItemIcon
+                    sx={{
+                      minWidth: 0,
+                      mr: open ? 2 : 'auto',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Avatar 
+                      alt={user?.name} 
+                      src={user?.image ?? undefined} 
+                      sx={{ 
+                        width: 32, 
+                        height: 32 
+                      }} 
+                    />
+                  </ListItemIcon>
+                  {open && <ListItemText primary={user ? user.name : "Sign In"} />}
+                </ListItemButton>
+              </Tooltip>
+            </ListItem>
+          </List>
         </Box>
-      )}
-      
-      <Box sx={{ flexGrow: 1 }} />
-      
-      <List>
-        <ListItem disablePadding sx={{ display: 'block' }}>
-          <Tooltip title={open ? "" : (user ? user.name : "Sign In")} placement="right">
-            <ListItemButton
-              component={RouterLink}
-              href={user ? "/browse" : "/api/auth/signin"}
-              sx={{
-                minHeight: 48,
-                justifyContent: open ? 'initial' : 'center',
-                px: 2.5,
-              }}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: 0,
-                  mr: open ? 2 : 'auto',
-                  justifyContent: 'center',
-                }}
-              >
-                <Avatar 
-                  alt={user?.name} 
-                  src={user?.image ?? undefined} 
-                  sx={{ 
-                    width: 32, 
-                    height: 32 
-                  }} 
-                />
-              </ListItemIcon>
-              {open && <ListItemText primary={user ? user.name : "Sign In"} />}
-            </ListItemButton>
-          </Tooltip>
-        </ListItem>
-      </List>
+      </Box>
     </Drawer>
   );
 };
