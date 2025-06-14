@@ -6,8 +6,10 @@
     "postinstall": "patch-package",
     "dev": "next dev --turbo",
     "build": "next build",
+    "clean": "rm -rf .next && rm -rf node_modules/.cache",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "rebuild": "npm run clean && npm run build"
   },
   "dependencies": {
     "@ai-sdk/google": "^1.1.27",

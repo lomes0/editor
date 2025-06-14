@@ -167,6 +167,19 @@ const nextConfig: NextConfig = {
     // Ensure consistent class names between server and client
     if (config.optimization) {
       config.optimization.realContentHash = false;
+      
+      // Additional optimization settings for consistent builds
+      if (config.optimization.minimizer) {
+        config.optimization.minimizer.forEach((plugin: { constructor: { name: string }, options: { terserOptions?: any } }) => {
+          if (plugin.constructor.name === 'TerserPlugin') {
+            plugin.options.terserOptions = {
+              ...plugin.options.terserOptions,
+              keep_classnames: true,
+              keep_fnames: true,
+            };
+          }
+        });
+      }
     }
     
     return config;

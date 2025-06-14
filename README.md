@@ -26,3 +26,7 @@ cd matheditor
 npm install
 npm run dev
 ```
+
+## Troubleshooting
+
+If you encounter hydration errors or other rendering issues, see [Hydration Error Troubleshooting](docs/HYDRATION.md) for detailed instructions.

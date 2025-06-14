@@ -1,12 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
 import ThemeProvider from "@/components/Layout/ThemeProvider";
 import "mathlive/static.css";
 import "@/editor/theme.css";
 import "./globals.css";
 
-// Force MUI to generate deterministic class names for server and client
+// Force Next.js to use SSG for this layout, which helps with consistency between server and client
 export const dynamic = "force-static";
+export const revalidate = false;
+export const fetchCache = "force-cache";
 
 const PUBLIC_URL = process.env.PUBLIC_URL;
 
@@ -71,11 +72,9 @@ export default function RootLayout(
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <AppRouterCacheProvider options={{ key: "mui-app", prepend: true }}>
-          <ThemeProvider>
-            {children}
-          </ThemeProvider>
-        </AppRouterCacheProvider>
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

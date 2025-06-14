@@ -4,7 +4,7 @@ import {
   createTheme,
   ThemeProvider as MuiThemeProvider,
 } from "@mui/material/styles";
-import EmotionCache from "./EmotionCache";
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
@@ -26,15 +26,22 @@ const theme = createTheme({
   },
 });
 
+// Options for the emotion cache
+const cacheOptions = {
+  key: "mui-app",
+  prepend: true, 
+  stylisPlugins: [] // Ensure consistent behavior between server and client
+};
+
 export default function ThemeProvider(
   { children }: { children: React.ReactNode },
 ) {
   return (
-    <EmotionCache>
+    <AppRouterCacheProvider options={cacheOptions}>
       <MuiThemeProvider theme={theme}>
         <CssBaseline />
         {children}
       </MuiThemeProvider>
-    </EmotionCache>
+    </AppRouterCacheProvider>
   );
 }

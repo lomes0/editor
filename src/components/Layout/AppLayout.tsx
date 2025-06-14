@@ -5,6 +5,7 @@ import ScrollTop from "./ScrollTop";
 import AlertDialog from "./Alert";
 import Announcer from "./Announcer";
 import ProgressBar from "./ProgressBar";
+import HydrationManager from "./HydrationManager";
 import {
   Box,
   Container,
@@ -49,28 +50,31 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
                 minHeight: "0 !important",
               }}
             />
-            <Container
-              className="editor-container"
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                mx: "auto", /* Reset to center horizontally */
-                my: 2,
-                flex: 1,
-                position: "relative",
-                maxWidth: {
-                  xs: "100% !important",
-                  sm: "100% !important",
-                  md: "1800px !important",
-                },
-                px: {
-                  xs: 1,
-                  sm: 1,
-                }, /* Reduced horizontal padding */
-              }}
-            >
-              {children}
-            </Container>
+            <HydrationManager>
+              <Container
+                className="editor-container"
+                id="editor-main-container"
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  mx: "auto", /* Reset to center horizontally */
+                  my: 2,
+                  flex: 1,
+                  position: "relative",
+                  maxWidth: {
+                    xs: "100% !important",
+                    sm: "100% !important",
+                    md: "1800px !important",
+                  },
+                  px: {
+                    xs: 1,
+                    sm: 1,
+                  }, /* Reduced horizontal padding */
+                }}
+              >
+                {children}
+              </Container>
+            </HydrationManager>
           </Box>
           <ScrollTop />
         </Box>
