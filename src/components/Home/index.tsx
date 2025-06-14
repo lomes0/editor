@@ -12,7 +12,6 @@ import {
   DialogTitle,
 } from "@mui/material";
 import { UserDocument } from "@/types";
-import Footer from "./Footer";
 import PwaUpdater from "./PwaUpdater";
 
 const Home: React.FC<{ staticDocuments: UserDocument[] }> = (
@@ -51,7 +50,6 @@ const Home: React.FC<{ staticDocuments: UserDocument[] }> = (
           </DialogActions>
         </Dialog>
       )}
-      <Footer />
       <PwaUpdater />
     </>
   );

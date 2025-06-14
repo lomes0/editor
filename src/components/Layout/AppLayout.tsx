@@ -6,6 +6,7 @@ import AlertDialog from "./Alert";
 import Announcer from "./Announcer";
 import ProgressBar from "./ProgressBar";
 import HydrationManager from "./HydrationManager";
+import Footer from "@/components/Home/Footer";
 import {
   Box,
   Container,
@@ -78,6 +79,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
           </Box>
           <ScrollTop />
         </Box>
+        <Footer />
         <AlertDialog />
         <Announcer />
       </StoreProvider>

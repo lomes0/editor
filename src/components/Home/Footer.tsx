@@ -16,7 +16,9 @@ const Footer: React.FC = () => {
       sx={{
         display: "flex",
         displayPrint: "none",
-        mt: "auto",
+        position: "fixed",
+        bottom: 8,
+        right: 16,
         gap: 1,
         zIndex: 1000,
       }}
