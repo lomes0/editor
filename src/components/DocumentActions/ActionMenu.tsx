@@ -4,7 +4,7 @@ import { IconButton, Menu } from '@mui/material';
 import { MoreVert } from '@mui/icons-material';
 import DownloadDocument from './Download';
 import ForkDocument from './Fork';
-import DeleteDocument from './Delete';
+import DeleteBothDocument from './DeleteBoth';
 import UploadDocument from './Upload';
 import { User, UserDocument } from '@/types';
 import ShareDocument from './Share';
@@ -74,7 +74,7 @@ function DocumentActionMenu({ userDocument, user }: { userDocument: UserDocument
         {options.includes('fork') && <ForkDocument userDocument={userDocument} variant="menuitem" closeMenu={closeMenu} />}
         {options.includes('upload') && isLocal && !isUpToDate && <UploadDocument userDocument={userDocument} variant="menuitem" closeMenu={closeMenu} />}
         {options.includes('restore') && <RestoreDocument userDocument={userDocument} variant="menuitem" closeMenu={closeMenu} />}
-        {options.includes('delete') && <DeleteDocument userDocument={userDocument} variant="menuitem" closeMenu={closeMenu} />}
+        {options.includes('delete') && <DeleteBothDocument userDocument={userDocument} variant="menuitem" closeMenu={closeMenu} />}
       </Menu>
     </>
   );

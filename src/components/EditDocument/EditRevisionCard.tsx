@@ -150,10 +150,9 @@ const RevisionCard: React.FC<{
   }
 
   const deleteRevision = async () => {
-    const variant = isLocalRevision ? 'Local' : 'Cloud';
     const alert = {
-      title: `Delete ${variant} Revision?`,
-      content: `Are you sure you want to delete this ${variant} revision?`,
+      title: `Delete Revision?`,
+      content: `Are you sure you want to delete this revision? This will remove it from both cloud and local storage if it exists in both.`,
       actions: [
         { label: "Cancel", id: uuid() },
         { label: "Delete", id: uuid() },
@@ -161,8 +160,15 @@ const RevisionCard: React.FC<{
     };
     const response = await dispatch(actions.alert(alert));
     if (response.payload === alert.actions[1].id) {
-      if (isLocalRevision) dispatch(actions.deleteLocalRevision({ id: revision.id, documentId: revision.documentId }));
-      else dispatch(actions.deleteCloudRevision({ id: revision.id, documentId: revision.documentId }));
+      // Delete from cloud first (if exists)
+      if (isCloudRevision) {
+        await dispatch(actions.deleteCloudRevision({ id: revision.id, documentId: revision.documentId }));
+      }
+      
+      // Then delete from local (if exists)
+      if (isLocalRevision) {
+        await dispatch(actions.deleteLocalRevision({ id: revision.id, documentId: revision.documentId }));
+      }
     }
   }
 
@@ -190,7 +196,7 @@ const RevisionCard: React.FC<{
         {showDiff && <Chip color={isNew ? "primary" : "default"} sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<Update />} label="New" onClick={setAsNew} disabled={!isOnline && !isLocalRevision} />}
         {showCreate && <Chip variant='outlined' clickable sx={{ width: 0, flex: 1, maxWidth: "fit-content" }} icon={<CloudUpload />} label="Save to Cloud" onClick={createRevision} />}
         {showUpdate && <IconButton aria-label="Update Cloud Head" size="small" onClick={updateCloudHead}><CloudSync /></IconButton>}
-        {showDelete && <IconButton aria-label="Delete Revision" size="small" onClick={deleteRevision}>{isLastCopy ? <DeleteForever /> : <Delete />}</IconButton>}
+        {showDelete && <IconButton aria-label="Delete Revision" size="small" onClick={deleteRevision}><DeleteForever /></IconButton>}
       </CardActions>
     </Card>
   );
