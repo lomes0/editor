@@ -2,7 +2,7 @@
 import * as React from 'react';
 import { memo, Suspense } from 'react';
 import { SxProps, Theme } from '@mui/material/styles';
-import { Badge, Chip, IconButton, Skeleton, Avatar, Card, CardActionArea, CardHeader, CardActions } from '@mui/material';
+import { Badge, Chip, IconButton, Skeleton, Avatar, Card, CardActionArea, CardHeader, CardActions, CardContent, Typography, Box } from '@mui/material';
 import { MobileFriendly, Cloud, CloudDone, CloudSync, Public, Workspaces, Security, Share, MoreVert } from '@mui/icons-material';
 import { User, UserDocument } from '@/types';
 import DocumentActionMenu from './DocumentActionMenu';
@@ -93,86 +93,148 @@ const DocumentCard: React.FC<{ userDocument?: UserDocument, user?: User, sx?: Sx
         flexDirection: "column", 
         justifyContent: "space-between", 
         height: "100%", 
-        minHeight: "200px", 
+        minHeight: "280px", 
         maxWidth: "100%", 
         position: "relative",
-        borderRadius: "8px",
+        borderRadius: "12px",
         borderColor: "divider",
         transition: "all 0.2s ease-in-out",
         boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
         "&:hover": {
-          boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+          boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
           borderColor: "primary.light",
-          transform: "translateY(-2px)"
+          transform: "translateY(-4px)"
         },
         borderWidth: 1,
         ...sx 
       }}
     >
+      {/* Top section (70%): Document Thumbnail */}
+      <Box
+        sx={{
+          height: '70%',
+          minHeight: '196px',
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: 'background.paper', // Changed from grey.100 to white background
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+        }}
+      >
+        <Badge badgeContent={revisionsBadgeContent} color="secondary">
+          <Suspense fallback={<ThumbnailSkeleton />}>
+            <DocumentThumbnail userDocument={userDocument} />
+          </Suspense>
+        </Badge>
+      </Box>
+
+      {/* Clickable area for the entire card except the action buttons */}
       <CardActionArea 
         component={RouterLink} 
         prefetch={false} 
         href={href} 
         sx={{ 
-          flexGrow: 1,
           position: "absolute",
           top: 0,
           left: 0,
           right: 0,
-          bottom: 0,
+          bottom: '50px',
           zIndex: 1,
-          borderRadius: "8px",
+          borderRadius: '12px 12px 0 0',
           "&:hover": {
             backgroundColor: "transparent" // Remove default hover background
           }
         }}
       />
-      <div style={{ position: "relative", zIndex: 2, pointerEvents: "none" }}>
-        <CardHeader 
-          sx={{ 
-            alignItems: "start", 
-            px: 2.5,
-            pt: 2.5,
-            pb: 1.5,
-            '& .MuiCardHeader-content': { 
-              whiteSpace: "nowrap", 
-              overflow: "hidden", 
-              textOverflow: "ellipsis",
-              ml: 0.5
-            },
-            '& .MuiCardHeader-title': { 
-              whiteSpace: "nowrap", 
-              overflow: "hidden", 
-              textOverflow: "ellipsis",
-              fontSize: "1.05rem",
-              fontWeight: 500,
-              letterSpacing: "0.01em",
-              color: "text.primary"
-            }
-          }}
-          title={document ? document.name : <Skeleton variant="text" width={190} />}
-          subheader={subheaderContent}
-          avatar={avatarContent}
-        />
-      </div>
-      <CardActions 
-        sx={{ 
-          height: 50, 
-          minHeight: 50,
-          px: 2,
-          py: 1,
-          backgroundColor: "transparent",
-          borderTop: "1px solid",
-          borderColor: "divider",
-          "& button:first-of-type": { ml: "auto !important" }, 
-          '& .MuiChip-root:last-of-type': { mr: 1 },
-          position: "relative", 
+
+      {/* Bottom section (30%): Document Info & Actions */}
+      <Box
+        sx={{
+          height: '30%',
+          display: 'flex',
+          flexDirection: 'column',
+          position: 'relative',
           zIndex: 2,
-          pointerEvents: "auto"
         }}
       >
-        {actionsContent}
-      </CardActions>
+        <CardContent sx={{ pt: 2, pb: 1, flexGrow: 1 }}>
+          <Typography 
+            variant="h6" 
+            component="div" 
+            sx={{ 
+              fontWeight: 600,
+              mb: 0.5,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              fontSize: '1.25rem'
+            }}
+          >
+            {document ? document.name : <Skeleton variant="text" width={190} />}
+          </Typography>
+          {subheaderContent}
+        </CardContent>
+
+        <Box 
+          sx={{ 
+            px: 2, 
+            py: 1, 
+            display: 'flex', 
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            backgroundColor: 'transparent',
+            zIndex: 3,
+            height: '50px',
+            mt: 'auto',
+            "& button:first-of-type": { ml: "auto !important" }, 
+            '& .MuiChip-root:last-of-type': { mr: 1 },
+            pointerEvents: "auto"
+          }}
+        >
+          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'nowrap', overflow: 'hidden' }}>
+            {!userDocument ? (
+              <>
+                <Chip size="small" variant="outlined" label={<Skeleton variant="text" width={50} />} />
+                <Chip size="small" variant="outlined" label={<Skeleton variant="text" width={70} />} />
+              </>
+            ) : (
+              <>
+                {isLocalOnly && <Chip size="small" variant="outlined" icon={<MobileFriendly />} label="Local" />}
+                {isUploaded && <Chip size="small" variant="outlined" icon={isUpToDate ? <CloudDone /> : <CloudSync />} label={isUpToDate ? "Synced" : "Out of Sync"} />}
+                {isCloudOnly && (isAuthor || isCoauthor) && <Chip size="small" variant="outlined" icon={<Cloud />} label="Cloud" />}
+                {isPublished && <Chip size="small" variant="outlined" icon={<Public />} label="Published" />}
+                {isCollab && <Chip size="small" variant="outlined" icon={<Workspaces />} label="Collab" />}
+                {isPrivate && <Chip size="small" variant="outlined" icon={<Security />} label="Private" />}
+                <Chip 
+                  size="small"
+                  variant="outlined"
+                  sx={{ pointerEvents: "auto" }}
+                  avatar={
+                    document ? <Avatar alt={author?.name ?? "Local User"} src={author?.image ?? undefined} />
+                      : <Skeleton variant="circular" width={24} height={24} />
+                  }
+                  label={document ? author?.name ?? "Local User" : <Skeleton variant="text" width={100} />} 
+                />
+              </>
+            )}
+          </Box>
+          
+          <Box sx={{ display: 'flex', ml: 'auto' }}>
+            {!userDocument ? (
+              <>
+                <IconButton aria-label="Share Document" size="small" disabled><Share /></IconButton>
+                <IconButton aria-label='Document Actions' size="small" disabled><MoreVert /></IconButton>
+              </>
+            ) : (
+              <DocumentActionMenu userDocument={userDocument} user={user} />
+            )}
+          </Box>
+        </Box>
+      </Box>
     </Card>
   );
 });
