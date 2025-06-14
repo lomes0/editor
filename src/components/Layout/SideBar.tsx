@@ -32,6 +32,7 @@ import {
   Help,
   LibraryBooks
 } from '@mui/icons-material';
+import FileBrowser from '@/components/FileBrowser';
 
 const drawerWidth = 240;
 
@@ -48,6 +49,7 @@ const SideBar: React.FC = () => {
   
   const showPrintButton = !!['/edit', '/view', '/playground'].find(path => pathname.startsWith(path));
   const showInfoButton = !!['/edit', '/view'].find(path => pathname.startsWith(path));
+  const showFileBrowser = pathname.startsWith('/browse');
 
   const handlePrint = () => { window.print(); }
   const toggleDrawer = () => { dispatch(actions.toggleDrawer()); }
@@ -214,6 +216,12 @@ const SideBar: React.FC = () => {
           </ListItem>
         )}
       </List>
+      
+      {showFileBrowser && (
+        <Box sx={{ mt: 1 }}>
+          <FileBrowser open={open} />
+        </Box>
+      )}
       
       <Box sx={{ flexGrow: 1 }} />
       
