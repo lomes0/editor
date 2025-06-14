@@ -5,6 +5,9 @@ import "mathlive/static.css";
 import "@/editor/theme.css";
 import "./globals.css";
 
+// Force MUI to generate deterministic class names for server and client
+export const dynamic = "force-static";
+
 const PUBLIC_URL = process.env.PUBLIC_URL;
 
 export const metadata: Metadata = {
@@ -68,7 +71,7 @@ export default function RootLayout(
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <AppRouterCacheProvider>
+        <AppRouterCacheProvider options={{ key: "mui-app", prepend: true }}>
           <ThemeProvider>
             {children}
           </ThemeProvider>

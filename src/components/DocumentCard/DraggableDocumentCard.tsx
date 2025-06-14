@@ -1,7 +1,8 @@
 "use client";
 import React, { useRef, useState } from "react";
 import { DocumentType, User, UserDocument } from "@/types";
-import { Box, SxProps, Theme, useTheme } from "@mui/material";
+import { Box, SxProps } from "@mui/material";
+import { Theme, useTheme } from "@mui/material/styles";
 import DocumentCard from "./index";
 import { actions, useDispatch, useSelector } from "@/store";
 

@@ -10,8 +10,8 @@ import {
   Container,
   Toolbar,
   useMediaQuery,
-  useTheme,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { Suspense } from "react";
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {

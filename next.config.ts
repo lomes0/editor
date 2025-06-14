@@ -142,6 +142,15 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   reactStrictMode: false,
   distDir: process.env.BUILD_DIR || ".next",
+  // Add modularizeImports for deterministic MUI component imports
+  modularizeImports: {
+    "@mui/material": {
+      transform: "@mui/material/{{member}}",
+    },
+    "@mui/icons-material": {
+      transform: "@mui/icons-material/{{member}}",
+    },
+  },
   webpack: (config, { isServer }) => {
     if (isServer) {
       config.externals.push("canvas");
@@ -154,6 +163,12 @@ const nextConfig: NextConfig = {
       type: "asset/resource",
       resourceQuery: /url/,
     });
+    
+    // Ensure consistent class names between server and client
+    if (config.optimization) {
+      config.optimization.realContentHash = false;
+    }
+    
     return config;
   },
   async headers() {

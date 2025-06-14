@@ -17,8 +17,8 @@ import {
   ListItemText,
   Tooltip,
   useMediaQuery,
-  useTheme,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import {
   ChevronLeft,
   ChevronRight,
@@ -33,6 +33,7 @@ import {
   Settings,
 } from "@mui/icons-material";
 import FileBrowser from "@/components/FileBrowser";
+import { styles } from "./styles";
 
 const drawerWidth = 240;
 
@@ -166,17 +167,10 @@ const SideBar: React.FC = () => {
         </IconButton>
       </Box>
 
-      <Divider />
+      <Divider sx={styles.divider} />
 
-      {/* Top section - Main navigation - 1/3 of height */}
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          height: "33%",
-          overflow: "auto",
-        }}
-      >
+      {/* Top section - Main navigation */}
+      <Box sx={styles.sectionBox}>
         <List>
           {navigationItems.map((item) => (
             <ListItem
@@ -216,96 +210,90 @@ const SideBar: React.FC = () => {
         </List>
       </Box>
 
-      <Divider />
+      <Divider sx={styles.divider} />
 
-      {/* Middle section - File browser - 1/3 of height */}
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          height: "33%",
-          overflow: "auto",
-        }}
-      >
+      {/* Middle section - File browser */}
+      <Box sx={styles.sectionBox}>
         {showFileBrowser && <FileBrowser open={open} />}
       </Box>
 
-      {(showPrintButton || showInfoButton) && <Divider />}
+      {(showPrintButton || showInfoButton) && <Divider sx={styles.divider} />}
 
-      {/* Bottom section - Actions and user - 1/3 of height */}
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          height: "33%",
-          justifyContent: "space-between",
-        }}
-      >
-        <List>
-          {showPrintButton && (
-            <ListItem disablePadding sx={{ display: "block" }}>
-              <Tooltip
-                title={open ? "" : "Print"}
-                placement="right"
-              >
-                <ListItemButton
-                  onClick={handlePrint}
-                  sx={{
-                    minHeight: 48,
-                    justifyContent: open ? "initial" : "center",
-                    px: 2.5,
-                  }}
+      {/* Document actions section */}
+      {(showPrintButton || showInfoButton) && (
+        <Box sx={styles.sectionBox}>
+          <List>
+            {showPrintButton && (
+              <ListItem disablePadding sx={{ display: "block" }}>
+                <Tooltip
+                  title={open ? "" : "Print"}
+                  placement="right"
                 >
-                  <ListItemIcon
+                  <ListItemButton
+                    onClick={handlePrint}
                     sx={{
-                      minWidth: 0,
-                      mr: open ? 2 : "auto",
-                      justifyContent: "center",
+                      minHeight: 48,
+                      justifyContent: open ? "initial" : "center",
+                      px: 2.5,
                     }}
                   >
-                    <Print />
-                  </ListItemIcon>
-                  {open && <ListItemText primary="Print" />}
-                </ListItemButton>
-              </Tooltip>
-            </ListItem>
-          )}
+                    <ListItemIcon
+                      sx={{
+                        minWidth: 0,
+                        mr: open ? 2 : "auto",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Print />
+                    </ListItemIcon>
+                    {open && <ListItemText primary="Print" />}
+                  </ListItemButton>
+                </Tooltip>
+              </ListItem>
+            )}
 
-          {showInfoButton && (
-            <ListItem disablePadding sx={{ display: "block" }}>
-              <Tooltip
-                title={open ? "" : "Document Info"}
-                placement="right"
-              >
-                <ListItemButton
-                  id="document-info"
-                  onClick={toggleDrawer}
-                  sx={{
-                    minHeight: 48,
-                    justifyContent: open ? "initial" : "center",
-                    px: 2.5,
-                    "& >.MuiBadge-root": {
-                      height: "1em",
-                      userSelect: "none",
-                      zIndex: -1,
-                    },
-                  }}
+            {showInfoButton && (
+              <ListItem disablePadding sx={{ display: "block" }}>
+                <Tooltip
+                  title={open ? "" : "Document Info"}
+                  placement="right"
                 >
-                  <ListItemIcon
+                  <ListItemButton
+                    id="document-info"
+                    onClick={toggleDrawer}
                     sx={{
-                      minWidth: 0,
-                      mr: open ? 2 : "auto",
-                      justifyContent: "center",
+                      minHeight: 48,
+                      justifyContent: open ? "initial" : "center",
+                      px: 2.5,
+                      "& >.MuiBadge-root": {
+                        height: "1em",
+                        userSelect: "none",
+                        zIndex: -1,
+                      },
                     }}
                   >
-                    <Info />
-                  </ListItemIcon>
-                  {open && <ListItemText primary="Document Info" />}
-                </ListItemButton>
-              </Tooltip>
-            </ListItem>
-          )}
-        </List>
+                    <ListItemIcon
+                      sx={{
+                        minWidth: 0,
+                        mr: open ? 2 : "auto",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Info />
+                    </ListItemIcon>
+                    {open && <ListItemText primary="Document Info" />}
+                  </ListItemButton>
+                </Tooltip>
+              </ListItem>
+            )}
+          </List>
+        </Box>
+      )}
+
+      <Divider sx={styles.dividerBottom} />
+
+      {/* Bottom section - User */}
+      <Box sx={styles.userBox}>
 
         <Box sx={{ mt: "auto" }}>
           <List>
