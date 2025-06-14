@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "@/store";
 import { useEffect, useState } from "react";
 import {
   Box,
-  Breadcrumbs,
   Button,
   Container,
   Divider,
@@ -20,7 +19,6 @@ import {
   CreateNewFolder,
   FilterList,
   Folder,
-  Home as HomeIcon,
   PostAdd,
 } from "@mui/icons-material";
 import DraggableDocumentCard from "../DocumentCard/DraggableDocumentCard";
@@ -43,9 +41,6 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
     UserDocument | null
   >(null);
   const [childItems, setChildItems] = useState<UserDocument[]>([]);
-  const [breadcrumbs, setBreadcrumbs] = useState<
-    { id: string; name: string }[]
-  >([]);
   const [sortValue, setSortValue] = useState({
     key: "updatedAt",
     direction: "desc",
@@ -68,30 +63,6 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
 
       if (directory) {
         setCurrentDirectory(directory);
-
-        // Build breadcrumb trail
-        const buildBreadcrumbs = (
-          docId: string,
-          trail: { id: string; name: string }[] = [],
-        ) => {
-          const doc = documents.find((d) =>
-            d.local?.id === docId || d.cloud?.id === docId
-          );
-          if (!doc) return trail;
-
-          const name = doc.local?.name || doc.cloud?.name || "";
-          const parentId = doc.local?.parentId || doc.cloud?.parentId;
-
-          const newTrail = [{ id: docId, name }, ...trail];
-
-          if (parentId) {
-            return buildBreadcrumbs(parentId, newTrail);
-          }
-
-          return newTrail;
-        };
-
-        setBreadcrumbs(buildBreadcrumbs(directoryId));
       }
 
       setLoading(false);
@@ -242,99 +213,6 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
             px: { xs: 1, sm: 2, md: 3 }, // Add padding that increases with screen size
           }}
         >
-          {/* Breadcrumb navigation */}
-          <Box
-            sx={{
-              mb: 3,
-              mt: -1,
-              pl: 0.5,
-            }}
-          >
-            <Breadcrumbs
-              aria-label="breadcrumb"
-              sx={{
-                "& .MuiBreadcrumbs-separator": {
-                  color: "text.disabled",
-                  mx: 0.5,
-                  fontSize: "0.7rem",
-                },
-              }}
-            >
-              <Link
-                href="/browse"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  color: "text.primary",
-                  textDecoration: "none",
-                  fontSize: "0.75rem",
-                  fontWeight: !directoryId ? "medium" : "normal",
-                }}
-              >
-                <HomeIcon
-                  sx={{
-                    mr: 0.5,
-                    fontSize: "0.75rem",
-                    opacity: 0.7,
-                  }}
-                />
-                Root
-              </Link>
-
-              {/* Display directory breadcrumbs if we're in a directory */}
-              {breadcrumbs.map((crumb, index) => {
-                const isLast = index === breadcrumbs.length - 1;
-
-                if (isLast) {
-                  return (
-                    <Typography
-                      key={crumb.id}
-                      color="text.primary"
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        fontSize: "0.75rem",
-                        fontWeight: "medium",
-                      }}
-                    >
-                      <Folder
-                        sx={{
-                          mr: 0.5,
-                          fontSize: "0.75rem",
-                          opacity: 0.7,
-                        }}
-                      />
-                      {crumb.name}
-                    </Typography>
-                  );
-                }
-
-                return (
-                  <Link
-                    key={crumb.id}
-                    href={`/browse/${crumb.id}`}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      color: "text.primary",
-                      textDecoration: "none",
-                      fontSize: "0.75rem",
-                    }}
-                  >
-                    <Folder
-                      sx={{
-                        mr: 0.5,
-                        fontSize: "0.75rem",
-                        opacity: 0.7,
-                      }}
-                    />
-                    {crumb.name}
-                  </Link>
-                );
-              })}
-            </Breadcrumbs>
-          </Box>
-
           {/* Page title and controls */}
           <Box
             sx={{
