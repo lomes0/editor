@@ -14,6 +14,16 @@ import "@fontsource/roboto/700.css";
 const theme = createTheme({
   colorSchemes: { light: true, dark: true },
   cssVariables: { colorSchemeSelector: "media" },
+  components: {
+    // Override default container sizes
+    MuiContainer: {
+      styleOverrides: {
+        maxWidthXl: {
+          maxWidth: "2400px !important", // Override the default 'xl' size of 1536px
+        },
+      },
+    },
+  },
 });
 
 export default function ThemeProvider(

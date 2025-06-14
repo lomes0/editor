@@ -178,7 +178,7 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
   // Render loading state for directory browsing
   if (loading) {
     return (
-      <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Container maxWidth="xl" sx={{ py: 4, px: { xs: 2, sm: 3, md: 4, lg: 5 } }}>
         <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
           <Typography>Loading directory contents...</Typography>
         </Box>
@@ -189,7 +189,7 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
   // Render error state if specified directory not found
   if (directoryId && !currentDirectory) {
     return (
-      <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Container maxWidth="xl" sx={{ py: 4, px: { xs: 2, sm: 3, md: 4, lg: 5 } }}>
         <Box
           sx={{
             display: "flex",
@@ -229,7 +229,7 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
     : "Root";
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Container maxWidth="xl" sx={{ py: 4, px: { xs: 2, sm: 3, md: 4, lg: 5 } }}>
       <Fade in={true} timeout={600}>
         <Box
           className="document-browser-container"
@@ -238,6 +238,8 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
             flexDirection: "column",
             gap: 4,
             width: "100%",
+            maxWidth: "100%",
+            px: { xs: 1, sm: 2, md: 3 }, // Add padding that increases with screen size
           }}
         >
           {/* Breadcrumb navigation */}
@@ -552,7 +554,7 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
                         Folders
                       </Typography>
                     </Box>
-                    <Grid container spacing={2}>
+                    <Grid container spacing={3}>
                       {sortedDirectories.map(
                         (directory) => (
                           <Grid
@@ -561,6 +563,7 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
                               xs: 12,
                               sm: 6,
                               md: 4,
+                              lg: 3
                             }}
                           >
                             <DraggableDocumentCard
@@ -602,7 +605,7 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
                         Documents
                       </Typography>
                     </Box>
-                    <Grid container spacing={2}>
+                    <Grid container spacing={3}>
                       {sortedDocuments.map((document) => (
                         <Grid
                           key={document.id}
@@ -610,6 +613,7 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
                             xs: 12,
                             sm: 6,
                             md: 4,
+                            lg: 3
                           }}
                         >
                           <DraggableDocumentCard
