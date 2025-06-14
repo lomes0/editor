@@ -1,17 +1,11 @@
 "use client"
 import * as React from 'react';
-import RouterLink from 'next/link'
-import { User, UserDocument, DocumentType } from '@/types';
 import { memo } from 'react';
 import { SxProps, Theme } from '@mui/material/styles';
-import { Card, CardActionArea, CardHeader, Skeleton, Avatar, CardActions, Chip, Badge, IconButton, Box } from '@mui/material';
-import { MobileFriendly, Cloud, Public, Workspaces, Security, CloudDone, CloudSync, MoreVert, Share, Folder } from '@mui/icons-material';
-import DocumentActionMenu from './DocumentActionMenu';
-import { useHydration } from '@/hooks/useHydration';
-import DocumentCard from './DocumentCard';
-import DirectoryCard from './DirectoryCard';
+import { Card, CardActionArea, CardHeader, CardActions } from '@mui/material';
+import RouterLink from 'next/link';
+import { User, UserDocument } from '@/types';
 
-// Base Card component that handles common functionality
 const BaseCard: React.FC<{
   userDocument?: UserDocument,
   user?: User,
@@ -114,21 +108,4 @@ const BaseCard: React.FC<{
   );
 });
 
-// Main component that decides whether to render a document or directory card
-const CardSelector: React.FC<{ userDocument?: UserDocument, user?: User, sx?: SxProps<Theme> }> = memo(({ userDocument, user, sx }) => {
-  // Early return for loading state
-  if (!userDocument) {
-    return <DocumentCard userDocument={undefined} user={user} sx={sx} />;
-  }
-
-  const document = userDocument.local || userDocument.cloud;
-  const isDirectory = document?.type === DocumentType.DIRECTORY;
-
-  if (isDirectory) {
-    return <DirectoryCard userDocument={userDocument} user={user} sx={sx} />;
-  } else {
-    return <DocumentCard userDocument={userDocument} user={user} sx={sx} />;
-  }
-});
-
-export default CardSelector;
+export default BaseCard;
