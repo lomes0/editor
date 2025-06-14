@@ -3,15 +3,14 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
  */
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   $findMatchingParent,
   $insertNodeToNearestRoot,
   mergeRegister,
-} from '@lexical/utils';
+} from "@lexical/utils";
 import {
   $createParagraphNode,
   $getSelection,
@@ -26,20 +25,20 @@ import {
   KEY_ARROW_RIGHT_COMMAND,
   KEY_ARROW_UP_COMMAND,
   LexicalNode,
-} from 'lexical';
-import { useEffect } from 'react';
+} from "lexical";
+import { useEffect } from "react";
 
 import {
   $createDetailsContainerNode,
-  $isDetailsContainerNode,
-  DetailsContainerNode,
   $createDetailsContentNode,
-  $isDetailsContentNode,
-  DetailsContentNode,
   $createDetailsSummaryNode,
+  $isDetailsContainerNode,
+  $isDetailsContentNode,
   $isDetailsSummaryNode,
+  DetailsContainerNode,
+  DetailsContentNode,
   DetailsSummaryNode,
-} from '@/editor/nodes/DetailsNode';
+} from "@/editor/nodes/DetailsNode";
 
 export const INSERT_DETAILS_COMMAND = createCommand<void>();
 
@@ -55,7 +54,7 @@ export default function CollapsiblePlugin(): null {
       ])
     ) {
       throw new Error(
-        'DetailsPlugin: DetailsContainerNode, DetailsSummaryNode, or DetailsContentNode not registered on editor',
+        "DetailsPlugin: DetailsContainerNode, DetailsSummaryNode, or DetailsContentNode not registered on editor",
       );
     }
 
@@ -77,7 +76,8 @@ export default function CollapsiblePlugin(): null {
             parent !== null &&
             parent.getFirstChild<LexicalNode>() === container &&
             selection.anchor.key ===
-            container.getFirstDescendant<LexicalNode>()?.getKey()
+              container.getFirstDescendant<LexicalNode>()
+                ?.getKey()
           ) {
             container.insertBefore($createParagraphNode());
           }
@@ -101,17 +101,24 @@ export default function CollapsiblePlugin(): null {
             parent !== null &&
             parent.getLastChild<LexicalNode>() === container
           ) {
-            const titleParagraph = container.getFirstDescendant<LexicalNode>();
-            const contentParagraph = container.getLastDescendant<LexicalNode>();
+            const titleParagraph = container.getFirstDescendant<
+              LexicalNode
+            >();
+            const contentParagraph = container.getLastDescendant<
+              LexicalNode
+            >();
 
             if (
               (contentParagraph !== null &&
-                selection.anchor.key === contentParagraph.getKey() &&
+                selection.anchor.key ===
+                  contentParagraph.getKey() &&
                 selection.anchor.offset ===
-                contentParagraph.getTextContentSize()) ||
+                  contentParagraph.getTextContentSize()) ||
               (titleParagraph !== null &&
-                selection.anchor.key === titleParagraph.getKey() &&
-                selection.anchor.offset === titleParagraph.getTextContentSize())
+                selection.anchor.key ===
+                  titleParagraph.getKey() &&
+                selection.anchor.offset ===
+                  titleParagraph.getTextContentSize())
             ) {
               container.insertAfter($createParagraphNode());
             }
@@ -136,17 +143,17 @@ export default function CollapsiblePlugin(): null {
           node.remove();
         }
       }),
-
       editor.registerNodeTransform(DetailsSummaryNode, (node) => {
         const parent = node.getParent<ElementNode>();
         if (!$isDetailsContainerNode(parent)) {
           node.replace(
-            $createParagraphNode().append(...node.getChildren<LexicalNode>()),
+            $createParagraphNode().append(
+              ...node.getChildren<LexicalNode>(),
+            ),
           );
           return;
         }
       }),
-
       editor.registerNodeTransform(DetailsContainerNode, (node) => {
         const children = node.getChildren<LexicalNode>();
         if (
@@ -160,7 +167,6 @@ export default function CollapsiblePlugin(): null {
           node.remove();
         }
       }),
-
       // This handles the case when container is collapsed and we delete its previous sibling
       // into it, it would cause collapsed content deleted (since it's display: none, and selection
       // swallows it when deletes single char). Instead we expand container, which is although
@@ -183,8 +189,13 @@ export default function CollapsiblePlugin(): null {
             return false;
           }
 
-          const container = topLevelElement.getPreviousSibling<LexicalNode>();
-          if (!$isDetailsContainerNode(container) || container.getOpen()) {
+          const container = topLevelElement.getPreviousSibling<
+            LexicalNode
+          >();
+          if (
+            !$isDetailsContainerNode(container) ||
+            container.getOpen()
+          ) {
             return false;
           }
 
@@ -193,7 +204,6 @@ export default function CollapsiblePlugin(): null {
         },
         COMMAND_PRIORITY_LOW,
       ),
-
       // When Details is the last child pressing down/right arrow will insert paragraph
       // below it to allow adding more content. It's similar what $insertBlockNode
       // (mainly for decorators), except it'll always be possible to continue adding
@@ -203,13 +213,11 @@ export default function CollapsiblePlugin(): null {
         $onEscapeDown,
         COMMAND_PRIORITY_LOW,
       ),
-
       editor.registerCommand(
         KEY_ARROW_RIGHT_COMMAND,
         $onEscapeDown,
         COMMAND_PRIORITY_LOW,
       ),
-
       // When Details is the first child pressing up/left arrow will insert paragraph
       // above it to allow adding more content. It's similar what $insertBlockNode
       // (mainly for decorators), except it'll always be possible to continue adding
@@ -219,13 +227,11 @@ export default function CollapsiblePlugin(): null {
         $onEscapeUp,
         COMMAND_PRIORITY_LOW,
       ),
-
       editor.registerCommand(
         KEY_ARROW_LEFT_COMMAND,
         $onEscapeUp,
         COMMAND_PRIORITY_LOW,
       ),
-
       // Enter goes from Title to Content rather than a new line inside Title
       editor.registerCommand(
         INSERT_PARAGRAPH_COMMAND,
@@ -238,8 +244,12 @@ export default function CollapsiblePlugin(): null {
             );
 
             if ($isDetailsSummaryNode(titleNode)) {
-              const container = titleNode.getParent<ElementNode>();
-              if (container && $isDetailsContainerNode(container)) {
+              const container = titleNode.getParent<
+                ElementNode
+              >();
+              if (
+                container && $isDetailsContainerNode(container)
+              ) {
                 if (!container.getOpen()) {
                   container.toggleOpen();
                 }
@@ -262,7 +272,9 @@ export default function CollapsiblePlugin(): null {
             $insertNodeToNearestRoot(
               $createDetailsContainerNode(true).append(
                 title.append(paragraph),
-                $createDetailsContentNode().append($createParagraphNode()),
+                $createDetailsContentNode().append(
+                  $createParagraphNode(),
+                ),
               ),
             );
             paragraph.select();

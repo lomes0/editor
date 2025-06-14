@@ -1,6 +1,15 @@
 import { authOptions } from "@/lib/auth";
-import { createDocument, findDocumentsByAuthorId, findPublishedDocuments, findUserDocument } from "@/repositories/document";
-import { DocumentCreateInput, GetDocumentsResponse, PostDocumentsResponse } from "@/types";
+import {
+  createDocument,
+  findDocumentsByAuthorId,
+  findPublishedDocuments,
+  findUserDocument,
+} from "@/repositories/document";
+import {
+  DocumentCreateInput,
+  GetDocumentsResponse,
+  PostDocumentsResponse,
+} from "@/types";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
@@ -15,20 +24,26 @@ export async function GET() {
     if (!session) {
       const publishedDocuments = await findPublishedDocuments();
       response.data = publishedDocuments;
-      return NextResponse.json(response, { status: 200 })
+      return NextResponse.json(response, { status: 200 });
     }
     const { user } = session;
     if (user.disabled) {
-      response.error = { title: "Account Disabled", subtitle: "Account is disabled for violating terms of service" }
-      return NextResponse.json(response, { status: 403 })
+      response.error = {
+        title: "Account Disabled",
+        subtitle: "Account is disabled for violating terms of service",
+      };
+      return NextResponse.json(response, { status: 403 });
     }
     const documents = await findDocumentsByAuthorId(user.id);
     response.data = documents;
-    return NextResponse.json(response, { status: 200 })
+    return NextResponse.json(response, { status: 200 });
   } catch (error) {
     console.log(error);
-    response.error = { title: "Something went wrong", subtitle: "Please try again later" }
-    return NextResponse.json(response, { status: 500 })
+    response.error = {
+      title: "Something went wrong",
+      subtitle: "Please try again later",
+    };
+    return NextResponse.json(response, { status: 500 });
   }
 }
 
@@ -37,24 +52,36 @@ export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
-      response.error = { title: "Unauthorized", subtitle: "Please sign in to save your document to the cloud" }
-      return NextResponse.json(response, { status: 401 })
+      response.error = {
+        title: "Unauthorized",
+        subtitle: "Please sign in to save your document to the cloud",
+      };
+      return NextResponse.json(response, { status: 401 });
     }
     const { user } = session;
     if (user.disabled) {
-      response.error = { title: "Account Disabled", subtitle: "Account is disabled for violating terms of service" }
-      return NextResponse.json(response, { status: 403 })
+      response.error = {
+        title: "Account Disabled",
+        subtitle: "Account is disabled for violating terms of service",
+      };
+      return NextResponse.json(response, { status: 403 });
     }
     const body = await request.json() as DocumentCreateInput;
     if (!body) {
-      response.error = { title: "Bad Request", subtitle: "No document provided" }
-      return NextResponse.json(response, { status: 400 })
+      response.error = {
+        title: "Bad Request",
+        subtitle: "No document provided",
+      };
+      return NextResponse.json(response, { status: 400 });
     }
 
     const userDocument = await findUserDocument(body.id);
     if (userDocument) {
-      response.error = { title: "Unauthorized", subtitle: "A document with this id already exists" }
-      return NextResponse.json(response, { status: 403 })
+      response.error = {
+        title: "Unauthorized",
+        subtitle: "A document with this id already exists",
+      };
+      return NextResponse.json(response, { status: 403 });
     }
 
     const input: Prisma.DocumentUncheckedCreateInput = {
@@ -68,34 +95,39 @@ export async function POST(request: Request) {
       collab: body.collab,
       private: body.private,
       parentId: body.parentId, // Include parentId when creating document
-      type: body.type || 'DOCUMENT',
+      type: body.type || "DOCUMENT",
       revisions: {
         create: {
           id: body.head || undefined,
           data: body.data as unknown as Prisma.JsonObject,
           authorId: user.id,
           createdAt: body.updatedAt,
-        }
-      }
+        },
+      },
     };
     if (body.handle) {
       input.handle = body.handle.toLowerCase();
       const validationError = await validateHandle(input.handle);
       if (validationError) {
         response.error = validationError;
-        return NextResponse.json(response, { status: 400 })
+        return NextResponse.json(response, { status: 400 });
       }
     }
     if (body.coauthors) {
       const documentId = body.id;
       const userEmails = body.coauthors as string[];
-      const InvalidEmails = userEmails.filter(email => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
+      const InvalidEmails = userEmails.filter((email) =>
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+      );
       if (InvalidEmails.length > 0) {
-        response.error = { title: "Invalid Coauther Email", subtitle: "One or more emails are invalid" }
-        return NextResponse.json(response, { status: 400 })
+        response.error = {
+          title: "Invalid Coauther Email",
+          subtitle: "One or more emails are invalid",
+        };
+        return NextResponse.json(response, { status: 400 });
       }
       input.coauthors = {
-        connectOrCreate: userEmails.map(userEmail => ({
+        connectOrCreate: userEmails.map((userEmail) => ({
           where: { documentId_userEmail: { documentId, userEmail } },
           create: {
             user: {
@@ -105,9 +137,9 @@ export async function POST(request: Request) {
                   name: userEmail.split("@")[0],
                   email: userEmail,
                 },
-              }
-            }
-          }
+              },
+            },
+          },
         })),
       };
     }
@@ -118,10 +150,13 @@ export async function POST(request: Request) {
     }
 
     response.data = await createDocument(input);
-    return NextResponse.json(response, { status: 200 })
+    return NextResponse.json(response, { status: 200 });
   } catch (error) {
     console.log(error);
-    response.error = { title: "Something went wrong", subtitle: "Please try again later" }
-    return NextResponse.json(response, { status: 500 })
+    response.error = {
+      title: "Something went wrong",
+      subtitle: "Please try again later",
+    };
+    return NextResponse.json(response, { status: 500 });
   }
 }

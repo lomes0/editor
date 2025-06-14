@@ -1,5 +1,5 @@
-import { findPublishedDocuments } from '@/repositories/document';
-import { MetadataRoute } from 'next';
+import { findPublishedDocuments } from "@/repositories/document";
+import { MetadataRoute } from "next";
 
 const PUBLIC_URL = process.env.PUBLIC_URL;
 

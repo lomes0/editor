@@ -13,32 +13,46 @@ export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
-      response.error = { title: "Unauthorized", subtitle: "Please sign in to save your revision to the cloud" }
-      return NextResponse.json(response, { status: 401 })
+      response.error = {
+        title: "Unauthorized",
+        subtitle: "Please sign in to save your revision to the cloud",
+      };
+      return NextResponse.json(response, { status: 401 });
     }
     const { user } = session;
     if (user.disabled) {
-      response.error = { title: "Account Disabled", subtitle: "Account is disabled for violating terms of service" }
-      return NextResponse.json(response, { status: 403 })
+      response.error = {
+        title: "Account Disabled",
+        subtitle: "Account is disabled for violating terms of service",
+      };
+      return NextResponse.json(response, { status: 403 });
     }
     const body = await request.json() as EditorDocumentRevision;
     if (!body) {
-      response.error = { title: "Bad Request", subtitle: "No revision provided" }
-      return NextResponse.json(response, { status: 400 })
+      response.error = {
+        title: "Bad Request",
+        subtitle: "No revision provided",
+      };
+      return NextResponse.json(response, { status: 400 });
     }
 
     const cloudDocument = await findUserDocument(body.documentId);
     if (!cloudDocument) {
-      response.error = { title: "Document not found" }
-      return NextResponse.json(response, { status: 404 })
+      response.error = { title: "Document not found" };
+      return NextResponse.json(response, { status: 404 });
     }
     const isAuthor = user.id === cloudDocument.author.id;
-    const isCoauthor = cloudDocument.coauthors.some(coauthor => coauthor.id === user.id);
+    const isCoauthor = cloudDocument.coauthors.some((coauthor) =>
+      coauthor.id === user.id
+    );
     const isCollab = cloudDocument.collab;
 
     if (!isAuthor && !isCoauthor && !isCollab) {
-      response.error = { title: "This document is private", subtitle: "You are not authorized to Edit this document" }
-      return NextResponse.json(response, { status: 403 })
+      response.error = {
+        title: "This document is private",
+        subtitle: "You are not authorized to Edit this document",
+      };
+      return NextResponse.json(response, { status: 403 });
     }
 
     const input: Prisma.RevisionUncheckedCreateInput = {
@@ -61,11 +75,14 @@ export async function POST(request: Request) {
         image: user.image,
         email: user.email,
       },
-    }
-    return NextResponse.json(response, { status: 200 })
+    };
+    return NextResponse.json(response, { status: 200 });
   } catch (error) {
     console.log(error);
-    response.error = { title: "Something went wrong", subtitle: "Please try again later" }
-    return NextResponse.json(response, { status: 500 })
+    response.error = {
+      title: "Something went wrong",
+      subtitle: "Please try again later",
+    };
+    return NextResponse.json(response, { status: 500 });
   }
 }

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 /*
  * Taken From https://stackoverflow.com/a/69614443/4377220
  * for good DX + SSR
@@ -9,7 +9,10 @@ interface WaitUntilProps {
   timeout?: number;
 }
 
-export const waitUntil = (condition: { (): boolean; (): any; }, options?: WaitUntilProps) => {
+export const waitUntil = (
+  condition: { (): boolean; (): any },
+  options?: WaitUntilProps,
+) => {
   return new Promise<void>((resolve, reject) => {
     const interval = setInterval(() => {
       if (!condition()) return;

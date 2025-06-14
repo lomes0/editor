@@ -1,18 +1,20 @@
-"use client"
-import * as React from 'react';
-import { IconButton, Menu } from '@mui/material';
-import { MoreVert } from '@mui/icons-material';
-import DownloadDocument from './Download';
-import ForkDocument from './Fork';
-import DeleteBothDocument from './DeleteBoth';
-import UploadDocument from './Upload';
-import { User, UserDocument } from '@/types';
-import ShareDocument from './Share';
-import EditDocument from './Edit';
-import RestoreDocument from './Restore';
-import MoveDocument from './Move';
+"use client";
+import * as React from "react";
+import { IconButton, Menu } from "@mui/material";
+import { MoreVert } from "@mui/icons-material";
+import DownloadDocument from "./Download";
+import ForkDocument from "./Fork";
+import DeleteBothDocument from "./DeleteBoth";
+import UploadDocument from "./Upload";
+import { User, UserDocument } from "@/types";
+import ShareDocument from "./Share";
+import EditDocument from "./Edit";
+import RestoreDocument from "./Restore";
+import MoveDocument from "./Move";
 
-function DocumentActionMenu({ userDocument, user }: { userDocument: UserDocument, user?: User }) {
+function DocumentActionMenu(
+  { userDocument, user }: { userDocument: UserDocument; user?: User },
+) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const openMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -28,27 +30,31 @@ function DocumentActionMenu({ userDocument, user }: { userDocument: UserDocument
   const isCloud = !!cloudDocument;
   const isUploaded = isLocal && isCloud;
   const isUpToDate = isUploaded && localDocument.head === cloudDocument.head;
-  const isAuthor = isCloud ? cloudDocument.author.id === user?.id : true
-  const isCoauthor = isCloud ? cloudDocument.coauthors.some(u => u.id === user?.id) : false;
+  const isAuthor = isCloud ? cloudDocument.author.id === user?.id : true;
+  const isCoauthor = isCloud
+    ? cloudDocument.coauthors.some((u) => u.id === user?.id)
+    : false;
   const isCollab = isCloud ? cloudDocument.collab : false;
   const id = userDocument.id;
 
-  const options = ['fork', 'share', 'move'];
-  if (isAuthor || isCoauthor || isLocal || isCollab) options.push('download');
-  if (isAuthor || isLocal) options.push('delete');
-  if (isAuthor) options.push('edit', 'upload');
-  if (isUploaded && !isUpToDate) options.push('restore');
+  const options = ["fork", "share", "move"];
+  if (isAuthor || isCoauthor || isLocal || isCollab) options.push("download");
+  if (isAuthor || isLocal) options.push("delete");
+  if (isAuthor) options.push("edit", "upload");
+  if (isUploaded && !isUpToDate) options.push("restore");
 
   return (
     <>
-      {options.includes('edit') && <EditDocument userDocument={userDocument} />}
-      {options.includes('share') && <ShareDocument userDocument={userDocument} />}
+      {options.includes("edit") && <EditDocument userDocument={userDocument} />}
+      {options.includes("share") && (
+        <ShareDocument userDocument={userDocument} />
+      )}
       <IconButton
         id={`${id}-action-button`}
         aria-controls={open ? `${id}-action-menu` : undefined}
         aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
-        aria-label='Document Actions'
+        aria-expanded={open ? "true" : undefined}
+        aria-label="Document Actions"
         onClick={openMenu}
         size="small"
       >
@@ -61,20 +67,56 @@ function DocumentActionMenu({ userDocument, user }: { userDocument: UserDocument
         open={open}
         onClose={closeMenu}
         anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
+          vertical: "bottom",
+          horizontal: "right",
         }}
         transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
+          vertical: "top",
+          horizontal: "right",
         }}
       >
-        {options.includes('move') && <MoveDocument userDocument={userDocument} variant="menuitem" closeMenu={closeMenu} />}
-        {options.includes('download') && <DownloadDocument userDocument={userDocument} variant="menuitem" closeMenu={closeMenu} />}
-        {options.includes('fork') && <ForkDocument userDocument={userDocument} variant="menuitem" closeMenu={closeMenu} />}
-        {options.includes('upload') && isLocal && !isUpToDate && <UploadDocument userDocument={userDocument} variant="menuitem" closeMenu={closeMenu} />}
-        {options.includes('restore') && <RestoreDocument userDocument={userDocument} variant="menuitem" closeMenu={closeMenu} />}
-        {options.includes('delete') && <DeleteBothDocument userDocument={userDocument} variant="menuitem" closeMenu={closeMenu} />}
+        {options.includes("move") && (
+          <MoveDocument
+            userDocument={userDocument}
+            variant="menuitem"
+            closeMenu={closeMenu}
+          />
+        )}
+        {options.includes("download") && (
+          <DownloadDocument
+            userDocument={userDocument}
+            variant="menuitem"
+            closeMenu={closeMenu}
+          />
+        )}
+        {options.includes("fork") && (
+          <ForkDocument
+            userDocument={userDocument}
+            variant="menuitem"
+            closeMenu={closeMenu}
+          />
+        )}
+        {options.includes("upload") && isLocal && !isUpToDate && (
+          <UploadDocument
+            userDocument={userDocument}
+            variant="menuitem"
+            closeMenu={closeMenu}
+          />
+        )}
+        {options.includes("restore") && (
+          <RestoreDocument
+            userDocument={userDocument}
+            variant="menuitem"
+            closeMenu={closeMenu}
+          />
+        )}
+        {options.includes("delete") && (
+          <DeleteBothDocument
+            userDocument={userDocument}
+            variant="menuitem"
+            closeMenu={closeMenu}
+          />
+        )}
       </Menu>
     </>
   );

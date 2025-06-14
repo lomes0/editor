@@ -3,17 +3,21 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
  */
 
-import type { ElementNode, LexicalCommand, LexicalNode, NodeKey } from 'lexical';
+import type {
+  ElementNode,
+  LexicalCommand,
+  LexicalNode,
+  NodeKey,
+} from "lexical";
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   $findMatchingParent,
   $insertNodeToNearestRoot,
   mergeRegister,
-} from '@lexical/utils';
+} from "@lexical/utils";
 import {
   $createParagraphNode,
   $getNodeByKey,
@@ -26,20 +30,21 @@ import {
   KEY_ARROW_LEFT_COMMAND,
   KEY_ARROW_RIGHT_COMMAND,
   KEY_ARROW_UP_COMMAND,
-} from 'lexical';
-import { useEffect } from 'react';
+} from "lexical";
+import { useEffect } from "react";
 
 import {
   $createLayoutContainerNode,
-  $isLayoutContainerNode,
-  LayoutContainerNode,
   $createLayoutItemNode,
+  $isLayoutContainerNode,
   $isLayoutItemNode,
+  LayoutContainerNode,
   LayoutItemNode,
-} from '@/editor/nodes/LayoutNode';
+} from "@/editor/nodes/LayoutNode";
 
-export const INSERT_LAYOUT_COMMAND: LexicalCommand<string> =
-  createCommand<string>();
+export const INSERT_LAYOUT_COMMAND: LexicalCommand<string> = createCommand<
+  string
+>();
 
 export const UPDATE_LAYOUT_COMMAND: LexicalCommand<{
   template: string;
@@ -51,7 +56,7 @@ export function LayoutPlugin(): null {
   useEffect(() => {
     if (!editor.hasNodes([LayoutContainerNode, LayoutItemNode])) {
       throw new Error(
-        'LayoutPlugin: LayoutContainerNode, or LayoutItemNode not registered on editor',
+        "LayoutPlugin: LayoutContainerNode, or LayoutItemNode not registered on editor",
       );
     }
 
@@ -69,8 +74,7 @@ export function LayoutPlugin(): null {
 
         if ($isLayoutContainerNode(container)) {
           const parent = container.getParent<ElementNode>();
-          const child =
-            parent &&
+          const child = parent &&
             (before
               ? parent.getFirstChild<LexicalNode>()
               : parent?.getLastChild<LexicalNode>());
@@ -133,7 +137,9 @@ export function LayoutPlugin(): null {
 
             for (let i = 0; i < itemsCount; i++) {
               container.append(
-                $createLayoutItemNode().append($createParagraphNode()),
+                $createLayoutItemNode().append(
+                  $createParagraphNode(),
+                ),
               );
             }
 
@@ -164,12 +170,20 @@ export function LayoutPlugin(): null {
             if (itemsCount > prevItemsCount) {
               for (let i = prevItemsCount; i < itemsCount; i++) {
                 container.append(
-                  $createLayoutItemNode().append($createParagraphNode()),
+                  $createLayoutItemNode().append(
+                    $createParagraphNode(),
+                  ),
                 );
               }
             } else if (itemsCount < prevItemsCount) {
-              for (let i = prevItemsCount - 1; i >= itemsCount; i--) {
-                const layoutItem = container.getChildAtIndex<LexicalNode>(i);
+              for (
+                let i = prevItemsCount - 1;
+                i >= itemsCount;
+                i--
+              ) {
+                const layoutItem = container.getChildAtIndex<
+                  LexicalNode
+                >(i);
 
                 if ($isLayoutItemNode(layoutItem)) {
                   layoutItem.remove();

@@ -1,16 +1,21 @@
-"use client"
+"use client";
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
  */
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { LexicalCommand, $createParagraphNode, LexicalEditor, $insertNodes, $isRootNode } from 'lexical';
-import { useEffect } from 'react';
-import { mergeRegister, $wrapNodeInElement } from '@lexical/utils';
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import {
+  $createParagraphNode,
+  $insertNodes,
+  $isRootNode,
+  LexicalCommand,
+  LexicalEditor,
+} from "lexical";
+import { useEffect } from "react";
+import { $wrapNodeInElement, mergeRegister } from "@lexical/utils";
 import {
   $createRangeSelection,
   $getSelection,
@@ -23,18 +28,27 @@ import {
   DRAGOVER_COMMAND,
   DRAGSTART_COMMAND,
   DROP_COMMAND,
-} from 'lexical';
+} from "lexical";
 
-import { $createStickyNode, $isStickyNode, StickyNode, StickyPayload } from '@/editor/nodes/StickyNode';
+import {
+  $createStickyNode,
+  $isStickyNode,
+  StickyNode,
+  StickyPayload,
+} from "@/editor/nodes/StickyNode";
 export type InsertStickyPayload = Readonly<StickyPayload>;
 
-export const INSERT_STICKY_COMMAND: LexicalCommand<InsertStickyPayload | undefined> = createCommand();
+export const INSERT_STICKY_COMMAND: LexicalCommand<
+  InsertStickyPayload | undefined
+> = createCommand();
 
 export default function StickyPlugin() {
   const [editor] = useLexicalComposerContext();
   useEffect(() => {
     if (!editor.hasNodes([StickyNode])) {
-      throw new Error('StickyPlugin: StickyNode not registered on editor');
+      throw new Error(
+        "StickyPlugin: StickyNode not registered on editor",
+      );
     }
     return mergeRegister(
       editor.registerCommand(
@@ -43,13 +57,14 @@ export default function StickyPlugin() {
           const stickyNode = $createStickyNode(payload);
           $insertNodes([stickyNode]);
           if ($isRootNode(stickyNode.getParentOrThrow())) {
-            $wrapNodeInElement(stickyNode, $createParagraphNode)
+            $wrapNodeInElement(stickyNode, $createParagraphNode);
           }
           stickyNode.focus();
           return true;
         },
         COMMAND_PRIORITY_EDITOR,
-      ), editor.registerCommand<DragEvent>(
+      ),
+      editor.registerCommand<DragEvent>(
         DRAGSTART_COMMAND,
         (event) => {
           return onDragStart(event);
@@ -78,8 +93,8 @@ export default function StickyPlugin() {
 
 function onDragStart(event: DragEvent): boolean {
   const TRANSPARENT_STICKY =
-    'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-  const img = document.createElement('img');
+    "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+  const img = document.createElement("img");
   img.src = TRANSPARENT_STICKY;
 
   const node = getStickyNodeInSelection();
@@ -90,17 +105,17 @@ function onDragStart(event: DragEvent): boolean {
   if (!dataTransfer) {
     return false;
   }
-  dataTransfer.setData('text/plain', '_');
+  dataTransfer.setData("text/plain", "_");
   dataTransfer.setDragImage(img, 0, 0);
   dataTransfer.setData(
-    'application/x-lexical-drag',
+    "application/x-lexical-drag",
     JSON.stringify({
       data: {
         style: node.__style,
         editor: node.__editor,
         key: node.getKey(),
       },
-      type: 'sticky',
+      type: "sticky",
     }),
   );
 
@@ -152,12 +167,12 @@ function getStickyNodeInSelection(): StickyNode | null {
 }
 
 function getDragStickyData(event: DragEvent): null {
-  const dragData = event.dataTransfer?.getData('application/x-lexical-drag');
+  const dragData = event.dataTransfer?.getData("application/x-lexical-drag");
   if (!dragData) {
     return null;
   }
   const { type, data } = JSON.parse(dragData);
-  if (type !== 'sticky') {
+  if (type !== "sticky") {
     return null;
   }
 
@@ -176,9 +191,11 @@ function canDropSticky(event: DragEvent): boolean {
   return !!(
     target &&
     target instanceof HTMLElement &&
-    !target.closest('code, figure.LexicalTheme__image, div.sticky-note-container') &&
+    !target.closest(
+      "code, figure.LexicalTheme__image, div.sticky-note-container",
+    ) &&
     target.parentElement &&
-    target.parentElement.closest('div.editor-input')
+    target.parentElement.closest("div.editor-input")
   );
 }
 

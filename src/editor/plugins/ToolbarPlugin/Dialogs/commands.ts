@@ -1,5 +1,5 @@
 "use client";
-import { LexicalCommand, createCommand } from 'lexical';
+import { createCommand, LexicalCommand } from "lexical";
 
 export interface EditorDialogs {
   image?: {
@@ -16,21 +16,22 @@ export interface EditorDialogs {
   };
   iframe?: {
     open: boolean;
-  },
+  };
   link?: {
     open: boolean;
-  },
+  };
   layout?: {
     open: boolean;
-  },
+  };
   ocr?: {
     open: boolean;
-  },
+  };
   ai?: {
     open: boolean;
-  },
-};
+  };
+}
 
 export type SetDialogsPayload = Readonly<Partial<EditorDialogs>>;
 
-export const SET_DIALOGS_COMMAND: LexicalCommand<SetDialogsPayload> = createCommand();
+export const SET_DIALOGS_COMMAND: LexicalCommand<SetDialogsPayload> =
+  createCommand();

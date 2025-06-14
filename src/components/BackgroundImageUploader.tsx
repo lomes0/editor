@@ -1,9 +1,9 @@
-"use client"
-import { useState } from 'react';
-import { Button, Box, Typography, CircularProgress } from '@mui/material';
-import { UploadFile, Delete } from '@mui/icons-material';
-import { UserDocument, isDirectory, DocumentType } from '@/types';
-import { useDispatch, actions } from '@/store';
+"use client";
+import { useState } from "react";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
+import { Delete, UploadFile } from "@mui/icons-material";
+import { DocumentType, isDirectory, UserDocument } from "@/types";
+import { actions, useDispatch } from "@/store";
 
 interface BackgroundImageUploaderProps {
   userDocument: UserDocument;
@@ -11,7 +11,9 @@ interface BackgroundImageUploaderProps {
   currentImage: string | null;
 }
 
-const BackgroundImageUploader = ({ userDocument, onChange, currentImage }: BackgroundImageUploaderProps) => {
+const BackgroundImageUploader = (
+  { userDocument, onChange, currentImage }: BackgroundImageUploaderProps,
+) => {
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(currentImage);
   const dispatch = useDispatch();
@@ -21,12 +23,12 @@ const BackgroundImageUploader = ({ userDocument, onChange, currentImage }: Backg
     if (!files || files.length === 0) return;
 
     const file = files[0];
-    if (!file.type.startsWith('image/')) {
+    if (!file.type.startsWith("image/")) {
       dispatch(actions.announce({
         message: {
           title: "Invalid File Type",
-          subtitle: "Please select an image file."
-        }
+          subtitle: "Please select an image file.",
+        },
       }));
       return;
     }
@@ -37,11 +39,11 @@ const BackgroundImageUploader = ({ userDocument, onChange, currentImage }: Backg
 
     // Prepare form data for upload
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
 
     try {
       setIsUploading(true);
-      
+
       // Get document ID
       const documentId = userDocument.cloud?.id || userDocument.local?.id;
       if (!documentId) {
@@ -57,49 +59,61 @@ const BackgroundImageUploader = ({ userDocument, onChange, currentImage }: Backg
         localType: userDocument.local?.type,
         documentType: document?.type,
         isDirectoryCheck: document?.type === DocumentType.DIRECTORY,
-        rawDocumentType: typeof document?.type === 'string' ? document?.type : 'not a string',
+        rawDocumentType: typeof document?.type === "string"
+          ? document?.type
+          : "not a string",
         DocumentTypeENUM: {
           DIRECTORY: DocumentType.DIRECTORY,
-          DOCUMENT: DocumentType.DOCUMENT
-        }
+          DOCUMENT: DocumentType.DOCUMENT,
+        },
       });
-      
+
       if (!document) {
         throw new Error("Document not found");
       }
-      
+
       // Check document type
       if (document.type !== DocumentType.DIRECTORY) {
-        console.error("Not a directory - document type:", document.type, 
-                      "Expected:", DocumentType.DIRECTORY);
-        throw new Error(`This document is not a directory (type: ${document.type})`);
+        console.error(
+          "Not a directory - document type:",
+          document.type,
+          "Expected:",
+          DocumentType.DIRECTORY,
+        );
+        throw new Error(
+          `This document is not a directory (type: ${document.type})`,
+        );
       }
 
       console.log("Uploading image for directory:", documentId);
-      
+
       // Upload the image
-      const response = await fetch(`/api/documents/${documentId}/background`, {
-        method: 'POST',
-        body: formData,
-      });
+      const response = await fetch(
+        `/api/documents/${documentId}/background`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
 
       const responseData = await response.json();
       console.log("Response from server:", responseData);
-      
+
       if (!response.ok) {
-        const errorMessage = responseData.error?.subtitle || responseData.error?.title || "Upload failed";
+        const errorMessage = responseData.error?.subtitle ||
+          responseData.error?.title || "Upload failed";
         throw new Error(errorMessage);
       }
 
       const imagePath = responseData.data?.background_image;
-      
+
       if (imagePath) {
         onChange(imagePath);
         dispatch(actions.announce({
           message: {
             title: "Background Image Updated",
-            subtitle: "Your directory background has been updated."
-          }
+            subtitle: "Your directory background has been updated.",
+          },
         }));
       } else {
         throw new Error("No image path returned from server");
@@ -109,8 +123,10 @@ const BackgroundImageUploader = ({ userDocument, onChange, currentImage }: Backg
       dispatch(actions.announce({
         message: {
           title: "Upload Failed",
-          subtitle: error instanceof Error ? error.message : "Please try again later."
-        }
+          subtitle: error instanceof Error
+            ? error.message
+            : "Please try again later.",
+        },
       }));
       // Reset preview on error
       if (currentImage) {
@@ -133,60 +149,72 @@ const BackgroundImageUploader = ({ userDocument, onChange, currentImage }: Backg
       <Typography variant="subtitle1" gutterBottom>
         Directory Background Image
       </Typography>
-      
-      {previewUrl ? (
-        <Box sx={{ 
-          position: 'relative', 
-          width: '100%', 
-          height: 120, 
-          backgroundImage: `url(${previewUrl})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          borderRadius: 1,
-          mb: 1
-        }}>
-          <Button 
-            variant="contained" 
-            color="error" 
-            size="small"
-            onClick={handleRemoveImage}
-            startIcon={<Delete />}
-            sx={{ 
-              position: 'absolute', 
-              right: 8, 
-              bottom: 8,
-              opacity: 0.8,
-              '&:hover': {
-                opacity: 1
-              }
+
+      {previewUrl
+        ? (
+          <Box
+            sx={{
+              position: "relative",
+              width: "100%",
+              height: 120,
+              backgroundImage: `url(${previewUrl})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              borderRadius: 1,
+              mb: 1,
             }}
           >
-            Remove
-          </Button>
-        </Box>
-      ) : (
-        <Box sx={{ 
-          width: '100%', 
-          height: 120, 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          border: '1px dashed',
-          borderColor: 'divider',
-          borderRadius: 1,
-          mb: 1
-        }}>
-          <Typography variant="body2" color="text.secondary" align="center">
-            No background image selected
-          </Typography>
-        </Box>
-      )}
-      
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Button
+              variant="contained"
+              color="error"
+              size="small"
+              onClick={handleRemoveImage}
+              startIcon={<Delete />}
+              sx={{
+                position: "absolute",
+                right: 8,
+                bottom: 8,
+                opacity: 0.8,
+                "&:hover": {
+                  opacity: 1,
+                },
+              }}
+            >
+              Remove
+            </Button>
+          </Box>
+        )
+        : (
+          <Box
+            sx={{
+              width: "100%",
+              height: 120,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              border: "1px dashed",
+              borderColor: "divider",
+              borderRadius: 1,
+              mb: 1,
+            }}
+          >
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              align="center"
+            >
+              No background image selected
+            </Typography>
+          </Box>
+        )}
+
+      <Box sx={{ display: "flex", alignItems: "center" }}>
         <Button
           variant="outlined"
           component="label"
-          startIcon={isUploading ? <CircularProgress size={20} /> : <UploadFile />}
+          startIcon={isUploading
+            ? <CircularProgress size={20} />
+            : <UploadFile />}
           disabled={isUploading}
           sx={{ mr: 1 }}
         >
@@ -199,7 +227,7 @@ const BackgroundImageUploader = ({ userDocument, onChange, currentImage }: Backg
             disabled={isUploading}
           />
         </Button>
-        
+
         <Typography variant="caption" color="text.secondary">
           Recommended size: 1280x720 or similar ratio
         </Typography>

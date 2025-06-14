@@ -1,20 +1,26 @@
-export function mspace (element, targetParent, previousSibling, nextSibling, ancestors) {
+export function mspace(
+  element,
+  targetParent,
+  previousSibling,
+  nextSibling,
+  ancestors,
+) {
   targetParent.children.push({
-    name: 'm:r',
-    type: 'tag',
+    name: "m:r",
+    type: "tag",
     attribs: {},
     children: [{
-      name: 'm:t',
-      type: 'tag',
+      name: "m:t",
+      type: "tag",
       attribs: {
-        'xml:space': 'preserve'
+        "xml:space": "preserve",
       },
       children: [
         {
-          type: 'text',
-          data: ' '
-        }
-      ]
-    }]
-  })
+          type: "text",
+          data: " ",
+        },
+      ],
+    }],
+  });
 }

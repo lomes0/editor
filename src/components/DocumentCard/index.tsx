@@ -1,13 +1,15 @@
-"use client"
-import * as React from 'react';
-import { User, UserDocument, DocumentType } from '@/types';
-import { memo } from 'react';
-import { SxProps, Theme } from '@mui/material/styles';
-import DocumentCard from './DocumentCard';
-import DirectoryCard from './DirectoryCard';
+"use client";
+import * as React from "react";
+import { DocumentType, User, UserDocument } from "@/types";
+import { memo } from "react";
+import { SxProps, Theme } from "@mui/material/styles";
+import DocumentCard from "./DocumentCard";
+import DirectoryCard from "./DirectoryCard";
 
 // Main component that decides whether to render a document or directory card
-const CardSelector: React.FC<{ userDocument?: UserDocument, user?: User, sx?: SxProps<Theme> }> = memo(({ userDocument, user, sx }) => {
+const CardSelector: React.FC<
+  { userDocument?: UserDocument; user?: User; sx?: SxProps<Theme> }
+> = memo(({ userDocument, user, sx }) => {
   // Early return for loading state
   if (!userDocument) {
     return <DocumentCard userDocument={undefined} user={user} sx={sx} />;

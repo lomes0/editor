@@ -3,7 +3,6 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
  */
 
 import type {
@@ -13,10 +12,10 @@ import type {
   NodeKey,
   SerializedElementNode,
   Spread,
-} from 'lexical';
+} from "lexical";
 
-import { addClassNamesToElement } from '@lexical/utils';
-import { ElementNode } from 'lexical';
+import { addClassNamesToElement } from "@lexical/utils";
+import { ElementNode } from "lexical";
 
 export type SerializedLayoutContainerNode = Spread<
   {
@@ -34,7 +33,7 @@ export class LayoutContainerNode extends ElementNode {
   }
 
   static getType(): string {
-    return 'layout-container';
+    return "layout-container";
   }
 
   static clone(node: LayoutContainerNode): LayoutContainerNode {
@@ -42,9 +41,9 @@ export class LayoutContainerNode extends ElementNode {
   }
 
   createDOM(config: EditorConfig): HTMLElement {
-    const dom = document.createElement('div');
+    const dom = document.createElement("div");
     dom.style.gridTemplateColumns = this.__templateColumns;
-    if (typeof config.theme.layoutContainer === 'string') {
+    if (typeof config.theme.layoutContainer === "string") {
       addClassNamesToElement(dom, config.theme.layoutContainer);
     }
     return dom;
@@ -61,7 +60,9 @@ export class LayoutContainerNode extends ElementNode {
     return {};
   }
 
-  static importJSON(json: SerializedLayoutContainerNode): LayoutContainerNode {
+  static importJSON(
+    json: SerializedLayoutContainerNode,
+  ): LayoutContainerNode {
     return $createLayoutContainerNode(json.templateColumns);
   }
 
@@ -73,7 +74,7 @@ export class LayoutContainerNode extends ElementNode {
     return {
       ...super.exportJSON(),
       templateColumns: this.__templateColumns,
-      type: 'layout-container',
+      type: "layout-container",
       version: 1,
     };
   }

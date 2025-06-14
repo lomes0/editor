@@ -1,8 +1,7 @@
 import {
-  TableNode as LexicalTableNode,
   SerializedTableNode as LexicalSerializedTableNode,
-} from '@lexical/table';
-
+  TableNode as LexicalTableNode,
+} from "@lexical/table";
 
 import type {
   BaseSelection,
@@ -14,13 +13,15 @@ import type {
   LexicalEditor,
   LexicalNode,
   NodeKey,
-} from 'lexical';
+} from "lexical";
 
-import { addClassNamesToElement, isHTMLElement, removeClassNamesFromElement } from '@lexical/utils';
 import {
-  $applyNodeReplacement,
-} from 'lexical';
-import { floatWrapperElement, getStyleObjectFromRawCSS } from '../utils';
+  addClassNamesToElement,
+  isHTMLElement,
+  removeClassNamesFromElement,
+} from "@lexical/utils";
+import { $applyNodeReplacement } from "lexical";
+import { floatWrapperElement, getStyleObjectFromRawCSS } from "../utils";
 
 export type SerializedTableNode = LexicalSerializedTableNode & {
   style: string;
@@ -37,7 +38,7 @@ function alignTableElement(
   }
   const removeClasses: string[] = [];
   const addClasses: string[] = [];
-  for (const format of ['left', 'center', 'right'] as const) {
+  for (const format of ["left", "center", "right"] as const) {
     const classes = config.theme.tableAlignment[format];
     if (!classes) {
       continue;
@@ -48,8 +49,12 @@ function alignTableElement(
   addClassNamesToElement(dom, ...addClasses);
 }
 
-function wrapTableElement(element: HTMLElement, config: EditorConfig, clone?: boolean): HTMLElement {
-  const wrapperElement = document.createElement('div');
+function wrapTableElement(
+  element: HTMLElement,
+  config: EditorConfig,
+  clone?: boolean,
+): HTMLElement {
+  const wrapperElement = document.createElement("div");
   const classes = config.theme.tableScrollableWrapper;
   addClassNamesToElement(wrapperElement, classes);
   wrapperElement.appendChild(clone ? element.cloneNode(true) : element);
@@ -61,7 +66,7 @@ export class TableNode extends LexicalTableNode {
   __style: string;
   __id: string;
   static getType(): string {
-    return 'matheditor-table';
+    return "matheditor-table";
   }
 
   static clone(node: TableNode): TableNode {
@@ -93,8 +98,8 @@ export class TableNode extends LexicalTableNode {
 
   constructor(key?: NodeKey) {
     super(key);
-    this.__style = '';
-    this.__id = '';
+    this.__style = "";
+    this.__id = "";
   }
 
   exportJSON(): SerializedTableNode {
@@ -125,7 +130,7 @@ export class TableNode extends LexicalTableNode {
     }
     const float = getStyleObjectFromRawCSS(this.__style).float;
     const colWidthsChanged = this.__colWidths !== prevNode.__colWidths;
-    if (float && float !== 'none' && colWidthsChanged) {
+    if (float && float !== "none" && colWidthsChanged) {
       return true;
     }
     if (this.__style !== prevNode.__style) {
@@ -161,14 +166,18 @@ export class TableNode extends LexicalTableNode {
           if (!isHTMLElement(element)) {
             return null;
           }
-          const wrapperElement = wrapTableElement(element, config, true);
+          const wrapperElement = wrapTableElement(
+            element,
+            config,
+            true,
+          );
           const float = getStyleObjectFromRawCSS(this.__style).float;
           floatWrapperElement(wrapperElement, config, float);
           return wrapperElement;
         }
       },
       element,
-    }
+    };
   }
 
   getStyle(): string {

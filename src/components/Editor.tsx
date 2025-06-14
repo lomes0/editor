@@ -1,34 +1,42 @@
-"use client"
-import { RefObject, RefCallback } from 'react';
-import { COMMAND_PRIORITY_LOW } from 'lexical';
-import { mergeRegister } from '@lexical/utils';
-import type { EditorDocument } from '@/types';
-import { ANNOUNCE_COMMAND, UPDATE_DOCUMENT_COMMAND, ALERT_COMMAND } from '@/editor/commands';
-import { actions, useDispatch } from '@/store';
-import type { EditorState, LexicalEditor } from 'lexical';
-import Editor from '@/editor/Editor';
+"use client";
+import { RefCallback, RefObject } from "react";
+import { COMMAND_PRIORITY_LOW } from "lexical";
+import { mergeRegister } from "@lexical/utils";
+import type { EditorDocument } from "@/types";
+import {
+  ALERT_COMMAND,
+  ANNOUNCE_COMMAND,
+  UPDATE_DOCUMENT_COMMAND,
+} from "@/editor/commands";
+import { actions, useDispatch } from "@/store";
+import type { EditorState, LexicalEditor } from "lexical";
+import Editor from "@/editor/Editor";
 
 const Container: React.FC<{
-  document: EditorDocument,
-  editorRef?: RefObject<LexicalEditor | null> | RefCallback<LexicalEditor>,
-  onChange?: (editorState: EditorState, editor: LexicalEditor, tags: Set<string>) => void;
+  document: EditorDocument;
+  editorRef?: RefObject<LexicalEditor | null> | RefCallback<LexicalEditor>;
+  onChange?: (
+    editorState: EditorState,
+    editor: LexicalEditor,
+    tags: Set<string>,
+  ) => void;
   ignoreHistoryMerge?: boolean;
 }> = ({ document, editorRef, onChange, ignoreHistoryMerge }) => {
   const dispatch = useDispatch();
   const editorRefCallback = (editor: LexicalEditor) => {
-    if (typeof editorRef === 'function') {
+    if (typeof editorRef === "function") {
       editorRef(editor);
-    } else if (typeof editorRef === 'object') {
+    } else if (typeof editorRef === "object") {
       editorRef.current = editor;
     }
     return mergeRegister(
       editor.registerCommand(
         ANNOUNCE_COMMAND,
         (payload) => {
-          dispatch((actions.announce(payload)))
+          dispatch(actions.announce(payload));
           return false;
         },
-        COMMAND_PRIORITY_LOW
+        COMMAND_PRIORITY_LOW,
       ),
       editor.registerCommand(
         ALERT_COMMAND,
@@ -36,7 +44,7 @@ const Container: React.FC<{
           dispatch(actions.alert(payload));
           return false;
         },
-        COMMAND_PRIORITY_LOW
+        COMMAND_PRIORITY_LOW,
       ),
       editor.registerCommand(
         UPDATE_DOCUMENT_COMMAND,
@@ -45,14 +53,19 @@ const Container: React.FC<{
           onChange?.(editorState, editor, new Set());
           return false;
         },
-        COMMAND_PRIORITY_LOW
+        COMMAND_PRIORITY_LOW,
       ),
     );
   };
 
   return (
-    <Editor initialConfig={{ editorState: JSON.stringify(document.data) }} onChange={onChange} editorRef={editorRefCallback} ignoreHistoryMerge={ignoreHistoryMerge} />
+    <Editor
+      initialConfig={{ editorState: JSON.stringify(document.data) }}
+      onChange={onChange}
+      editorRef={editorRefCallback}
+      ignoreHistoryMerge={ignoreHistoryMerge}
+    />
   );
-}
+};
 
 export default Container;

@@ -1,9 +1,9 @@
 ﻿enum Action {
-	equal,
-	delete,
-	insert,
-	none,
-	replace,
+  equal,
+  delete,
+  insert,
+  none,
+  replace,
 }
 
-export default Action
+export default Action;

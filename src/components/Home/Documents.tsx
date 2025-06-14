@@ -1,36 +1,59 @@
-"use client"
-import { useRouter } from 'next/navigation';
-import RouterLink from 'next/link'
-import { useDispatch, useSelector, actions } from '@/store';
+"use client";
+import { useRouter } from "next/navigation";
+import RouterLink from "next/link";
+import { actions, useDispatch, useSelector } from "@/store";
 import DocumentCard from "../DocumentCard";
 import { memo, Suspense, useEffect } from "react";
-import { BackupDocument, DocumentType, User, UserDocument } from '@/types';
+import { BackupDocument, DocumentType, User, UserDocument } from "@/types";
 import { validate } from "uuid";
-import documentDB, { revisionDB } from '@/indexeddb';
-import Grid from '@mui/material/Grid2';
-import { Box, Avatar, Button, Typography, Card, CardActionArea, CardHeader, Pagination } from '@mui/material';
-import { PostAdd, UploadFile, Help, Storage, Science, Pageview, CreateNewFolder } from '@mui/icons-material';
-import DocumentSortControl from '../DocumentControls/SortControl';
+import documentDB, { revisionDB } from "@/indexeddb";
+import Grid from "@mui/material/Grid2";
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardActionArea,
+  CardHeader,
+  Pagination,
+  Typography,
+} from "@mui/material";
+import {
+  CreateNewFolder,
+  Help,
+  Pageview,
+  PostAdd,
+  Science,
+  Storage,
+  UploadFile,
+} from "@mui/icons-material";
+import DocumentSortControl from "../DocumentControls/SortControl";
 import { sortDocuments } from "../DocumentControls/sortDocuments";
-import DocumentFilterControl, { filterDocuments } from '../DocumentControls/FilterControl';
-import { v4 as uuid } from 'uuid';
-import useLocalStorage from '@/hooks/useLocalStorage';
-import { useHydration } from '@/hooks/useHydration';
+import DocumentFilterControl, {
+  filterDocuments,
+} from "../DocumentControls/FilterControl";
+import { v4 as uuid } from "uuid";
+import useLocalStorage from "@/hooks/useLocalStorage";
+import { useHydration } from "@/hooks/useHydration";
 
-const Documents: React.FC<{ staticDocuments: UserDocument[] }> = ({ staticDocuments }) => {
-  const user = useSelector(state => state.user);
+const Documents: React.FC<{ staticDocuments: UserDocument[] }> = (
+  { staticDocuments },
+) => {
+  const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const router = useRouter();
   const navigate = (path: string) => router.push(path);
-  const initialized = useSelector(state => state.ui.initialized);
-  const documents = useSelector(state => state.documents);
+  const initialized = useSelector((state) => state.ui.initialized);
+  const documents = useSelector((state) => state.documents);
 
   useEffect(() => {
     if ("launchQueue" in window && "LaunchParams" in window) {
       (window as any).launchQueue.setConsumer(
         async (launchParams: { files: FileSystemFileHandle[] }) => {
           if (!launchParams.files.length) return;
-          const files = await Promise.all(launchParams.files.map(async file => file.getFile()));
+          const files = await Promise.all(
+            launchParams.files.map(async (file) => file.getFile()),
+          );
           await handleFilesChange(files);
         },
       );
@@ -40,58 +63,81 @@ const Documents: React.FC<{ staticDocuments: UserDocument[] }> = ({ staticDocume
   const handleFilesChange = async (files: FileList | File[] | null) => {
     if (!files?.length) return;
     for (const file of files) await loadFromFile(file, files.length === 1);
-  }
+  };
 
   async function loadFromFile(file: File, shouldNavigate?: boolean) {
     const reader = new FileReader();
     reader.readAsText(file);
-    await new Promise<void>(resolve => {
+    await new Promise<void>((resolve) => {
       reader.onload = async () => {
         try {
-          const data: BackupDocument | BackupDocument[] = JSON.parse(reader.result as string);
+          const data: BackupDocument | BackupDocument[] = JSON.parse(
+            reader.result as string,
+          );
           if (!Array.isArray(data)) {
-            validate(data.id) && await addDocument(data, shouldNavigate);
+            validate(data.id) &&
+              await addDocument(data, shouldNavigate);
           } else {
             for (const document of data) {
-              validate(document.id) && await addDocument(document);
+              validate(document.id) &&
+                await addDocument(document);
             }
           }
         } catch (error) {
-          dispatch(actions.announce({ message: { title: "Invalid file", subtitle: "Please select a valid .me file" } }));
+          dispatch(
+            actions.announce({
+              message: {
+                title: "Invalid file",
+                subtitle: "Please select a valid .me file",
+              },
+            }),
+          );
         } finally {
           resolve();
         }
-      }
-    })
+      };
+    });
   }
 
-  async function addDocument(document: BackupDocument, shouldNavigate?: boolean) {
+  async function addDocument(
+    document: BackupDocument,
+    shouldNavigate?: boolean,
+  ) {
     const revisions = document.revisions || [];
     if (!document.head) document.head = uuid();
-    const isHeadLocalRevision = !!revisions.find(revision => revision.id === document.head);
+    const isHeadLocalRevision = !!revisions.find((revision) =>
+      revision.id === document.head
+    );
     if (!isHeadLocalRevision) {
       document.revisions = [
         {
           id: document.head,
           documentId: document.id,
           data: document.data,
-          createdAt: document.updatedAt
+          createdAt: document.updatedAt,
         },
-        ...revisions
+        ...revisions,
       ];
     }
-    if (documents.find(d => d.id === document.id && d.local)) {
+    if (documents.find((d) => d.id === document.id && d.local)) {
       const alert = {
         title: `Document already exists`,
         content: `Do you want to overwrite ${document.name}?`,
         actions: [
           { label: "Cancel", id: uuid() },
-          { label: "Overwrite", id: uuid() }
-        ]
+          { label: "Overwrite", id: uuid() },
+        ],
       };
       const response = await dispatch(actions.alert(alert));
       if (response.payload === alert.actions[1].id) {
-        dispatch(actions.updateLocalDocument({ id: document.id, partial: document })).then(() => { if (shouldNavigate) navigate(`/edit/${document.id}`) });
+        dispatch(
+          actions.updateLocalDocument({
+            id: document.id,
+            partial: document,
+          }),
+        ).then(() => {
+          if (shouldNavigate) navigate(`/edit/${document.id}`);
+        });
       }
     } else {
       dispatch(actions.createLocalDocument(document)).then(() => {
@@ -104,18 +150,24 @@ const Documents: React.FC<{ staticDocuments: UserDocument[] }> = ({ staticDocume
     try {
       const documents = await documentDB.getAll();
       const revisions = await revisionDB.getAll();
-      const data: BackupDocument[] = documents.map(document => ({
+      const data: BackupDocument[] = documents.map((document) => ({
         ...document,
-        revisions: revisions.filter(revision => revision.documentId === document.id && revision.id !== document.head)
+        revisions: revisions.filter((revision) =>
+          revision.documentId === document.id &&
+          revision.id !== document.head
+        ),
       }));
 
-      const blob = new Blob([JSON.stringify(data)], { type: "text/json" });
+      const blob = new Blob([JSON.stringify(data)], {
+        type: "text/json",
+      });
       const link = window.document.createElement("a");
 
       const now = new Date();
       link.download = now.toISOString() + ".me";
       link.href = window.URL.createObjectURL(blob);
-      link.dataset.downloadurl = ["text/json", link.download, link.href].join(":");
+      link.dataset.downloadurl = ["text/json", link.download, link.href]
+        .join(":");
 
       const evt = new MouseEvent("click", {
         view: window,
@@ -126,15 +178,29 @@ const Documents: React.FC<{ staticDocuments: UserDocument[] }> = ({ staticDocume
       link.dispatchEvent(evt);
       link.remove();
     } catch (error) {
-      dispatch(actions.announce({ message: { title: "Backup failed", subtitle: "Please try again" } }));
-    };
-  };
+      dispatch(
+        actions.announce({
+          message: {
+            title: "Backup failed",
+            subtitle: "Please try again",
+          },
+        }),
+      );
+    }
+  }
 
-  const [sort, setSort] = useLocalStorage("sort", { key: "updatedAt", direction: "desc" });
+  const [sort, setSort] = useLocalStorage("sort", {
+    key: "updatedAt",
+    direction: "desc",
+  });
   const [filter, setFilter] = useLocalStorage("filter", 0);
 
   const filteredDocuments = filterDocuments(documents, user, filter);
-  const sortedDocuments = sortDocuments(filteredDocuments, sort.key, sort.direction);
+  const sortedDocuments = sortDocuments(
+    filteredDocuments,
+    sort.key,
+    sort.direction,
+  );
 
   const hydrated = useHydration();
 
@@ -145,10 +211,10 @@ const Documents: React.FC<{ staticDocuments: UserDocument[] }> = ({ staticDocume
       content: "Enter a name for the new directory:",
       actions: [
         { label: "Cancel", id: "cancel" },
-        { label: "Create", id: "create" }
-      ]
+        { label: "Create", id: "create" },
+      ],
     };
-    
+
     const response = await dispatch(actions.alert(alert));
     if (response.payload === "create") {
       // Create directory document with DIRECTORY type
@@ -158,69 +224,188 @@ const Documents: React.FC<{ staticDocuments: UserDocument[] }> = ({ staticDocume
         type: DocumentType.DIRECTORY,
         parentId: null, // Root level directory
         head: uuid(), // Provide a UUID for head even though it's not used for directories
-        data: { root: { children: [], direction: null, format: "", indent: 0, type: "root", version: 1 } }, // Empty editor state
+        data: {
+          root: {
+            children: [],
+            direction: null,
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }, // Empty editor state
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        sort_order: 0 // Default sort order
+        sort_order: 0, // Default sort order
       }));
     }
   };
 
   return (
     <>
-      <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: { sm: "space-between" }, alignItems: "center", position: "sticky", top: { 'xs': 55.99, 'sm': 63.99 }, backgroundColor: 'var(--mui-palette-background-default)', zIndex: 5, py: 1, mb: 4 }}>
-        <Typography variant="h6" component="h2" sx={{ display: { xs: 'none', sm: 'block' } }}>Documents</Typography>
-        <Box sx={{ display: "flex", gap: 0.5, width: ["100%","auto"], justifyContent: "center", mb: 1 }}>
-          <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
-            <Button variant="outlined" sx={{ px: 1, "& .MuiButton-startIcon": { ml: 0 }}} startIcon={<UploadFile />} component="label">
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: { sm: "space-between" },
+          alignItems: "center",
+          position: "sticky",
+          top: { "xs": 55.99, "sm": 63.99 },
+          backgroundColor: "var(--mui-palette-background-default)",
+          zIndex: 5,
+          py: 1,
+          mb: 4,
+        }}
+      >
+        <Typography
+          variant="h6"
+          component="h2"
+          sx={{ display: { xs: "none", sm: "block" } }}
+        >
+          Documents
+        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 0.5,
+            width: ["100%", "auto"],
+            justifyContent: "center",
+            mb: 1,
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              gap: 0.5,
+              justifyContent: "center",
+            }}
+          >
+            <Button
+              variant="outlined"
+              sx={{ px: 1, "& .MuiButton-startIcon": { ml: 0 } }}
+              startIcon={<UploadFile />}
+              component="label"
+            >
               Import
-              <input type="file" hidden accept=".me" multiple onChange={e => handleFilesChange(e.target.files)} />
+              <input
+                type="file"
+                hidden
+                accept=".me"
+                multiple
+                onChange={(e) => handleFilesChange(e.target.files)}
+              />
             </Button>
-            <Button variant="outlined" sx={{ px: 1, "& .MuiButton-startIcon": { ml: 0 } }} startIcon={<Storage />} onClick={backup}>
+            <Button
+              variant="outlined"
+              sx={{ px: 1, "& .MuiButton-startIcon": { ml: 0 } }}
+              startIcon={<Storage />}
+              onClick={backup}
+            >
               Backup
             </Button>
           </Box>
-          <Suspense key={hydrated ? 'local' : 'cloud'}>
+          <Suspense key={hydrated ? "local" : "cloud"}>
             <DocumentSortControl value={sort} setValue={setSort} />
           </Suspense>
         </Box>
-        <Suspense key={hydrated ? 'local' : 'cloud'}>
-          <DocumentFilterControl value={filter} setValue={setFilter} />
+        <Suspense key={hydrated ? "local" : "cloud"}>
+          <DocumentFilterControl
+            value={filter}
+            setValue={setFilter}
+          />
         </Suspense>
       </Box>
-      
-      {/* Add a divider with extra spacing for better separation */}
-      <Box sx={{ my: 5, borderBottom: 1, borderColor: 'divider' }} />
-      
-      <DocumentsGrid documents={documents.length ? sortedDocuments : staticDocuments} initialized={initialized} user={user} />
-    </>
-  )
-}
 
-const DocumentsGrid: React.FC<{ documents: UserDocument[], user?: User, initialized: boolean }> = memo(({ documents, user, initialized }) => {
+      {/* Add a divider with extra spacing for better separation */}
+      <Box sx={{ my: 5, borderBottom: 1, borderColor: "divider" }} />
+
+      <DocumentsGrid
+        documents={documents.length ? sortedDocuments : staticDocuments}
+        initialized={initialized}
+        user={user}
+      />
+    </>
+  );
+};
+
+const DocumentsGrid: React.FC<
+  { documents: UserDocument[]; user?: User; initialized: boolean }
+> = memo(({ documents, user, initialized }) => {
   const dispatch = useDispatch();
   const showSkeletons = !initialized && !documents.length;
   const showEmpty = initialized && !documents.length;
   const pageSize = 12;
   const pages = Math.ceil(documents.length / pageSize);
-  const savedPage = useSelector(state => state.ui.page);
+  const savedPage = useSelector((state) => state.ui.page);
   const page = Math.min(savedPage, pages);
-  const handlePageChange = (_: any, value: number) => dispatch(actions.setPage(value));
-  const pageDocuments = documents.slice((page - 1) * pageSize, page * pageSize);
+  const handlePageChange = (_: any, value: number) =>
+    dispatch(actions.setPage(value));
+  const pageDocuments = documents.slice(
+    (page - 1) * pageSize,
+    page * pageSize,
+  );
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: "column", flex: 1, justifyContent: 'space-between', mb: 2 }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        flex: 1,
+        justifyContent: "space-between",
+        mb: 2,
+      }}
+    >
       <Grid container spacing={2}>
-        {showSkeletons && Array.from({ length: 6 }).map((_, i) => <Grid key={i} size={{ xs: 12, sm: 6, md: 4 }}><DocumentCard /></Grid>)}
-        {showEmpty && <Grid size={{ xs: 12 }} sx={{ display: 'flex', flexDirection: "column", alignItems: "center", my: 5, gap: 2 }}>
-          <Pageview sx={{ width: 64, height: 64, fontSize: 64 }} />
-          <Typography variant="overline" component="p">No documents found</Typography>
-        </Grid>}
-        {pageDocuments.map(document => <Grid key={document.id} size={{ xs: 12, sm: 6, md: 4 }}>
-          <DocumentCard userDocument={document} user={user} />
-        </Grid>)}
+        {showSkeletons &&
+          Array.from({ length: 6 }).map((_, i) => (
+            <Grid key={i} size={{ xs: 12, sm: 6, md: 4 }}>
+              <DocumentCard />
+            </Grid>
+          ))}
+        {showEmpty && (
+          <Grid
+            size={{ xs: 12 }}
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              my: 5,
+              gap: 2,
+            }}
+          >
+            <Pageview
+              sx={{ width: 64, height: 64, fontSize: 64 }}
+            />
+            <Typography variant="overline" component="p">
+              No documents found
+            </Typography>
+          </Grid>
+        )}
+        {pageDocuments.map((document) => (
+          <Grid key={document.id} size={{ xs: 12, sm: 6, md: 4 }}>
+            <DocumentCard userDocument={document} user={user} />
+          </Grid>
+        ))}
       </Grid>
-      {pages > 1 && <Pagination count={pages} page={page} onChange={handlePageChange} sx={{ position: "sticky", zIndex: 5, bottom: 0, mx: 'auto', '& .MuiPagination-ul': { backgroundColor: 'var(--mui-palette-AppBar-defaultBg)', py: 0.5, my: 1.5, borderRadius: 6 } }} />}
+      {pages > 1 && (
+        <Pagination
+          count={pages}
+          page={page}
+          onChange={handlePageChange}
+          sx={{
+            position: "sticky",
+            zIndex: 5,
+            bottom: 0,
+            mx: "auto",
+            "& .MuiPagination-ul": {
+              backgroundColor: "var(--mui-palette-AppBar-defaultBg)",
+              py: 0.5,
+              my: 1.5,
+              borderRadius: 6,
+            },
+          }}
+        />
+      )}
     </Box>
   );
 });

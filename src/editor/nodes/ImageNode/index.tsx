@@ -3,7 +3,6 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
  */
 
 import {
@@ -13,6 +12,7 @@ import {
   $getRoot,
   $setSelection,
   BaseSelection,
+  createEditor,
   DOMConversionMap,
   DOMConversionOutput,
   DOMExportOutput,
@@ -23,17 +23,20 @@ import {
   SerializedEditor,
   SerializedLexicalNode,
   Spread,
-  createEditor,
-} from 'lexical';
+} from "lexical";
 
-import { DecoratorNode } from 'lexical';
-import { editorConfig } from './config';
+import { DecoratorNode } from "lexical";
+import { editorConfig } from "./config";
 import { $generateHtmlFromNodes } from "@lexical/html";
 
-import ImageComponent from './ImageComponent';
-import htmr from 'htmr';
+import ImageComponent from "./ImageComponent";
+import htmr from "htmr";
 import { JSX } from "react";
-import { floatWrapperElement, getCSSFromStyleObject, getStyleObjectFromRawCSS } from '../utils';
+import {
+  floatWrapperElement,
+  getCSSFromStyleObject,
+  getStyleObjectFromRawCSS,
+} from "../utils";
 
 export interface ImagePayload {
   altText?: string;
@@ -49,11 +52,11 @@ export interface ImagePayload {
 
 function convertImageElement(domNode: Node): null | DOMConversionOutput {
   const img = domNode as HTMLImageElement;
-  if (img.src.startsWith('file:///')) {
+  if (img.src.startsWith("file:///")) {
     return null;
   }
-  const { alt: altText, src, width, height, id, } = img;
-  const style = '';
+  const { alt: altText, src, width, height, id } = img;
+  const style = "";
   const node = $createImageNode({ altText, height, src, width, id, style });
   return { node };
 }
@@ -83,7 +86,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
   __caption: LexicalEditor;
 
   static getType(): string {
-    return 'image';
+    return "image";
   }
 
   static clone(node: ImageNode): ImageNode {
@@ -115,27 +118,36 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     try {
       if (caption) {
         const nestedEditor = node.__caption;
-        const editorState = nestedEditor.parseEditorState(caption.editorState);
+        const editorState = nestedEditor.parseEditorState(
+          caption.editorState,
+        );
         if (!editorState.isEmpty()) {
           nestedEditor.setEditorState(editorState);
         }
       }
-    } catch (error) { console.error(error); }
+    } catch (error) {
+      console.error(error);
+    }
     return node;
   }
 
   exportDOM(editor: LexicalEditor): DOMExportOutput {
     const { element } = super.exportDOM(editor);
     if (!element) return { element };
-    const img = document.createElement('img');
-    img.setAttribute('src', this.__src);
-    img.setAttribute('alt', this.__altText);
-    if (this.__width) img.setAttribute('width', this.__width.toString());
-    if (this.__height) img.setAttribute('height', this.__height.toString());
-    if (this.__width && this.__height) img.setAttribute('style', `aspect-ratio: ${this.__width}/${this.__height};`);
+    const img = document.createElement("img");
+    img.setAttribute("src", this.__src);
+    img.setAttribute("alt", this.__altText);
+    if (this.__width) img.setAttribute("width", this.__width.toString());
+    if (this.__height) img.setAttribute("height", this.__height.toString());
+    if (this.__width && this.__height) {
+      img.setAttribute(
+        "style",
+        `aspect-ratio: ${this.__width}/${this.__height};`,
+      );
+    }
     element.appendChild(img);
     if (!this.__showCaption) return { element };
-    const caption = document.createElement('figcaption');
+    const caption = document.createElement("figcaption");
     this.__caption.getEditorState().read(() => {
       caption.innerHTML = $generateHtmlFromNodes(this.__caption);
     });
@@ -171,12 +183,12 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     this.__style = style;
     this.__id = id;
     this.__showCaption = !!showCaption;
-    if (caption) this.__caption = caption
+    if (caption) this.__caption = caption;
     else {
       const editor = createEditor(editorConfig);
       editor.update(() => {
         const root = $getRoot();
-        const paragraph = $createParagraphNode().setFormat('center');
+        const paragraph = $createParagraphNode().setFormat("center");
         paragraph.append($createTextNode(altText));
         root.append(paragraph);
       });
@@ -191,7 +203,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
       src: this.getSrc(),
       style: this.__style,
       id: this.__id,
-      type: 'image',
+      type: "image",
       version: 1,
       width: this.__width,
       showCaption: this.__showCaption,
@@ -234,9 +246,10 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
 
   getStyle(): string {
     const styleObject = getStyleObjectFromRawCSS(this.__style);
-    const isGraphOrSketchNode = this.__type === 'graph' || this.__type === 'sketch';
+    const isGraphOrSketchNode = this.__type === "graph" ||
+      this.__type === "sketch";
     if (isGraphOrSketchNode && !styleObject.filter) {
-      styleObject.filter = 'auto';
+      styleObject.filter = "auto";
     }
     return getCSSFromStyleObject(styleObject);
   }
@@ -268,7 +281,6 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     writable.__caption = payload.caption ?? writable.__caption;
   }
 
-
   select() {
     const nodeSelection = $createNodeSelection();
     nodeSelection.add(this.getKey());
@@ -276,7 +288,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
   }
 
   createDOM(config: EditorConfig, editor: LexicalEditor): HTMLElement {
-    const element = document.createElement('figure');
+    const element = document.createElement("figure");
     const theme = config.theme;
     const className = theme.image;
     if (className) element.className = className;
@@ -291,7 +303,11 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
     return element;
   }
 
-  updateDOM(prevNode: ImageNode, dom: HTMLElement, config: EditorConfig): boolean {
+  updateDOM(
+    prevNode: ImageNode,
+    dom: HTMLElement,
+    config: EditorConfig,
+  ): boolean {
     if (this.__style !== prevNode.__style) {
       const style = getStyleObjectFromRawCSS(this.getStyle());
       const float = style.float;
@@ -324,7 +340,9 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
 
   decorate(): JSX.Element {
     const self = this.getLatest();
-    const html = self.__caption.getEditorState().read(() => $generateHtmlFromNodes(self.__caption));
+    const html = self.__caption.getEditorState().read(() =>
+      $generateHtmlFromNodes(self.__caption)
+    );
     const children = htmr(html);
 
     return (
@@ -344,7 +362,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
 }
 
 export function $createImageNode({
-  altText = 'Image',
+  altText = "Image",
   height,
   src,
   width,

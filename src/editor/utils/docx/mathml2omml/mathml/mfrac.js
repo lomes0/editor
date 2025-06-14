@@ -1,65 +1,71 @@
-import { walker } from '../walker.js'
+import { walker } from "../walker.js";
 
-export function mfrac (element, targetParent, previousSibling, nextSibling, ancestors) {
+export function mfrac(
+  element,
+  targetParent,
+  previousSibling,
+  nextSibling,
+  ancestors,
+) {
   if (element.children.length !== 2) {
     // treat as mrow
-    return targetParent
+    return targetParent;
   }
 
-  const numerator = element.children[0]
-  const denumerator = element.children[1]
+  const numerator = element.children[0];
+  const denumerator = element.children[1];
   const numeratorTarget = {
-    name: 'm:num',
-    type: 'tag',
+    name: "m:num",
+    type: "tag",
     attribs: {},
-    children: []
-  }
+    children: [],
+  };
   const denumeratorTarget = {
-    name: 'm:den',
-    type: 'tag',
+    name: "m:den",
+    type: "tag",
     attribs: {},
-    children: []
-  }
-  ancestors = [...ancestors]
-  ancestors.unshift(element)
+    children: [],
+  };
+  ancestors = [...ancestors];
+  ancestors.unshift(element);
   walker(
     numerator,
     numeratorTarget,
     false,
     false,
-    ancestors
-  )
+    ancestors,
+  );
   walker(
     denumerator,
     denumeratorTarget,
     false,
     false,
-    ancestors
-  )
-  const fracType = element.attribs?.linethickness === '0' ? 'noBar' : 'bar'
+    ancestors,
+  );
+  const fracType = element.attribs?.linethickness === "0" ? "noBar" : "bar";
   targetParent.children.push({
-    type: 'tag',
-    name: 'm:f',
+    type: "tag",
+    name: "m:f",
     attribs: {},
     children: [
       {
-        type: 'tag',
-        name: 'm:fPr',
+        type: "tag",
+        name: "m:fPr",
         attribs: {},
         children: [
           {
-            type: 'tag',
-            name: 'm:type',
+            type: "tag",
+            name: "m:type",
             attribs: {
-              'm:val': fracType
+              "m:val": fracType,
             },
-            children: []
-          }
-        ]
+            children: [],
+          },
+        ],
       },
       numeratorTarget,
-      denumeratorTarget
-    ]
-  })
+      denumeratorTarget,
+    ],
+  });
   // Don't iterate over children in the usual way.
 }

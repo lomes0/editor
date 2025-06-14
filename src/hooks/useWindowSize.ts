@@ -1,8 +1,12 @@
-import { useState, useLayoutEffect } from "react";
+import { useLayoutEffect, useState } from "react";
 
-export function useWindowSize(): { width: number | null; height: number | null } {
+export function useWindowSize(): {
+  width: number | null;
+  height: number | null;
+} {
   const [size, setSize] = useState<{
-    width: number | null; height: number | null
+    width: number | null;
+    height: number | null;
   }>({
     width: null,
     height: null,

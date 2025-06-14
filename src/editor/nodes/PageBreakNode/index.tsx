@@ -3,9 +3,8 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
  */
-import './index.css';
+import "./index.css";
 
 import {
   COMMAND_PRIORITY_HIGH,
@@ -14,15 +13,15 @@ import {
   DOMConversionOutput,
   LexicalNode,
   SerializedLexicalNode,
-} from 'lexical';
+} from "lexical";
 import { JSX } from "react";
-import PageBreakComponent from './PageBreakComponent';
+import PageBreakComponent from "./PageBreakComponent";
 
 export type SerializedPageBreakNode = SerializedLexicalNode;
 
 export class PageBreakNode extends DecoratorNode<JSX.Element> {
   static getType(): string {
-    return 'page-break';
+    return "page-break";
   }
 
   static clone(node: PageBreakNode): PageBreakNode {
@@ -36,7 +35,7 @@ export class PageBreakNode extends DecoratorNode<JSX.Element> {
   static importDOM(): DOMConversionMap | null {
     return {
       figure: (domNode: HTMLElement) => {
-        const tp = domNode.getAttribute('type');
+        const tp = domNode.getAttribute("type");
         if (tp !== this.getType()) return null;
 
         return {
@@ -55,14 +54,14 @@ export class PageBreakNode extends DecoratorNode<JSX.Element> {
   }
 
   createDOM(): HTMLElement {
-    const el = document.createElement('figure');
-    el.style.pageBreakAfter = 'always';
-    el.setAttribute('type', this.getType());
+    const el = document.createElement("figure");
+    el.style.pageBreakAfter = "always";
+    el.setAttribute("type", this.getType());
     return el;
   }
 
   getTextContent(): string {
-    return '\n';
+    return "\n";
   }
 
   isInline(): false {

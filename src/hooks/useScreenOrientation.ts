@@ -1,30 +1,31 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from "react";
 
-const getOrientation = () => typeof window !== 'undefined' ?
-  window.screen?.orientation?.type : 'portrait-primary';
+const getOrientation = () =>
+  typeof window !== "undefined"
+    ? window.screen?.orientation?.type
+    : "portrait-primary";
 
 const useScreenOrientation = () => {
-  const [orientation, setOrientation] =
-    useState(getOrientation())
+  const [orientation, setOrientation] = useState(getOrientation());
 
   const updateOrientation = (event: Event) => {
-    setOrientation(getOrientation())
-  }
+    setOrientation(getOrientation());
+  };
 
   useEffect(() => {
     window.addEventListener(
-      'orientationchange',
-      updateOrientation
-    )
+      "orientationchange",
+      updateOrientation,
+    );
     return () => {
       window.removeEventListener(
-        'orientationchange',
-        updateOrientation
-      )
-    }
-  }, [])
+        "orientationchange",
+        updateOrientation,
+      );
+    };
+  }, []);
 
-  return orientation
-}
+  return orientation;
+};
 
-export default useScreenOrientation
+export default useScreenOrientation;

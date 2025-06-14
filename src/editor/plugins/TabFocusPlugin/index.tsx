@@ -1,20 +1,19 @@
-"use client"
+"use client";
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
  */
 
-import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   $getSelection,
   $isRangeSelection,
   $setSelection,
   FOCUS_COMMAND,
-} from 'lexical';
-import {useEffect} from 'react';
+} from "lexical";
+import { useEffect } from "react";
 
 const COMMAND_PRIORITY_LOW = 1;
 const TAB_TO_FOCUS_INTERVAL = 100;
@@ -24,7 +23,7 @@ let hasRegisteredKeyDownListener = false;
 
 function registerKeyTimeStampTracker() {
   window.addEventListener(
-    'keydown',
+    "keydown",
     (event: KeyboardEvent) => {
       // Tab
       if (event.keyCode === 9) {
@@ -51,7 +50,7 @@ export default function TabFocusPlugin(): null {
         if ($isRangeSelection(selection)) {
           if (
             lastTabKeyDownTimestamp + TAB_TO_FOCUS_INTERVAL >
-            event.timeStamp
+              event.timeStamp
           ) {
             $setSelection(selection.clone());
           }

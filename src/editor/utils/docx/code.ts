@@ -4,18 +4,17 @@ import { IRunOptions, Paragraph, TextRun } from "docx";
 export function $convertCodeNode(node: CodeNode) {
   return new Paragraph({
     shading: {
-      type: 'solid',
-      color: '#f0f2f5',
+      type: "solid",
+      color: "#f0f2f5",
     },
     border: {
-      top: { space: 8, style: 'none' },
-      bottom: { space: 8, style: 'none' },
-      left: { space: 8, style: 'none' },
-      right: { space: 8, style: 'none' },
+      top: { space: 8, style: "none" },
+      bottom: { space: 8, style: "none" },
+      left: { space: 8, style: "none" },
+      right: { space: 8, style: "none" },
     },
     indent: { left: 12 * 15, right: 12 * 15 },
-
-  })
+  });
 }
 
 const colorMap: Record<string, string> = {
@@ -54,11 +53,10 @@ export function $convertCodeHighlightNode(node: CodeHighlightNode) {
   const highlightType = node.getHighlightType();
   const options: IRunOptions = {
     text: node.getTextContent(),
-    font: 'Consolas',
+    font: "Consolas",
     size: 10 * 2,
     color: colorMap[highlightType as string],
   };
-
 
   return new TextRun(options);
 }

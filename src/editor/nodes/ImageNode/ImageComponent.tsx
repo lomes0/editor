@@ -1,11 +1,10 @@
-"use client"
+"use client";
 /* eslint-disable @next/next/no-img-element */
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
  */
 
 import {
@@ -15,13 +14,13 @@ import {
   KEY_ESCAPE_COMMAND,
   LexicalEditor,
   NodeKey,
-} from 'lexical';
+} from "lexical";
 
-import './index.css';
+import "./index.css";
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
-import { mergeRegister } from '@lexical/utils';
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { useLexicalNodeSelection } from "@lexical/react/useLexicalNodeSelection";
+import { mergeRegister } from "@lexical/utils";
 import {
   $getNodeByKey,
   $getSelection,
@@ -31,12 +30,12 @@ import {
   DRAGSTART_COMMAND,
   KEY_BACKSPACE_COMMAND,
   KEY_DELETE_COMMAND,
-} from 'lexical';
-import { useCallback, useEffect, useRef, useState } from 'react';
+} from "lexical";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import ImageResizer from './ImageResizer';
-import ImageCaption from './ImageCaption';
-import { $isImageNode } from '.';
+import ImageResizer from "./ImageResizer";
+import ImageCaption from "./ImageCaption";
+import { $isImageNode } from ".";
 
 export default function ImageComponent({
   src,
@@ -46,7 +45,7 @@ export default function ImageComponent({
   height,
   showCaption,
   caption,
-  element = 'img',
+  element = "img",
   children,
 }: {
   altText: string;
@@ -59,9 +58,12 @@ export default function ImageComponent({
   element?: "img" | "iframe" | "svg";
   children?: React.ReactNode;
 }) {
-  const imageRef = useRef<HTMLImageElement | HTMLIFrameElement | SVGSVGElement>(null);
-  const [isSelected, setSelected, clearSelection] =
-    useLexicalNodeSelection(nodeKey);
+  const imageRef = useRef<
+    HTMLImageElement | HTMLIFrameElement | SVGSVGElement
+  >(null);
+  const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(
+    nodeKey,
+  );
   const [isResizing, setIsResizing] = useState<boolean>(false);
   const [editor] = useLexicalComposerContext();
 
@@ -89,7 +91,9 @@ export default function ImageComponent({
   const $onEscape = useCallback(
     (event: KeyboardEvent) => {
       if (event.currentTarget === caption._rootElement) {
-        caption.update(() => { $setSelection(null); });
+        caption.update(() => {
+          $setSelection(null);
+        });
         setSelected(true);
         return true;
       }
@@ -122,7 +126,10 @@ export default function ImageComponent({
       if (isResizing) {
         return true;
       }
-      if (imageRef.current && imageRef.current.contains(event.target as Node)) {
+      if (
+        imageRef.current &&
+        imageRef.current.contains(event.target as Node)
+      ) {
         caption.update(() => {
           $setSelection(null);
         });
@@ -170,7 +177,11 @@ export default function ImageComponent({
         $onDelete,
         COMMAND_PRIORITY_LOW,
       ),
-      editor.registerCommand(KEY_ENTER_COMMAND, $onEnter, COMMAND_PRIORITY_LOW),
+      editor.registerCommand(
+        KEY_ENTER_COMMAND,
+        $onEnter,
+        COMMAND_PRIORITY_LOW,
+      ),
       editor.registerCommand(
         KEY_ESCAPE_COMMAND,
         $onEscape,
@@ -218,17 +229,19 @@ export default function ImageComponent({
     editor.getEditorState().read(() => {
       const selection = $getSelection();
       if (!$isRangeSelection(selection)) {
-        const scrollTop = Math.round(document.documentElement.scrollTop);
+        const scrollTop = Math.round(
+          document.documentElement.scrollTop,
+        );
         const rootElement = editor.getRootElement();
         rootElement?.focus();
         document.documentElement.scrollTop = scrollTop;
         const nativeSelection = window.getSelection();
         nativeSelection?.removeAllRanges();
         const element = imageRef.current;
-        element?.scrollIntoView({ block: 'nearest' });
+        element?.scrollIntoView({ block: "nearest" });
       }
     });
-  }
+  };
 
   const [draggable, setDraggable] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -237,32 +250,48 @@ export default function ImageComponent({
     isSelected && onLoad();
     editor.getEditorState().read(() => {
       const selection = $getSelection();
-      const isDraggable = isSelected && $isNodeSelection(selection) && !isResizing;
-      const isFocused = $isNodeSelection(selection) && (isSelected || isResizing);
+      const isDraggable = isSelected && $isNodeSelection(selection) &&
+        !isResizing;
+      const isFocused = $isNodeSelection(selection) &&
+        (isSelected || isResizing);
       setDraggable(isDraggable);
       setFocused(isFocused);
-    })
+    });
   }, [isSelected]);
 
   useEffect(() => {
     if (!imageRef.current) return;
-    if (element === 'svg') {
-      const isBase64 = src.startsWith('data:image/svg+xml;base64');
-      const decoded = isBase64 ? atob(src.split(',')[1]) : decodeURIComponent(src.split(',')[1]);
-      const string = decoded.replace(/<!-- payload-start -->\s*(.+?)\s*<!-- payload-end -->/, "");
-      const svg = new DOMParser().parseFromString(string, 'image/svg+xml').documentElement;
-      const styles = svg.querySelectorAll('style');
-      styles.forEach(style => { style.remove(); });
-      const viewBox = svg.getAttribute('viewBox');
-      const svgWidth = svg.getAttribute('width');
-      const svgHeight = svg.getAttribute('height');
-      imageRef.current.setAttribute('viewBox', viewBox ? viewBox : `0 0 ${svgWidth} ${svgHeight}`);
-      if (!width && svgWidth) imageRef.current.setAttribute('width', svgWidth);
-      if (!height && svgHeight) imageRef.current.setAttribute('height', svgHeight);
+    if (element === "svg") {
+      const isBase64 = src.startsWith("data:image/svg+xml;base64");
+      const decoded = isBase64
+        ? atob(src.split(",")[1])
+        : decodeURIComponent(src.split(",")[1]);
+      const string = decoded.replace(
+        /<!-- payload-start -->\s*(.+?)\s*<!-- payload-end -->/,
+        "",
+      );
+      const svg = new DOMParser().parseFromString(string, "image/svg+xml")
+        .documentElement;
+      const styles = svg.querySelectorAll("style");
+      styles.forEach((style) => {
+        style.remove();
+      });
+      const viewBox = svg.getAttribute("viewBox");
+      const svgWidth = svg.getAttribute("width");
+      const svgHeight = svg.getAttribute("height");
+      imageRef.current.setAttribute(
+        "viewBox",
+        viewBox ? viewBox : `0 0 ${svgWidth} ${svgHeight}`,
+      );
+      if (!width && svgWidth) {
+        imageRef.current.setAttribute("width", svgWidth);
+      }
+      if (!height && svgHeight) {
+        imageRef.current.setAttribute("height", svgHeight);
+      }
       imageRef.current.innerHTML = svg.innerHTML;
     }
   }, [imageRef, src]);
-
 
   return (
     <>
@@ -273,7 +302,7 @@ export default function ImageComponent({
         onResizeEnd={onResizeEnd}
         showResizers={focused}
       >
-        {element === 'svg' && (
+        {element === "svg" && (
           <svg
             ref={imageRef as React.Ref<SVGSVGElement>}
             width={width || undefined}
@@ -282,7 +311,7 @@ export default function ImageComponent({
             version="1.1"
           />
         )}
-        {element === 'iframe' && (
+        {element === "iframe" && (
           <iframe
             ref={imageRef as React.Ref<HTMLIFrameElement>}
             width={width}
@@ -299,16 +328,26 @@ export default function ImageComponent({
           src={src}
           alt={altText}
           draggable={draggable}
-          ref={element === 'img' ? imageRef as React.Ref<HTMLImageElement> : undefined}
+          ref={element === "img"
+            ? imageRef as React.Ref<HTMLImageElement>
+            : undefined}
           width={width || undefined}
           height={height || undefined}
-          style={element === 'img' ?
-            { aspectRatio: (width / height) || undefined } :
-            { aspectRatio: (width / height) || undefined, position: 'absolute', opacity: 0, pointerEvents: focused ? 'auto' : 'none' }
-          }
+          style={element === "img"
+            ? { aspectRatio: (width / height) || undefined }
+            : {
+              aspectRatio: (width / height) || undefined,
+              position: "absolute",
+              opacity: 0,
+              pointerEvents: focused ? "auto" : "none",
+            }}
         />
       </ImageResizer>
-      {showCaption && <ImageCaption editor={caption} nodeKey={nodeKey}>{children}</ImageCaption>}
+      {showCaption && (
+        <ImageCaption editor={caption} nodeKey={nodeKey}>
+          {children}
+        </ImageCaption>
+      )}
     </>
   );
 }

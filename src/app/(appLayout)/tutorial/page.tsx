@@ -5,9 +5,9 @@ import { findRevisionHtml } from "@/app/api/utils";
 import { findUserDocument } from "@/repositories/document";
 
 export const metadata: Metadata = {
-  title: 'Tutorial',
-  description: 'Learn how to use Editor',
-}
+  title: "Tutorial",
+  description: "Learn how to use Editor",
+};
 
 const page = async () => {
   const document = await findUserDocument("tutorial");
@@ -15,7 +15,7 @@ const page = async () => {
   const revisionId = document.head;
   const html = await findRevisionHtml(revisionId);
   if (html === null) return <Tutorial />;
-  return <Tutorial>{htmr(html)}</Tutorial>
-}
+  return <Tutorial>{htmr(html)}</Tutorial>;
+};
 
 export default page;

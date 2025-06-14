@@ -1,26 +1,26 @@
-"use client"
-import { useState, useEffect } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import { useSelector } from '@/store';
+"use client";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useSelector } from "@/store";
 import {
+  Box,
+  Collapse,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Collapse,
-  Box,
-  Typography,
   Tooltip,
-} from '@mui/material';
+  Typography,
+} from "@mui/material";
 import {
+  Article,
+  ChevronRight,
+  ExpandMore,
   Folder,
   FolderOpen,
-  Article,
-  ExpandMore,
-  ChevronRight,
   Home as HomeIcon,
-} from '@mui/icons-material';
-import { DocumentType, UserDocument } from '@/types';
+} from "@mui/icons-material";
+import { DocumentType, UserDocument } from "@/types";
 
 interface FileBrowserProps {
   open: boolean; // Whether sidebar is expanded
@@ -35,30 +35,33 @@ interface TreeItem {
 }
 
 const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
-  const documents = useSelector(state => state.documents);
+  const documents = useSelector((state) => state.documents);
   const pathname = usePathname();
   const router = useRouter();
   const [treeData, setTreeData] = useState<TreeItem[]>([]);
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
-  const [currentDirectory, setCurrentDirectory] = useState<string | null>(null);
+  const [currentDirectory, setCurrentDirectory] = useState<string | null>(
+    null,
+  );
 
   // Extract directory ID from pathname
   useEffect(() => {
-    if (pathname.startsWith('/browse/')) {
-      const dirId = pathname.replace('/browse/', '');
+    if (pathname.startsWith("/browse/")) {
+      const dirId = pathname.replace("/browse/", "");
       setCurrentDirectory(dirId);
-      
+
       // Auto-expand parents of current directory
       if (dirId) {
         const expandParents = (id: string) => {
-          const doc = documents.find(d => 
-            (d.local?.id === id || d.cloud?.id === id)
+          const doc = documents.find(
+            (d) => (d.local?.id === id || d.cloud?.id === id),
           );
-          
+
           if (doc) {
-            const parentId = doc.local?.parentId || doc.cloud?.parentId;
+            const parentId = doc.local?.parentId ||
+              doc.cloud?.parentId;
             if (parentId) {
-              setExpandedNodes(prev => {
+              setExpandedNodes((prev) => {
                 const newSet = new Set(prev);
                 newSet.add(parentId);
                 return newSet;
@@ -67,38 +70,41 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
             }
           }
         };
-        
+
         expandParents(dirId);
       }
-    } else if (pathname.startsWith('/view/') || pathname.startsWith('/edit/')) {
+    } else if (
+      pathname.startsWith("/view/") || pathname.startsWith("/edit/")
+    ) {
       // For view and edit routes, highlight the current document and expand its parent directories
-      const docId = pathname.replace(/^\/(view|edit)\//, '');
-      
+      const docId = pathname.replace(/^\/(view|edit)\//, "");
+
       if (docId) {
         // Find the document and its parent
-        const doc = documents.find(d => d.id === docId);
+        const doc = documents.find((d) => d.id === docId);
         if (doc) {
           const parentId = doc.local?.parentId || doc.cloud?.parentId;
           if (parentId) {
             setCurrentDirectory(parentId);
-            
+
             // Auto-expand parent directories
             const expandParents = (id: string) => {
-              setExpandedNodes(prev => {
+              setExpandedNodes((prev) => {
                 const newSet = new Set(prev);
                 newSet.add(id);
                 return newSet;
               });
-              
-              const parent = documents.find(d => d.id === id);
+
+              const parent = documents.find((d) => d.id === id);
               if (parent) {
-                const grandParentId = parent.local?.parentId || parent.cloud?.parentId;
+                const grandParentId = parent.local?.parentId ||
+                  parent.cloud?.parentId;
                 if (grandParentId) {
                   expandParents(grandParentId);
                 }
               }
             };
-            
+
             expandParents(parentId);
           } else {
             setCurrentDirectory(null); // Root directory
@@ -113,34 +119,37 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
   // Build tree data structure from flat documents list
   useEffect(() => {
     // Function to determine if a document is a directory
-    const isDirectory = (doc: UserDocument) => 
-      (doc.local?.type === DocumentType.DIRECTORY) || 
+    const isDirectory = (doc: UserDocument) =>
+      (doc.local?.type === DocumentType.DIRECTORY) ||
       (doc.cloud?.type === DocumentType.DIRECTORY);
-    
+
     // Create tree structure
     const buildTree = () => {
       const items: TreeItem[] = [];
       const map = new Map<string, TreeItem>();
-      
+
       // First pass: create all tree items without children
-      documents.forEach(doc => {
-        const name = doc.local?.name || doc.cloud?.name || 'Untitled';
-        const type = isDirectory(doc) ? DocumentType.DIRECTORY : DocumentType.DOCUMENT;
-        const parentId = doc.local?.parentId || doc.cloud?.parentId || null;
-        
+      documents.forEach((doc) => {
+        const name = doc.local?.name || doc.cloud?.name || "Untitled";
+        const type = isDirectory(doc)
+          ? DocumentType.DIRECTORY
+          : DocumentType.DOCUMENT;
+        const parentId = doc.local?.parentId || doc.cloud?.parentId ||
+          null;
+
         const item: TreeItem = {
           id: doc.id,
           name,
           type,
           children: [],
-          parentId
+          parentId,
         };
-        
+
         map.set(doc.id, item);
       });
-      
+
       // Second pass: build hierarchy
-      map.forEach(item => {
+      map.forEach((item) => {
         if (item.parentId) {
           const parent = map.get(item.parentId);
           if (parent) {
@@ -154,38 +163,44 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
           items.push(item);
         }
       });
-      
+
       // Sort items: directories first, then by name
       const sortItems = (items: TreeItem[]) => {
         items.sort((a, b) => {
           // Directories first
-          if (a.type === DocumentType.DIRECTORY && b.type !== DocumentType.DIRECTORY) return -1;
-          if (a.type !== DocumentType.DIRECTORY && b.type === DocumentType.DIRECTORY) return 1;
-          
+          if (
+            a.type === DocumentType.DIRECTORY &&
+            b.type !== DocumentType.DIRECTORY
+          ) return -1;
+          if (
+            a.type !== DocumentType.DIRECTORY &&
+            b.type === DocumentType.DIRECTORY
+          ) return 1;
+
           // Then by name alphabetically
           return a.name.localeCompare(b.name);
         });
-        
+
         // Sort children recursively
-        items.forEach(item => {
+        items.forEach((item) => {
           if (item.children.length) {
             sortItems(item.children);
           }
         });
-        
+
         return items;
       };
-      
+
       return sortItems(items);
     };
-    
+
     setTreeData(buildTree());
   }, [documents]);
 
   const handleItemClick = (item: TreeItem) => {
     if (item.type === DocumentType.DIRECTORY) {
       // Toggle expansion state
-      setExpandedNodes(prev => {
+      setExpandedNodes((prev) => {
         const newSet = new Set(prev);
         if (newSet.has(item.id)) {
           newSet.delete(item.id);
@@ -194,7 +209,7 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
         }
         return newSet;
       });
-      
+
       // Navigate to directory
       router.push(`/browse/${item.id}`);
     } else {
@@ -204,20 +219,21 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
   };
 
   const handleRootClick = () => {
-    router.push('/browse');
+    router.push("/browse");
   };
 
   // Recursive component to render tree items
   const renderTreeItems = (items: TreeItem[], level: number = 0) => {
-    return items.map(item => {
+    return items.map((item) => {
       const isExpanded = expandedNodes.has(item.id);
       const isDirectory = item.type === DocumentType.DIRECTORY;
       const isCurrentDirectory = item.id === currentDirectory;
-      
+
       // Check if this is the current document (when in view/edit mode)
-      const isCurrentDocument = !isDirectory && 
-        (pathname === `/view/${item.id}` || pathname === `/edit/${item.id}`);
-      
+      const isCurrentDocument = !isDirectory &&
+        (pathname === `/view/${item.id}` ||
+          pathname === `/edit/${item.id}`);
+
       return (
         <Box key={item.id}>
           <ListItemButton
@@ -227,24 +243,28 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
               pl: level * 1.5 + 1,
               py: 0.5,
               minHeight: 36,
-              '&.Mui-selected': {
-                bgcolor: 'action.selected',
+              "&.Mui-selected": {
+                bgcolor: "action.selected",
               },
             }}
           >
             <ListItemIcon
               sx={{
                 minWidth: 30,
-                color: (isCurrentDirectory || isCurrentDocument) ? 'primary.main' : 'inherit',
+                color: (isCurrentDirectory || isCurrentDocument)
+                  ? "primary.main"
+                  : "inherit",
               }}
             >
-              {isDirectory ? (
-                isExpanded ? <FolderOpen fontSize="small" /> : <Folder fontSize="small" />
-              ) : (
-                <Article fontSize="small" />
-              )}
+              {isDirectory
+                ? (
+                  isExpanded
+                    ? <FolderOpen fontSize="small" />
+                    : <Folder fontSize="small" />
+                )
+                : <Article fontSize="small" />}
             </ListItemIcon>
-            
+
             {open && (
               <>
                 <ListItemText
@@ -252,20 +272,28 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
                   primaryTypographyProps={{
                     noWrap: true,
                     fontSize: 14,
-                    fontWeight: (isCurrentDirectory || isCurrentDocument) ? 'medium' : 'normal',
-                    color: (isCurrentDirectory || isCurrentDocument) ? 'primary.main' : 'text.primary',
+                    fontWeight: (isCurrentDirectory ||
+                        isCurrentDocument)
+                      ? "medium"
+                      : "normal",
+                    color: (isCurrentDirectory ||
+                        isCurrentDocument)
+                      ? "primary.main"
+                      : "text.primary",
                   }}
                 />
-                
+
                 {isDirectory && (
                   <Box>
-                    {isExpanded ? <ExpandMore fontSize="small" /> : <ChevronRight fontSize="small" />}
+                    {isExpanded
+                      ? <ExpandMore fontSize="small" />
+                      : <ChevronRight fontSize="small" />}
                   </Box>
                 )}
               </>
             )}
           </ListItemButton>
-          
+
           {/* Render children if directory is expanded */}
           {isDirectory && isExpanded && (
             <Collapse in={true} timeout="auto" unmountOnExit>
@@ -279,57 +307,80 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
 
   return (
     <>
-      <Box sx={{ display: 'flex', alignItems: 'center', px: 2, pt: 1 }}>
-        {open && <Typography variant="caption" color="text.secondary">Files</Typography>}
+      <Box sx={{ display: "flex", alignItems: "center", px: 2, pt: 1 }}>
+        {open && (
+          <Typography variant="caption" color="text.secondary">
+            Files
+          </Typography>
+        )}
       </Box>
-      
-      <List dense disablePadding sx={{ overflow: 'auto', maxHeight: '40vh' }}>
+
+      <List
+        dense
+        disablePadding
+        sx={{ overflow: "auto", maxHeight: "40vh" }}
+      >
         {/* Root node */}
         <ListItemButton
           onClick={handleRootClick}
-          selected={currentDirectory === null && pathname === '/browse'}
+          selected={currentDirectory === null &&
+            pathname === "/browse"}
           sx={{
             py: 0.5,
             minHeight: 36,
-            '&.Mui-selected': {
-              bgcolor: 'action.selected',
+            "&.Mui-selected": {
+              bgcolor: "action.selected",
             },
           }}
         >
           <ListItemIcon
             sx={{
               minWidth: 30,
-              color: currentDirectory === null && pathname === '/browse' ? 'primary.main' : 'inherit',
+              color: currentDirectory === null &&
+                  pathname === "/browse"
+                ? "primary.main"
+                : "inherit",
             }}
           >
             <HomeIcon fontSize="small" />
           </ListItemIcon>
-          
+
           {open && (
             <ListItemText
               primary="Root"
               primaryTypographyProps={{
                 noWrap: true,
                 fontSize: 14,
-                fontWeight: currentDirectory === null && pathname === '/browse' ? 'medium' : 'normal',
-                color: currentDirectory === null && pathname === '/browse' ? 'primary.main' : 'text.primary',
+                fontWeight: currentDirectory === null &&
+                    pathname === "/browse"
+                  ? "medium"
+                  : "normal",
+                color: currentDirectory === null &&
+                    pathname === "/browse"
+                  ? "primary.main"
+                  : "text.primary",
               }}
             />
           )}
         </ListItemButton>
-        
+
         {/* Directory tree */}
-        {treeData.length > 0 ? (
-          renderTreeItems(treeData)
-        ) : (
-          <Box sx={{ p: 1, textAlign: 'center' }}>
-            {open && (
-              <Typography variant="caption" color="text.secondary">
-                No folders found
-              </Typography>
-            )}
-          </Box>
-        )}
+        {treeData.length > 0
+          ? (
+            renderTreeItems(treeData)
+          )
+          : (
+            <Box sx={{ p: 1, textAlign: "center" }}>
+              {open && (
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                >
+                  No folders found
+                </Typography>
+              )}
+            </Box>
+          )}
       </List>
     </>
   );

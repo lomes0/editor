@@ -11,7 +11,10 @@ if (
         caches
           .open("start-url")
           .then((c) =>
-            c.put(__PWA_START_URL__, new Response("", { status: 200 }))
+            c.put(
+              __PWA_START_URL__,
+              new Response("", { status: 200 }),
+            )
           );
       }
     });
@@ -27,9 +30,9 @@ if (
     const urlsToCache = [
       // Cache home page and offline page only
       [`${origin}/`, { headers: { "RSC": "1" }, cache: "reload" }],
-      [`${origin}/offline`, { headers: { "RSC": "1" }, cache: "reload" }]
+      [`${origin}/offline`, { headers: { "RSC": "1" }, cache: "reload" }],
     ];
-    
+
     try {
       const cache = await caches.open("pages");
       for (const [url, options] of urlsToCache) {
@@ -37,10 +40,10 @@ if (
           if (response.ok) {
             cache.put(url, response);
           }
-        }).catch(err => console.log('Failed to cache:', url, err));
+        }).catch((err) => console.log("Failed to cache:", url, err));
       }
     } catch (error) {
-      console.log('Cache failed:', error);
+      console.log("Cache failed:", error);
     }
   });
 
@@ -70,7 +73,7 @@ if (
       .filter(
         (n) =>
           n.startsWith(`${window.location.origin}/_next/data/`) &&
-          n.endsWith(".json")
+          n.endsWith(".json"),
       );
     const cache = await caches.open("next-data");
     data.forEach((d) => cache.add(d));

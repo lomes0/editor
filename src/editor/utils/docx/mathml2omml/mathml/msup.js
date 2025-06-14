@@ -1,88 +1,99 @@
-import { walker } from '../walker.js'
-import { getNary, getNaryTarget } from '../ooml/index.js'
+import { walker } from "../walker.js";
+import { getNary, getNaryTarget } from "../ooml/index.js";
 
-export function msup (element, targetParent, previousSibling, nextSibling, ancestors) {
+export function msup(
+  element,
+  targetParent,
+  previousSibling,
+  nextSibling,
+  ancestors,
+) {
   // Superscript
   if (element.children.length !== 2) {
     // treat as mrow
-    return targetParent
+    return targetParent;
   }
-  ancestors = [...ancestors]
-  ancestors.unshift(element)
-  const base = element.children[0]
-  const superscript = element.children[1]
+  ancestors = [...ancestors];
+  ancestors.unshift(element);
+  const base = element.children[0];
+  const superscript = element.children[1];
 
-  let topTarget
+  let topTarget;
   //
   // m:nAry
   //
   // Conditions:
   // 1. base text must be nary operator
   // 2. no accents
-  const naryChar = getNary(base)
+  const naryChar = getNary(base);
   if (
     naryChar &&
-    element.attribs?.accent?.toLowerCase() !== 'true' &&
-    element.attribs?.accentunder?.toLowerCase() !== 'true'
+    element.attribs?.accent?.toLowerCase() !== "true" &&
+    element.attribs?.accentunder?.toLowerCase() !== "true"
   ) {
-    topTarget = getNaryTarget(naryChar, element, 'subSup', true)
-    element.isNary = true
-    topTarget.children.push({ type: 'tag', name: 'm:sub' })
+    topTarget = getNaryTarget(naryChar, element, "subSup", true);
+    element.isNary = true;
+    topTarget.children.push({ type: "tag", name: "m:sub" });
   } else {
     const baseTarget = {
-      name: 'm:e',
-      type: 'tag',
+      name: "m:e",
+      type: "tag",
       attribs: {},
-      children: []
-    }
+      children: [],
+    };
     walker(
       base,
       baseTarget,
       false,
       false,
-      ancestors
-    )
+      ancestors,
+    );
 
     topTarget = {
-      type: 'tag',
-      name: 'm:sSup',
+      type: "tag",
+      name: "m:sSup",
       attribs: {},
       children: [
         {
-          type: 'tag',
-          name: 'm:sSupPr',
+          type: "tag",
+          name: "m:sSupPr",
           attribs: {},
           children: [{
-            type: 'tag',
-            name: 'm:ctrlPr',
+            type: "tag",
+            name: "m:ctrlPr",
             attribs: {},
-            children: []
-          }]
+            children: [],
+          }],
         },
-        baseTarget
-      ]
-    }
+        baseTarget,
+      ],
+    };
   }
 
   const superscriptTarget = {
-    name: 'm:sup',
-    type: 'tag',
+    name: "m:sup",
+    type: "tag",
     attribs: {},
-    children: []
-  }
+    children: [],
+  };
 
   walker(
     superscript,
     superscriptTarget,
     false,
     false,
-    ancestors
-  )
+    ancestors,
+  );
 
-  topTarget.children.push(superscriptTarget)
+  topTarget.children.push(superscriptTarget);
   if (element.isNary) {
-    topTarget.children.push({ type: 'tag', name: 'm:e', attribs: {}, children: [] })
+    topTarget.children.push({
+      type: "tag",
+      name: "m:e",
+      attribs: {},
+      children: [],
+    });
   }
-  targetParent.children.push(topTarget)
+  targetParent.children.push(topTarget);
   // Don't iterate over children in the usual way.
 }

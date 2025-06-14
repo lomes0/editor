@@ -3,7 +3,6 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
  */
 
 import {
@@ -11,7 +10,7 @@ import {
   $insertNodeToNearestRoot,
   $unwrapAndFilterDescendants,
   mergeRegister,
-} from '@lexical/utils';
+} from "@lexical/utils";
 import {
   $createParagraphNode,
   $isTextNode,
@@ -19,31 +18,31 @@ import {
   LexicalEditor,
   LexicalNode,
   NodeKey,
-} from 'lexical';
-import invariant from '@/shared/invariant';
+} from "lexical";
+import invariant from "@/shared/invariant";
 
 import {
+  $computeTableMap,
+  $computeTableMapSkipCellCheck,
   $createTableCellNode,
-  $isTableCellNode,
-  TableCellNode,
-  INSERT_TABLE_COMMAND,
-  InsertTableCommandPayload,
-  $isTableNode,
-  TableNode,
+  $createTableNodeWithDimensions,
+  $getNodeTriplet,
   $getTableAndElementByKey,
-  TableObserver,
+  $isTableCellNode,
+  $isTableNode,
   $isTableRowNode,
-  TableRowNode,
   applyTableHandlers,
   getTableElement,
   HTMLTableElementWithWithTableSelectionState,
-  $computeTableMap,
-  $computeTableMapSkipCellCheck,
-  $createTableNodeWithDimensions,
-  $getNodeTriplet,
+  INSERT_TABLE_COMMAND,
+  InsertTableCommandPayload,
+  LexicalTableCellNode,
+  TableCellNode,
   TableDOMCell,
-  LexicalTableCellNode
-} from '@/editor/nodes/TableNode';
+  TableNode,
+  TableObserver,
+  TableRowNode,
+} from "@/editor/nodes/TableNode";
 
 function $insertTableCommandListener({
   rows,
@@ -102,7 +101,7 @@ function $tableTransform(node: TableNode) {
     }
     invariant(
       $isTableRowNode(rowNode),
-      'TablePlugin: Expecting all children of TableNode to be TableRowNode, found %s (type %s)',
+      "TablePlugin: Expecting all children of TableNode to be TableRowNode, found %s (type %s)",
       rowNode.constructor.name,
       rowNode.getType(),
     );
@@ -144,7 +143,7 @@ export function registerTableCellUnmergeTransform(
       let row = gridNode.getFirstChild();
       invariant(
         $isTableRowNode(row),
-        'Expected TableNode first child to be a RowNode',
+        "Expected TableNode first child to be a RowNode",
       );
       const unmerged = [];
       for (let i = 0; i < rowsCount; i++) {
@@ -152,7 +151,7 @@ export function registerTableCellUnmergeTransform(
           row = row.getNextSibling();
           invariant(
             $isTableRowNode(row),
-            'Expected TableNode first child to be a RowNode',
+            "Expected TableNode first child to be a RowNode",
           );
         }
         let lastRowCell: null | TableCellNode | LexicalTableCellNode = null;
@@ -165,9 +164,11 @@ export function registerTableCellUnmergeTransform(
           } else if (cell.getColSpan() > 1 || cell.getRowSpan() > 1) {
             invariant(
               $isTableCellNode(cell),
-              'Expected TableNode cell to be a TableCellNode',
+              "Expected TableNode cell to be a TableCellNode",
             );
-            const newCell = $createTableCellNode(cell.__headerState);
+            const newCell = $createTableCellNode(
+              cell.__headerState,
+            );
             if (lastRowCell !== null) {
               lastRowCell.insertAfter(newCell);
             } else {
@@ -250,18 +251,27 @@ export function registerTableSelectionObserver(
         () => {
           for (const [nodeKey, mutation] of nodeMutations) {
             const tableSelection = tableSelections.get(nodeKey);
-            if (mutation === 'created' || mutation === 'updated') {
-              const { tableNode, tableElement } =
-                $getTableAndElementByKey(nodeKey);
+            if (mutation === "created" || mutation === "updated") {
+              const { tableNode, tableElement } = $getTableAndElementByKey(
+                nodeKey,
+              );
               if (tableSelection === undefined) {
-                initializeTableNode(tableNode as any, nodeKey, tableElement);
+                initializeTableNode(
+                  tableNode as any,
+                  nodeKey,
+                  tableElement,
+                );
               } else if (tableElement !== tableSelection[1]) {
                 // The update created a new DOM node, destroy the existing TableObserver
                 tableSelection[0].removeListeners();
                 tableSelections.delete(nodeKey);
-                initializeTableNode(tableNode as any, nodeKey, tableElement);
+                initializeTableNode(
+                  tableNode as any,
+                  nodeKey,
+                  tableElement,
+                );
               }
-            } else if (mutation === 'destroyed') {
+            } else if (mutation === "destroyed") {
               if (tableSelection !== undefined) {
                 tableSelection[0].removeListeners();
                 tableSelections.delete(nodeKey);
@@ -295,7 +305,7 @@ export function registerTableSelectionObserver(
  */
 export function registerTablePlugin(editor: LexicalEditor): () => void {
   if (!editor.hasNodes([TableNode])) {
-    invariant(false, 'TablePlugin: TableNode is not registered on editor');
+    invariant(false, "TablePlugin: TableNode is not registered on editor");
   }
   return mergeRegister(
     editor.registerCommand(

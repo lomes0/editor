@@ -3,14 +3,13 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
  */
 
-import type { ListType } from '@lexical/list';
-import type { HeadingTagType } from '@lexical/rich-text';
+import type { ListType } from "@lexical/list";
+import type { HeadingTagType } from "@lexical/rich-text";
 
-import { $createCodeNode, $isCodeNode, CodeNode } from '@lexical/code';
-import { $createLinkNode, $isLinkNode, LinkNode } from '@lexical/link';
+import { $createCodeNode, $isCodeNode, CodeNode } from "@lexical/code";
+import { $createLinkNode, $isLinkNode, LinkNode } from "@lexical/link";
 import {
   $createListItemNode,
   $createListNode,
@@ -18,7 +17,7 @@ import {
   $isListNode,
   ListItemNode,
   ListNode,
-} from '@lexical/list';
+} from "@lexical/list";
 import {
   $createHeadingNode,
   $createQuoteNode,
@@ -26,7 +25,7 @@ import {
   $isQuoteNode,
   HeadingNode,
   QuoteNode,
-} from '@lexical/rich-text';
+} from "@lexical/rich-text";
 import {
   $createLineBreakNode,
   $createParagraphNode,
@@ -38,7 +37,7 @@ import {
   ParagraphNode,
   TextFormatType,
   TextNode,
-} from 'lexical';
+} from "lexical";
 
 export type Transformer =
   | ElementTransformer
@@ -73,7 +72,7 @@ export type ElementTransformer = {
      */
     isImport: boolean,
   ) => boolean | void;
-  type: 'element';
+  type: "element";
 };
 
 export type MultilineElementTransformer = {
@@ -109,15 +108,15 @@ export type MultilineElementTransformer = {
    * This regex determines when to stop matching. Anything in between regExpStart and regExpEnd will be matched
    */
   regExpEnd?:
-  | RegExp
-  | {
-    /**
-     * Whether the end match is optional. If true, the end match is not required to match for the transformer to be triggered.
-     * The entire text from regexpStart to the end of the document will then be matched.
-     */
-    optional?: true;
-    regExp: RegExp;
-  };
+    | RegExp
+    | {
+      /**
+       * Whether the end match is optional. If true, the end match is not required to match for the transformer to be triggered.
+       * The entire text from regexpStart to the end of the document will then be matched.
+       */
+      optional?: true;
+      regExp: RegExp;
+    };
   /**
    * `replace` is called only when markdown is imported in the editor, not when it's typed
    *
@@ -142,14 +141,14 @@ export type MultilineElementTransformer = {
      */
     isImport: boolean,
   ) => boolean | void;
-  type: 'multiline-element';
+  type: "multiline-element";
 };
 
 export type TextFormatTransformer = Readonly<{
   format: ReadonlyArray<TextFormatType>;
   tag: string;
   intraword?: boolean;
-  type: 'text-format';
+  type: "text-format";
 }>;
 
 export type TextMatchTransformer = Readonly<{
@@ -193,7 +192,7 @@ export type TextMatchTransformer = Readonly<{
    * If the trigger is matched, the `regExp` will be used to match the text in the second step.
    */
   trigger?: string;
-  type: 'text-match';
+  type: "text-match";
 }>;
 
 const ORDERED_LIST_REGEX = /^(\s*)(\d{1,})\.\s/;
@@ -210,7 +209,7 @@ const TABLE_ROW_DIVIDER_REG_EXP = /^(\| ?:?-*:? ?)+\|\s?$/;
 
 const createBlockNode = (
   createNode: (match: Array<string>) => ElementNode,
-): ElementTransformer['replace'] => {
+): ElementTransformer["replace"] => {
   return (parentNode, children, match) => {
     const node = createNode(match);
     node.append(...children);
@@ -240,12 +239,12 @@ function getIndent(whitespaces: string): number {
   return indent;
 }
 
-const listReplace = (listType: ListType): ElementTransformer['replace'] => {
+const listReplace = (listType: ListType): ElementTransformer["replace"] => {
   return (parentNode, children, match) => {
     const previousNode = parentNode.getPreviousSibling();
     const nextNode = parentNode.getNextSibling();
     const listItem = $createListItemNode(
-      listType === 'check' ? match[3] === 'x' : undefined,
+      listType === "check" ? match[3] === "x" : undefined,
     );
     if ($isListNode(nextNode) && nextNode.getListType() === listType) {
       const firstChild = nextNode.getFirstChild();
@@ -265,7 +264,7 @@ const listReplace = (listType: ListType): ElementTransformer['replace'] => {
     } else {
       const list = $createListNode(
         listType,
-        listType === 'number' ? Number(match[2]) : undefined,
+        listType === "number" ? Number(match[2]) : undefined,
       );
       list.append(listItem);
       parentNode.replace(list);
@@ -292,24 +291,25 @@ const listExport = (
       if (listItemNode.getChildrenSize() === 1) {
         const firstChild = listItemNode.getFirstChild();
         if ($isListNode(firstChild)) {
-          output.push(listExport(firstChild, exportChildren, depth + 1));
+          output.push(
+            listExport(firstChild, exportChildren, depth + 1),
+          );
           continue;
         }
       }
-      const indent = ' '.repeat(depth * LIST_INDENT_SIZE);
+      const indent = " ".repeat(depth * LIST_INDENT_SIZE);
       const listType = listNode.getListType();
-      const prefix =
-        listType === 'number'
-          ? `${listNode.getStart() + index}. `
-          : listType === 'check'
-            ? `- [${listItemNode.getChecked() ? 'x' : ' '}] `
-            : '- ';
+      const prefix = listType === "number"
+        ? `${listNode.getStart() + index}. `
+        : listType === "check"
+        ? `- [${listItemNode.getChecked() ? "x" : " "}] `
+        : "- ";
       output.push(indent + prefix + exportChildren(listItemNode));
       index++;
     }
   }
 
-  return output.join('\n');
+  return output.join("\n");
 };
 
 export const HEADING: ElementTransformer = {
@@ -319,14 +319,14 @@ export const HEADING: ElementTransformer = {
       return null;
     }
     const level = Number(node.getTag().slice(1));
-    return '#'.repeat(level) + ' ' + exportChildren(node);
+    return "#".repeat(level) + " " + exportChildren(node);
   },
   regExp: HEADING_REGEX,
   replace: createBlockNode((match) => {
-    const tag = ('h' + match[1].length) as HeadingTagType;
+    const tag = ("h" + match[1].length) as HeadingTagType;
     return $createHeadingNode(tag);
   }),
-  type: 'element',
+  type: "element",
 };
 
 export const QUOTE: ElementTransformer = {
@@ -336,12 +336,12 @@ export const QUOTE: ElementTransformer = {
       return null;
     }
 
-    const lines = exportChildren(node).split('\n');
+    const lines = exportChildren(node).split("\n");
     const output = [];
     for (const line of lines) {
-      output.push('> ' + line);
+      output.push("> " + line);
     }
-    return output.join('\n');
+    return output.join("\n");
   },
   regExp: QUOTE_REGEX,
   replace: (parentNode, children, _match, isImport) => {
@@ -363,7 +363,7 @@ export const QUOTE: ElementTransformer = {
     parentNode.replace(node);
     node.selectEnd();
   },
-  type: 'element',
+  type: "element",
 };
 
 export const CODE: MultilineElementTransformer = {
@@ -374,11 +374,11 @@ export const CODE: MultilineElementTransformer = {
     }
     const textContent = node.getTextContent();
     return (
-      '```' +
-      (node.getLanguage() || '') +
-      (textContent ? '\n' + textContent : '') +
-      '\n' +
-      '```'
+      "```" +
+      (node.getLanguage() || "") +
+      (textContent ? "\n" + textContent : "") +
+      "\n" +
+      "```"
     );
   },
   regExpEnd: {
@@ -407,7 +407,7 @@ export const CODE: MultilineElementTransformer = {
         } else {
           // No end match. We should assume the language is next to the backticks and that code will be typed on the next line in the future
           codeBlockNode = $createCodeNode(startMatch[1]);
-          code = linesInBetween[0].startsWith(' ')
+          code = linesInBetween[0].startsWith(" ")
             ? linesInBetween[0].slice(1)
             : linesInBetween[0];
         }
@@ -417,12 +417,14 @@ export const CODE: MultilineElementTransformer = {
 
         if (linesInBetween[0].trim().length === 0) {
           // Filter out all start and end lines that are length 0 until we find the first line with content
-          while (linesInBetween.length > 0 && !linesInBetween[0].length) {
+          while (
+            linesInBetween.length > 0 && !linesInBetween[0].length
+          ) {
             linesInBetween.shift();
           }
         } else {
           // The first line already has content => Remove the first space of the line if it exists
-          linesInBetween[0] = linesInBetween[0].startsWith(' ')
+          linesInBetween[0] = linesInBetween[0].startsWith(" ")
             ? linesInBetween[0].slice(1)
             : linesInBetween[0];
         }
@@ -435,7 +437,7 @@ export const CODE: MultilineElementTransformer = {
           linesInBetween.pop();
         }
 
-        code = linesInBetween.join('\n');
+        code = linesInBetween.join("\n");
       }
       const textNode = $createTextNode(code);
       codeBlockNode.append(textNode);
@@ -446,7 +448,7 @@ export const CODE: MultilineElementTransformer = {
       })(rootNode, children, startMatch, isImport);
     }
   },
-  type: 'multiline-element',
+  type: "multiline-element",
 };
 
 export const UNORDERED_LIST: ElementTransformer = {
@@ -455,8 +457,8 @@ export const UNORDERED_LIST: ElementTransformer = {
     return $isListNode(node) ? listExport(node, exportChildren, 0) : null;
   },
   regExp: UNORDERED_LIST_REGEX,
-  replace: listReplace('bullet'),
-  type: 'element',
+  replace: listReplace("bullet"),
+  type: "element",
 };
 
 export const CHECK_LIST: ElementTransformer = {
@@ -465,8 +467,8 @@ export const CHECK_LIST: ElementTransformer = {
     return $isListNode(node) ? listExport(node, exportChildren, 0) : null;
   },
   regExp: CHECK_LIST_REGEX,
-  replace: listReplace('check'),
-  type: 'element',
+  replace: listReplace("check"),
+  type: "element",
 };
 
 export const ORDERED_LIST: ElementTransformer = {
@@ -475,65 +477,65 @@ export const ORDERED_LIST: ElementTransformer = {
     return $isListNode(node) ? listExport(node, exportChildren, 0) : null;
   },
   regExp: ORDERED_LIST_REGEX,
-  replace: listReplace('number'),
-  type: 'element',
+  replace: listReplace("number"),
+  type: "element",
 };
 
 export const INLINE_CODE: TextFormatTransformer = {
-  format: ['code'],
-  tag: '`',
-  type: 'text-format',
+  format: ["code"],
+  tag: "`",
+  type: "text-format",
 };
 
 export const HIGHLIGHT: TextFormatTransformer = {
-  format: ['highlight'],
-  tag: '==',
-  type: 'text-format',
+  format: ["highlight"],
+  tag: "==",
+  type: "text-format",
 };
 
 export const BOLD_ITALIC_STAR: TextFormatTransformer = {
-  format: ['bold', 'italic'],
-  tag: '***',
-  type: 'text-format',
+  format: ["bold", "italic"],
+  tag: "***",
+  type: "text-format",
 };
 
 export const BOLD_ITALIC_UNDERSCORE: TextFormatTransformer = {
-  format: ['bold', 'italic'],
+  format: ["bold", "italic"],
   intraword: false,
-  tag: '___',
-  type: 'text-format',
+  tag: "___",
+  type: "text-format",
 };
 
 export const BOLD_STAR: TextFormatTransformer = {
-  format: ['bold'],
-  tag: '**',
-  type: 'text-format',
+  format: ["bold"],
+  tag: "**",
+  type: "text-format",
 };
 
 export const BOLD_UNDERSCORE: TextFormatTransformer = {
-  format: ['bold'],
+  format: ["bold"],
   intraword: false,
-  tag: '__',
-  type: 'text-format',
+  tag: "__",
+  type: "text-format",
 };
 
 export const STRIKETHROUGH: TextFormatTransformer = {
-  format: ['strikethrough'],
-  tag: '~~',
-  type: 'text-format',
+  format: ["strikethrough"],
+  tag: "~~",
+  type: "text-format",
 };
 
 export const ITALIC_STAR: TextFormatTransformer = {
-  format: ['italic'],
-  tag: '*',
-  type: 'text-format',
+  format: ["italic"],
+  tag: "*",
+  type: "text-format",
 };
 
 export const ITALIC_UNDERSCORE: TextFormatTransformer = {
-  format: ['italic'],
+  format: ["italic"],
   intraword: false,
-  tag: '_',
-  type: 'text-format',
+  tag: "_",
+  type: "text-format",
 };
 
 // Order of text transformers matters:
@@ -570,15 +572,15 @@ export const LINK: TextMatchTransformer = {
 
     return linkTextNode;
   },
-  trigger: ')',
-  type: 'text-match',
+  trigger: ")",
+  type: "text-match",
 };
 
 export function normalizeMarkdown(
   input: string,
   shouldMergeAdjacentLines = false,
 ): string {
-  const lines = input.split('\n');
+  const lines = input.split("\n");
   let inCodeBlock = false;
   const sanitizedLines: string[] = [];
 
@@ -608,8 +610,8 @@ export function normalizeMarkdown(
     // In markdown the concept of "empty paragraphs" does not exist.
     // Blocks must be separated by an empty line. Non-empty adjacent lines must be merged.
     if (
-      line === '' ||
-      lastLine === '' ||
+      line === "" ||
+      lastLine === "" ||
       !lastLine ||
       HEADING_REGEX.test(lastLine) ||
       HEADING_REGEX.test(line) ||
@@ -627,7 +629,7 @@ export function normalizeMarkdown(
     }
   }
 
-  return sanitizedLines.join('\n');
+  return sanitizedLines.join("\n");
 }
 
 /**
@@ -635,15 +637,17 @@ export function normalizeMarkdown(
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
  */
 
-import { $convertFromMarkdownString, $convertToMarkdownString } from '@lexical/markdown';
+import {
+  $convertFromMarkdownString,
+  $convertToMarkdownString,
+} from "@lexical/markdown";
 import {
   $createHorizontalRuleNode,
   $isHorizontalRuleNode,
   HorizontalRuleNode,
-} from '@/editor/nodes/HorizontalRuleNode';
+} from "@/editor/nodes/HorizontalRuleNode";
 
 import {
   $createTableCellNode,
@@ -656,19 +660,39 @@ import {
   TableCellNode,
   TableNode,
   TableRowNode,
-} from '@/editor/nodes/TableNode';
-import { $createMathNode, $isMathNode, MathNode } from '@/editor/nodes/MathNode';
-import { $createImageNode, $isImageNode, ImageNode } from '@/editor/nodes/ImageNode';
-import { $createGraphNode, $isGraphNode, GraphNode } from '@/editor/nodes/GraphNode';
-import { $createSketchNode, $isSketchNode, SketchNode } from '@/editor/nodes/SketchNode';
-import { $createStickyNode, $isStickyNode, StickyNode } from '@/editor/nodes/StickyNode';
-import { $isParagraphNode, $isTextNode, LexicalEditor } from 'lexical';
-import { $wrapNodeInElement } from '@lexical/utils';
+} from "@/editor/nodes/TableNode";
+import {
+  $createMathNode,
+  $isMathNode,
+  MathNode,
+} from "@/editor/nodes/MathNode";
+import {
+  $createImageNode,
+  $isImageNode,
+  ImageNode,
+} from "@/editor/nodes/ImageNode";
+import {
+  $createGraphNode,
+  $isGraphNode,
+  GraphNode,
+} from "@/editor/nodes/GraphNode";
+import {
+  $createSketchNode,
+  $isSketchNode,
+  SketchNode,
+} from "@/editor/nodes/SketchNode";
+import {
+  $createStickyNode,
+  $isStickyNode,
+  StickyNode,
+} from "@/editor/nodes/StickyNode";
+import { $isParagraphNode, $isTextNode, LexicalEditor } from "lexical";
+import { $wrapNodeInElement } from "@lexical/utils";
 
 export const HR: ElementTransformer = {
   dependencies: [HorizontalRuleNode],
   export: (node: LexicalNode) => {
-    return $isHorizontalRuleNode(node) ? '***' : null;
+    return $isHorizontalRuleNode(node) ? "***" : null;
   },
   regExp: /^(---+|\*\*\*+|___+|===+)\s?$/,
   replace: (parentNode, _1, _2, isImport) => {
@@ -683,7 +707,7 @@ export const HR: ElementTransformer = {
 
     line.selectNext();
   },
-  type: 'element',
+  type: "element",
 };
 
 export const IMAGE: TextMatchTransformer = {
@@ -704,13 +728,13 @@ export const IMAGE: TextMatchTransformer = {
       src,
       width: 0,
       height: 0,
-      id: '',
-      style: '',
+      id: "",
+      style: "",
     });
     textNode.replace(imageNode);
   },
-  trigger: ')',
-  type: 'text-match',
+  trigger: ")",
+  type: "text-match",
 };
 
 export const GRAPH: TextMatchTransformer = {
@@ -721,18 +745,25 @@ export const GRAPH: TextMatchTransformer = {
     }
     const src = node.getSrc();
     const altText = node.getType();
-    const url = src.startsWith('data:image/svg+xml') ? svgtoBase64(src) : src;
+    const url = src.startsWith("data:image/svg+xml") ? svgtoBase64(src) : src;
     return `![${altText}](${url})`;
   },
   importRegExp: /<graph src="([^"]+?)" value="([^"]+?)"\s?\/>\s?/,
   regExp: /<graph src="([^"]+?)" value="([^"]+?)"\s?\/>\s?/,
   replace: (textNode, match) => {
     const [, src, value] = match;
-    const graphNode = $createGraphNode({ src, value, width: 0, height: 0, id: '', style: '' });
+    const graphNode = $createGraphNode({
+      src,
+      value,
+      width: 0,
+      height: 0,
+      id: "",
+      style: "",
+    });
     textNode.replace(graphNode);
   },
-  trigger: '>',
-  type: 'text-match',
+  trigger: ">",
+  type: "text-match",
 };
 
 export const SKETCH: TextMatchTransformer = {
@@ -750,11 +781,17 @@ export const SKETCH: TextMatchTransformer = {
   regExp: /<sketch src="([^"]+?)"\s?\/>\s?$/,
   replace: (textNode, match) => {
     const [, src] = match;
-    const sketchNode = $createSketchNode({ src, width: 0, height: 0, id: '', style: '' });
+    const sketchNode = $createSketchNode({
+      src,
+      width: 0,
+      height: 0,
+      id: "",
+      style: "",
+    });
     textNode.replace(sketchNode);
   },
-  trigger: '>',
-  type: 'text-match',
+  trigger: ">",
+  type: "text-match",
 };
 
 export const STICKY: TextMatchTransformer = {
@@ -772,15 +809,15 @@ export const STICKY: TextMatchTransformer = {
     const stickyNode = $createStickyNode();
     textNode.replace(stickyNode);
   },
-  trigger: '>',
-  type: 'text-match',
+  trigger: ">",
+  type: "text-match",
 };
 
 const svgtoBase64 = (dataURI: string) => {
   const data = dataURI.split("data:image/svg+xml,")[1];
   const base64 = btoa(unescape(data));
   return `data:image/svg+xml;base64,${base64}`;
-}
+};
 
 export const MATH: TextMatchTransformer = {
   dependencies: [MathNode],
@@ -793,7 +830,7 @@ export const MATH: TextMatchTransformer = {
   },
   importRegExp: /\$+(.*?)(?:\$+|$)|\\\((.*?)(?:\\\)|$)|\\\[(.*?)(?:\\\]|$)/,
   regExp: /\$+(.*?)\$+/,
-  replace: (textNode, match,) => {
+  replace: (textNode, match) => {
     const value = match[1] || match[2] || match[3];
     if (!value && match[0] !== "$$") return;
     const style = textNode.getStyle();
@@ -801,8 +838,8 @@ export const MATH: TextMatchTransformer = {
     textNode.replace(mathNode);
     if (!value) mathNode.select();
   },
-  trigger: '$',
-  type: 'text-match',
+  trigger: "$",
+  type: "text-match",
 };
 
 export const MULTILINE_MATH: MultilineElementTransformer = {
@@ -812,7 +849,7 @@ export const MULTILINE_MATH: MultilineElementTransformer = {
       return null;
     }
     const textContent = node.getValue();
-    return '$$\n' + textContent + '\n$$';
+    return "$$\n" + textContent + "\n$$";
   },
   regExpEnd: {
     optional: true,
@@ -829,11 +866,12 @@ export const MULTILINE_MATH: MultilineElementTransformer = {
   ) => {
     if (!children && linesInBetween) {
       // skip if joined text partially matches single line math
-      const total = (startMatch[0] + linesInBetween.join('') + endMatch?.[0]).trim();
+      const total = (startMatch[0] + linesInBetween.join("") + endMatch?.[0])
+        .trim();
       const partial = total.match(MATH.importRegExp!)?.[0];
       if (total !== partial) return false;
 
-      const mathNode = $createMathNode('', '');
+      const mathNode = $createMathNode("", "");
       let math: string;
 
       if (linesInBetween.length === 1) {
@@ -854,7 +892,7 @@ export const MULTILINE_MATH: MultilineElementTransformer = {
           linesInBetween.pop();
         }
 
-        math = linesInBetween.join('\n');
+        math = linesInBetween.join("\n");
       }
 
       mathNode.setValue(math);
@@ -863,14 +901,14 @@ export const MULTILINE_MATH: MultilineElementTransformer = {
       if (mathNode.getParent()?.is(rootNode)) {
         $wrapNodeInElement(mathNode, () => {
           const paragraphNode = $createParagraphNode();
-          paragraphNode.setFormat('center');
+          paragraphNode.setFormat("center");
           return paragraphNode;
         });
         rootNode.append($createParagraphNode());
       }
     }
   },
-  type: 'multiline-element',
+  type: "multiline-element",
 };
 
 // Very primitive table setup
@@ -895,7 +933,7 @@ export const TABLE: ElementTransformer = {
         if ($isTableCellNode(cell)) {
           rowOutput.push(
             $convertToMarkdownString(TRANSFORMERS, cell)
-              .replace(/\n/g, '\\n')
+              .replace(/\n/g, "\\n")
               .trim(),
           );
           if (cell.__headerState === TableCellHeaderStates.ROW) {
@@ -904,13 +942,13 @@ export const TABLE: ElementTransformer = {
         }
       }
 
-      output.push(`| ${rowOutput.join(' | ')} |`);
+      output.push(`| ${rowOutput.join(" | ")} |`);
       if (isHeaderRow) {
-        output.push(`| ${rowOutput.map((_) => '---').join(' | ')} |`);
+        output.push(`| ${rowOutput.map((_) => "---").join(" | ")} |`);
       }
     }
 
-    return output.join('\n');
+    return output.join("\n");
   },
   regExp: TABLE_ROW_REG_EXP,
   replace: (parentNode, _1, match) => {
@@ -988,7 +1026,9 @@ export const TABLE: ElementTransformer = {
       table.append(tableRow);
 
       for (let i = 0; i < maxCells; i++) {
-        tableRow.append(i < cells.length ? cells[i] : $createTableCell(''));
+        tableRow.append(
+          i < cells.length ? cells[i] : $createTableCell(""),
+        );
       }
     }
 
@@ -1005,7 +1045,7 @@ export const TABLE: ElementTransformer = {
 
     table.selectEnd();
   },
-  type: 'element',
+  type: "element",
 };
 
 function getTableColumnsSize(table: TableNode) {
@@ -1014,7 +1054,7 @@ function getTableColumnsSize(table: TableNode) {
 }
 
 const $createTableCell = (textContent: string): TableCellNode => {
-  textContent = textContent.replace(/\\n/g, '\n');
+  textContent = textContent.replace(/\\n/g, "\n");
   const cell = $createTableCellNode(TableCellHeaderStates.NO_STATUS);
   $convertFromMarkdownString(textContent, TRANSFORMERS, cell);
   return cell;
@@ -1025,7 +1065,7 @@ const mapToTableCells = (textContent: string): Array<TableCellNode> | null => {
   if (!match || !match[1]) {
     return null;
   }
-  return match[1].split('|').map((text) => $createTableCell(text));
+  return match[1].split("|").map((text) => $createTableCell(text));
 };
 
 const ELEMENT_TRANSFORMERS: Array<ElementTransformer> = [

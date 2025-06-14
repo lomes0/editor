@@ -32,12 +32,12 @@ const findPublishedDocuments = async (limit?: number) => {
               name: true,
               image: true,
               email: true,
-            }
-          }
+            },
+          },
         },
         orderBy: {
-          createdAt: 'desc'
-        }
+          createdAt: "desc",
+        },
       },
       author: {
         select: {
@@ -46,7 +46,7 @@ const findPublishedDocuments = async (limit?: number) => {
           name: true,
           image: true,
           email: true,
-        }
+        },
       },
       coauthors: {
         select: {
@@ -57,39 +57,44 @@ const findPublishedDocuments = async (limit?: number) => {
               name: true,
               image: true,
               email: true,
-            }
-          }
+            },
+          },
         },
         orderBy: {
-          createdAt: 'asc'
-        }
+          createdAt: "asc",
+        },
       },
     },
     orderBy: {
-      updatedAt: 'desc'
+      updatedAt: "desc",
     },
-    take: limit
+    take: limit,
   });
 
   const cloudDocuments = documents.map((document) => {
-    const revisions = document.collab ? document.revisions : document.revisions.filter((revision) => revision.id === document.head);
-    
+    const revisions = document.collab
+      ? document.revisions
+      : document.revisions.filter((revision) => revision.id === document.head);
+
     // Cast to CloudDocument to avoid type errors
     const cloudDocument = {
       ...document,
       coauthors: document.coauthors.map((coauthor) => coauthor.user),
       revisions: revisions as any,
       type: (document as any).type || DocumentType.DOCUMENT,
-      head: document.head || ''
+      head: document.head || "",
     } as CloudDocument;
-    
+
     return cloudDocument;
   });
-  
-  return cloudDocuments;
-}
 
-const findUserDocument = async (handle: string, revisions?: "all" | string | null) => {
+  return cloudDocuments;
+};
+
+const findUserDocument = async (
+  handle: string,
+  revisions?: "all" | string | null,
+) => {
   const document = await prisma.document.findUnique({
     where: validate(handle) ? { id: handle } : { handle: handle.toLowerCase() },
     select: {
@@ -117,12 +122,12 @@ const findUserDocument = async (handle: string, revisions?: "all" | string | nul
               name: true,
               image: true,
               email: true,
-            }
-          }
+            },
+          },
         },
         orderBy: {
-          createdAt: 'desc'
-        }
+          createdAt: "desc",
+        },
       },
       author: {
         select: {
@@ -131,7 +136,7 @@ const findUserDocument = async (handle: string, revisions?: "all" | string | nul
           name: true,
           image: true,
           email: true,
-        }
+        },
       },
       coauthors: {
         select: {
@@ -142,14 +147,14 @@ const findUserDocument = async (handle: string, revisions?: "all" | string | nul
               name: true,
               image: true,
               email: true,
-            }
-          }
+            },
+          },
         },
         orderBy: {
-          createdAt: 'asc'
-        }
+          createdAt: "asc",
+        },
       },
-    }
+    },
   });
 
   if (!document) return null;
@@ -159,40 +164,45 @@ const findUserDocument = async (handle: string, revisions?: "all" | string | nul
     coauthors: document.coauthors.map((coauthor) => coauthor.user),
     // Use the document's type or default to DOCUMENT if not specified
     type: (document as any).type || DocumentType.DOCUMENT,
-    head: document.head || '',
+    head: document.head || "",
     revisions: document.revisions as any,
   };
-  
+
   if (revisions !== "all") {
-    const revisionId = revisions ?? (document.head || '');
-    const revision = cloudDocument.revisions.find((revision) => revision.id === revisionId);
+    const revisionId = revisions ?? (document.head || "");
+    const revision = cloudDocument.revisions.find((revision) =>
+      revision.id === revisionId
+    );
     if (!revision) return null;
     cloudDocument.revisions = [revision as any];
     cloudDocument.updatedAt = revision.createdAt;
   }
-  
+
   return cloudDocument;
-}
+};
 
 const createDocument = async (data: Prisma.DocumentUncheckedCreateInput) => {
   if (!data.id) return null;
   await prisma.document.create({ data });
   return findUserDocument(data.id);
-}
+};
 
-const updateDocument = async (handle: string, data: Prisma.DocumentUncheckedUpdateInput) => {
+const updateDocument = async (
+  handle: string,
+  data: Prisma.DocumentUncheckedUpdateInput,
+) => {
   await prisma.document.update({
     where: validate(handle) ? { id: handle } : { handle: handle.toLowerCase() },
-    data
+    data,
   });
   return findUserDocument(handle, "all");
-}
+};
 
 const deleteDocument = async (handle: string) => {
   return prisma.document.delete({
     where: validate(handle) ? { id: handle } : { handle: handle.toLowerCase() },
   });
-}
+};
 
 // Additional helpers for directory-specific operations
 const findEditorDocument = async (handle: string) => {
@@ -214,18 +224,18 @@ const findEditorDocument = async (handle: string) => {
   });
 
   if (!document) return null;
-  const revision = await getCachedRevision(document.head || '');
+  const revision = await getCachedRevision(document.head || "");
   if (!revision) return null;
 
   const editorDocument: EditorDocument = {
     ...document,
-    data: revision.data as unknown as EditorDocument['data'],
+    data: revision.data as unknown as EditorDocument["data"],
     type: (document as any).type || DocumentType.DOCUMENT,
-    head: document.head || '',
+    head: document.head || "",
   };
 
   return editorDocument;
-}
+};
 
 // Function to find documents by author ID
 const findDocumentsByAuthorId = async (authorId: string) => {
@@ -256,12 +266,12 @@ const findDocumentsByAuthorId = async (authorId: string) => {
               name: true,
               image: true,
               email: true,
-            }
-          }
+            },
+          },
         },
         orderBy: {
-          createdAt: 'desc'
-        }
+          createdAt: "desc",
+        },
       },
       author: {
         select: {
@@ -270,7 +280,7 @@ const findDocumentsByAuthorId = async (authorId: string) => {
           name: true,
           image: true,
           email: true,
-        }
+        },
       },
       coauthors: {
         select: {
@@ -281,34 +291,36 @@ const findDocumentsByAuthorId = async (authorId: string) => {
               name: true,
               image: true,
               email: true,
-            }
-          }
+            },
+          },
         },
         orderBy: {
-          createdAt: 'asc'
-        }
+          createdAt: "asc",
+        },
       },
     },
     orderBy: {
-      updatedAt: 'desc'
+      updatedAt: "desc",
     },
   });
 
   const cloudDocuments = documents.map((document) => {
-    const revisions = document.collab ? document.revisions : document.revisions.filter((revision) => revision.id === document.head);
-    
+    const revisions = document.collab
+      ? document.revisions
+      : document.revisions.filter((revision) => revision.id === document.head);
+
     // Cast to CloudDocument to avoid type errors
     const cloudDocument = {
       ...document,
       coauthors: document.coauthors.map((coauthor) => coauthor.user),
       revisions: revisions as any,
       type: (document as any).type || DocumentType.DOCUMENT,
-      head: document.head || ''
+      head: document.head || "",
     } as CloudDocument;
-    
+
     return cloudDocument;
   });
-  
+
   return cloudDocuments;
 };
 
@@ -341,12 +353,12 @@ const findPublishedDocumentsByAuthorId = async (authorId: string) => {
               name: true,
               image: true,
               email: true,
-            }
-          }
+            },
+          },
         },
         orderBy: {
-          createdAt: 'desc'
-        }
+          createdAt: "desc",
+        },
       },
       author: {
         select: {
@@ -355,7 +367,7 @@ const findPublishedDocumentsByAuthorId = async (authorId: string) => {
           name: true,
           image: true,
           email: true,
-        }
+        },
       },
       coauthors: {
         select: {
@@ -366,27 +378,29 @@ const findPublishedDocumentsByAuthorId = async (authorId: string) => {
               name: true,
               image: true,
               email: true,
-            }
-          }
+            },
+          },
         },
         orderBy: {
-          createdAt: 'asc'
-        }
+          createdAt: "asc",
+        },
       },
     },
     orderBy: {
-      updatedAt: 'desc'
-    }
+      updatedAt: "desc",
+    },
   });
 
   const cloudDocuments = documents.map((document) => {
-    const revisions = document.collab ? document.revisions : document.revisions.filter((revision) => revision.id === document.head);
+    const revisions = document.collab
+      ? document.revisions
+      : document.revisions.filter((revision) => revision.id === document.head);
     const cloudDocument: CloudDocument = {
       ...document,
       coauthors: document.coauthors.map((coauthor) => coauthor.user),
       revisions: revisions as any,
       type: (document as any).type || DocumentType.DOCUMENT,
-      head: document.head || ''
+      head: document.head || "",
     };
     return cloudDocument;
   });
@@ -396,7 +410,9 @@ const findPublishedDocumentsByAuthorId = async (authorId: string) => {
 
 // Function to find cloud storage usage by author ID
 const findCloudStorageUsageByAuthorId = async (authorId: string) => {
-  const documentSizes = await prisma.$queryRaw<{ id: string, name: string, size: number }[]>`
+  const documentSizes = await prisma.$queryRaw<
+    { id: string; name: string; size: number }[]
+  >`
     SELECT
       d.id,
       d.name,
@@ -420,13 +436,13 @@ const findCloudStorageUsageByAuthorId = async (authorId: string) => {
 
 // Export functions
 export {
-  findPublishedDocuments,
-  findUserDocument,
-  findEditorDocument,
   createDocument,
-  updateDocument,
   deleteDocument,
-  findDocumentsByAuthorId,
-  findPublishedDocumentsByAuthorId,
   findCloudStorageUsageByAuthorId,
+  findDocumentsByAuthorId,
+  findEditorDocument,
+  findPublishedDocuments,
+  findPublishedDocumentsByAuthorId,
+  findUserDocument,
+  updateDocument,
 };

@@ -9,8 +9,8 @@ const getRevisionHtml = async (id: string) => {
     if (!revision) return null;
     const data = revision.data;
     const response = await fetch(`${PUBLIC_URL}/api/embed`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
     if (!response.ok) return null;
@@ -20,19 +20,24 @@ const getRevisionHtml = async (id: string) => {
     console.log(error);
     return null;
   }
-}
+};
 
-const findRevisionHtml = unstable_cache(getRevisionHtml, [], { tags: ["html"] });
+const findRevisionHtml = unstable_cache(getRevisionHtml, [], {
+  tags: ["html"],
+});
 
 const getRevisionThumbnail = async (id: string) => {
   try {
     const revision = await getCachedRevision(id);
     if (!revision) return null;
     const data = revision.data;
-    const thumbnailData = { ...data, root: { ...data.root, children: data.root.children.slice(0, 3) } };
+    const thumbnailData = {
+      ...data,
+      root: { ...data.root, children: data.root.children.slice(0, 3) },
+    };
     const response = await fetch(`${PUBLIC_URL}/api/embed`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(thumbnailData),
     });
     if (!response.ok) return null;
@@ -42,11 +47,10 @@ const getRevisionThumbnail = async (id: string) => {
     console.log(error);
     return null;
   }
-}
-
-const findRevisionThumbnail = unstable_cache(getRevisionThumbnail, [], { tags: ["thumbnail"] });
-
-export {
-  findRevisionHtml,
-  findRevisionThumbnail,
 };
+
+const findRevisionThumbnail = unstable_cache(getRevisionThumbnail, [], {
+  tags: ["thumbnail"],
+});
+
+export { findRevisionHtml, findRevisionThumbnail };

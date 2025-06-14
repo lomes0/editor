@@ -1,18 +1,23 @@
 import { QuoteNode } from "@lexical/rich-text";
 import { ListItemNode, ListNode } from "@lexical/list";
-import { DOMExportOutput, ParagraphNode, isHTMLElement } from "lexical";
+import { DOMExportOutput, isHTMLElement, ParagraphNode } from "lexical";
 import type { HTMLConfig, Klass, LexicalEditor, LexicalNode } from "lexical";
 import { LinkNode } from "@lexical/link";
 
 export const htmlConfig: HTMLConfig = {
-  export: new Map<Klass<LexicalNode>, (editor: LexicalEditor, target: LexicalNode) => DOMExportOutput>([
+  export: new Map<
+    Klass<LexicalNode>,
+    (editor: LexicalEditor, target: LexicalNode) => DOMExportOutput
+  >([
     [
       ParagraphNode,
       (editor, node) => {
         const paragraphNode = node as ParagraphNode;
         const output = paragraphNode.exportDOM(editor);
         const children = paragraphNode.getChildren();
-        const hasDivs = children.some((child: any) => child.__caption || child.__editor);
+        const hasDivs = children.some((child: any) =>
+          child.__caption || child.__editor
+        );
         if (!hasDivs) return output;
         const element = output.element;
         if (!element || !isHTMLElement(element)) return output;
@@ -32,7 +37,7 @@ export const htmlConfig: HTMLConfig = {
         const element = output.element;
         if (!element || !isHTMLElement(element)) return output;
         const direction = listNode.getDirection();
-        if (direction) { element.dir = direction; }
+        if (direction) element.dir = direction;
         return { element };
       },
     ],
@@ -44,10 +49,10 @@ export const htmlConfig: HTMLConfig = {
         const element = output.element;
         if (!element || !isHTMLElement(element)) return output;
         const direction = listItemNode.getDirection();
-        if (direction) { element.dir = direction; }
+        if (direction) element.dir = direction;
         // linkedom doesn't support value attribute
         const value = listItemNode.getValue();
-        if (value) { element.setAttribute('value', value.toString()); }
+        if (value) element.setAttribute("value", value.toString());
         return { element };
       },
     ],
@@ -59,7 +64,7 @@ export const htmlConfig: HTMLConfig = {
         const element = output.element;
         if (!element || !isHTMLElement(element)) return output;
         const direction = quoteNode.getDirection();
-        if (direction) { element.dir = direction; }
+        if (direction) element.dir = direction;
         return { element };
       },
     ],
@@ -72,11 +77,13 @@ export const htmlConfig: HTMLConfig = {
         if (!element || !isHTMLElement(element)) return output;
         const url = linkNode.getURL();
         const target = linkNode.getTarget();
-        if (target === '_self') element.setAttribute('id', url.slice(1));
-        if (target !== '_blank') element.removeAttribute('target');
-        element.removeAttribute('rel');
+        if (target === "_self") {
+          element.setAttribute("id", url.slice(1));
+        }
+        if (target !== "_blank") element.removeAttribute("target");
+        element.removeAttribute("rel");
         return { element };
       },
-    ]
+    ],
   ]),
 };

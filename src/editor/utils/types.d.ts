@@ -1,1 +1,1 @@
-declare module 'mathml2omml'
+declare module "mathml2omml";

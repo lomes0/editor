@@ -1,12 +1,17 @@
-"use client"
-import type { LexicalEditor, NodeKey } from 'lexical';
-import { $getSelection, $setSelection, COMMAND_PRIORITY_LOW, SELECTION_CHANGE_COMMAND } from 'lexical';
-import { lazy, memo, Suspense, useEffect } from 'react';
-import { editorConfig } from './config';
-import { Typography } from '@mui/material';
-import { mergeRegister } from '@lexical/utils';
+"use client";
+import type { LexicalEditor, NodeKey } from "lexical";
+import {
+  $getSelection,
+  $setSelection,
+  COMMAND_PRIORITY_LOW,
+  SELECTION_CHANGE_COMMAND,
+} from "lexical";
+import { lazy, memo, Suspense, useEffect } from "react";
+import { editorConfig } from "./config";
+import { Typography } from "@mui/material";
+import { mergeRegister } from "@lexical/utils";
 
-const NestedEditor = lazy(() => import('@/editor/NestedEditor'));
+const NestedEditor = lazy(() => import("@/editor/NestedEditor"));
 
 export function ImageCaption({
   nodeKey,
@@ -24,11 +29,13 @@ export function ImageCaption({
         SELECTION_CHANGE_COMMAND,
         () => {
           if (!parentEditor) return false;
-          const parentSelection = parentEditor.getEditorState().read($getSelection);
+          const parentSelection = parentEditor.getEditorState().read(
+            $getSelection,
+          );
           if (!parentSelection) return false;
           parentEditor.update(() => {
             $setSelection(null);
-          })
+          });
           return false;
         },
         COMMAND_PRIORITY_LOW,
@@ -43,12 +50,20 @@ export function ImageCaption({
     nodeKey,
   ]);
 
-
   return (
     <figcaption>
       <Suspense fallback={children}>
-        <NestedEditor initialEditor={editor} initialNodes={editorConfig.nodes}
-          placeholder={<Typography color="text.secondary" className="nested-placeholder">Write a caption</Typography>}
+        <NestedEditor
+          initialEditor={editor}
+          initialNodes={editorConfig.nodes}
+          placeholder={
+            <Typography
+              color="text.secondary"
+              className="nested-placeholder"
+            >
+              Write a caption
+            </Typography>
+          }
         />
       </Suspense>
     </figcaption>

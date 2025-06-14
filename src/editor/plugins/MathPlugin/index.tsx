@@ -1,11 +1,20 @@
-"use client"
-import { $createParagraphNode, $getSelection, $insertNodes, $isRangeSelection, $isRootNode, KEY_ARROW_DOWN_COMMAND, KEY_ARROW_UP_COMMAND, LexicalCommand } from 'lexical';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { COMMAND_PRIORITY_EDITOR, createCommand } from 'lexical';
-import { useEffect } from 'react';
-import { $wrapNodeInElement, mergeRegister } from '@lexical/utils';
-import { $createMathNode, MathNode } from '@/editor/nodes/MathNode';
-import { IS_MOBILE } from '@/shared/environment';
+"use client";
+import {
+  $createParagraphNode,
+  $getSelection,
+  $insertNodes,
+  $isRangeSelection,
+  $isRootNode,
+  KEY_ARROW_DOWN_COMMAND,
+  KEY_ARROW_UP_COMMAND,
+  LexicalCommand,
+} from "lexical";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { COMMAND_PRIORITY_EDITOR, createCommand } from "lexical";
+import { useEffect } from "react";
+import { $wrapNodeInElement, mergeRegister } from "@lexical/utils";
+import { $createMathNode, MathNode } from "@/editor/nodes/MathNode";
+import { IS_MOBILE } from "@/shared/environment";
 
 type CommandPayload = {
   value: string;
@@ -20,7 +29,7 @@ export default function MathPlugin() {
   useEffect(() => {
     if (!editor.hasNodes([MathNode])) {
       throw new Error(
-        'MathPlugin: MathNode not registered on editor',
+        "MathPlugin: MathNode not registered on editor",
       );
     }
 
@@ -30,7 +39,7 @@ export default function MathPlugin() {
         (payload) => {
           const { value } = payload;
           const selection = $getSelection();
-          const style = $isRangeSelection(selection) ? selection.style : '';
+          const style = $isRangeSelection(selection) ? selection.style : "";
           const mathNode = $createMathNode(value, style);
           $insertNodes([mathNode]);
           if ($isRootNode(mathNode.getParentOrThrow())) {
@@ -42,33 +51,52 @@ export default function MathPlugin() {
         COMMAND_PRIORITY_EDITOR,
       ),
       // workaround for arrow up and arrow down key events
-      editor.registerCommand<KeyboardEvent>(KEY_ARROW_UP_COMMAND, (event => {
-        const rootElement = editor.getRootElement();
-        if (!rootElement) return false;
-        const mathfields = rootElement.querySelectorAll('math-field');
-        mathfields.forEach(mathfield => {
-          const keyboardSink = mathfield.shadowRoot?.querySelector('[part="keyboard-sink"]');
-          keyboardSink?.removeAttribute('contenteditable');
-          setTimeout(() => {
-            keyboardSink?.setAttribute('contenteditable', 'true');
-          }, 0);
-        });
-        return false;
-      }), COMMAND_PRIORITY_EDITOR),
-      editor.registerCommand<KeyboardEvent>(KEY_ARROW_DOWN_COMMAND, (event => {
-        const rootElement = editor.getRootElement();
-        if (!rootElement) return false;
-        const mathfields = rootElement.querySelectorAll('math-field');
-        mathfields.forEach(mathfield => {
-          const keyboardSink = mathfield.shadowRoot?.querySelector('[part="keyboard-sink"]');
-          keyboardSink?.removeAttribute('contenteditable');
-          setTimeout(() => {
-            keyboardSink?.setAttribute('contenteditable', 'true');
-          }, 0);
-        });
-        return false;
-      }), COMMAND_PRIORITY_EDITOR),
-
+      editor.registerCommand<KeyboardEvent>(
+        KEY_ARROW_UP_COMMAND,
+        (event) => {
+          const rootElement = editor.getRootElement();
+          if (!rootElement) return false;
+          const mathfields = rootElement.querySelectorAll(
+            "math-field",
+          );
+          mathfields.forEach((mathfield) => {
+            const keyboardSink = mathfield.shadowRoot
+              ?.querySelector('[part="keyboard-sink"]');
+            keyboardSink?.removeAttribute("contenteditable");
+            setTimeout(() => {
+              keyboardSink?.setAttribute(
+                "contenteditable",
+                "true",
+              );
+            }, 0);
+          });
+          return false;
+        },
+        COMMAND_PRIORITY_EDITOR,
+      ),
+      editor.registerCommand<KeyboardEvent>(
+        KEY_ARROW_DOWN_COMMAND,
+        (event) => {
+          const rootElement = editor.getRootElement();
+          if (!rootElement) return false;
+          const mathfields = rootElement.querySelectorAll(
+            "math-field",
+          );
+          mathfields.forEach((mathfield) => {
+            const keyboardSink = mathfield.shadowRoot
+              ?.querySelector('[part="keyboard-sink"]');
+            keyboardSink?.removeAttribute("contenteditable");
+            setTimeout(() => {
+              keyboardSink?.setAttribute(
+                "contenteditable",
+                "true",
+              );
+            }, 0);
+          });
+          return false;
+        },
+        COMMAND_PRIORITY_EDITOR,
+      ),
     );
   }, [editor]);
 
@@ -76,7 +104,7 @@ export default function MathPlugin() {
     const handleSelectionChange = () => {
       const domSelection = document.getSelection();
       if (!domSelection) return false;
-      const mathfields = document.querySelectorAll('math-field');
+      const mathfields = document.querySelectorAll("math-field");
       mathfields.forEach((mathfield) => {
         const isSelected = domSelection.containsNode(mathfield);
         mathfield.classList.toggle("selection-highlight", isSelected);
@@ -85,7 +113,10 @@ export default function MathPlugin() {
 
     document.addEventListener("selectionchange", handleSelectionChange);
     return () => {
-      document.removeEventListener("selectionchange", handleSelectionChange);
+      document.removeEventListener(
+        "selectionchange",
+        handleSelectionChange,
+      );
     };
   }, []);
 
@@ -94,16 +125,16 @@ export default function MathPlugin() {
     if (!navigation || !IS_MOBILE) return;
 
     const preventBackNavigation = (event: any) => {
-      if (event.navigationType === 'push') return;
+      if (event.navigationType === "push") return;
       const mathVirtualKeyboard = window.mathVirtualKeyboard;
       if (!mathVirtualKeyboard?.visible) return;
       event.preventDefault();
       mathVirtualKeyboard.hide();
     };
 
-    navigation.addEventListener('navigate', preventBackNavigation);
+    navigation.addEventListener("navigate", preventBackNavigation);
     return () => {
-      navigation.removeEventListener('navigate', preventBackNavigation);
+      navigation.removeEventListener("navigate", preventBackNavigation);
       const mathVirtualKeyboard = window.mathVirtualKeyboard;
       if (!mathVirtualKeyboard?.visible) return;
       mathVirtualKeyboard.hide();

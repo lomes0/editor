@@ -12,19 +12,27 @@ export async function GET() {
     const session = await getServerSession(authOptions);
     if (!session) {
       response.data = [];
-      return NextResponse.json(response, { status: 200 })
+      return NextResponse.json(response, { status: 200 });
     }
     const { user } = session;
     if (user.disabled) {
-      response.error = { title: "Account Disabled", subtitle: "Account is disabled for violating terms of service" }
-      return NextResponse.json(response, { status: 403 })
+      response.error = {
+        title: "Account Disabled",
+        subtitle: "Account is disabled for violating terms of service",
+      };
+      return NextResponse.json(response, { status: 403 });
     }
-    const cloudStorageUsage = await findCloudStorageUsageByAuthorId(user.id);
+    const cloudStorageUsage = await findCloudStorageUsageByAuthorId(
+      user.id,
+    );
     response.data = cloudStorageUsage;
-    return NextResponse.json(response, { status: 200 })
+    return NextResponse.json(response, { status: 200 });
   } catch (error) {
     console.log(error);
-    response.error = { title: "Something went wrong", subtitle: "Please try again later" }
-    return NextResponse.json(response, { status: 500 })
+    response.error = {
+      title: "Something went wrong",
+      subtitle: "Please try again later",
+    };
+    return NextResponse.json(response, { status: 500 });
   }
 }

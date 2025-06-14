@@ -103,7 +103,7 @@
 }
 
 .LexicalTheme__code:before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 0;
@@ -114,16 +114,16 @@
   counter-reset: line-number;
 }
 
-.LexicalTheme__code>span:first-child,
-.LexicalTheme__code>br:first-child,
-.LexicalTheme__code>br+span,
-.LexicalTheme__code>br+br {
+.LexicalTheme__code > span:first-child,
+.LexicalTheme__code > br:first-child,
+.LexicalTheme__code > br + span,
+.LexicalTheme__code > br + br {
   counter-increment: line-number;
 }
 
-.LexicalTheme__code>span:first-child:before,
-.LexicalTheme__code>br+span:before,
-.LexicalTheme__code>br+br:before {
+.LexicalTheme__code > span:first-child:before,
+.LexicalTheme__code > br + span:before,
+.LexicalTheme__code > br + br:before {
   color: #777;
   content: counter(line-number);
   user-select: none;
@@ -133,7 +133,7 @@
   text-align: end;
 }
 
-.LexicalTheme__code>br+br {
+.LexicalTheme__code > br + br {
   display: block;
   content: counter(line-number);
   height: 20px;
@@ -163,7 +163,7 @@
   margin-bottom: 1rem;
 }
 
-.LexicalTheme__tableScrollableWrapper>.LexicalTheme__table {
+.LexicalTheme__tableScrollableWrapper > .LexicalTheme__table {
   margin-bottom: 0;
 }
 
@@ -183,8 +183,8 @@
   margin-left: auto;
 }
 
-.LexicalTheme__floatLeft>.LexicalTheme__table,
-.LexicalTheme__floatRight>.LexicalTheme__table {
+.LexicalTheme__floatLeft > .LexicalTheme__table,
+.LexicalTheme__floatRight > .LexicalTheme__table {
   width: max-content;
 }
 
@@ -222,7 +222,7 @@
   A firefox workaround to allow scrolling of overflowing table cell
   ref: https://bugzilla.mozilla.org/show_bug.cgi?id=1904159
 */
-.LexicalTheme__tableCell>* {
+.LexicalTheme__tableCell > * {
   overflow: inherit;
 }
 
@@ -237,7 +237,7 @@
   bottom: 0;
   top: 0;
   background-color: #5fb7ff80;
-  content: '';
+  content: "";
   pointer-events: none;
 }
 
@@ -285,7 +285,7 @@
   margin-inline-start: 18px;
 }
 
-.LexicalTheme__checklist>.LexicalTheme__listItem {
+.LexicalTheme__checklist > .LexicalTheme__listItem {
   margin-inline-start: 0;
 }
 
@@ -325,8 +325,8 @@
   left: 0;
 }
 
-.LexicalTheme__listItemUnchecked[dir='rtl']:before,
-.LexicalTheme__listItemChecked[dir='rtl']:before {
+.LexicalTheme__listItemUnchecked[dir="rtl"]:before,
+.LexicalTheme__listItemChecked[dir="rtl"]:before {
   left: auto;
   right: 0;
 }
@@ -349,11 +349,11 @@
   border-width: 0 2px 2px 0;
   border-style: solid;
   transform-origin: bottom left;
-  transform: rotate(45deg)
+  transform: rotate(45deg);
 }
 
-.LexicalTheme__listItemUnchecked[dir='rtl']:after,
-.LexicalTheme__listItemChecked[dir='rtl']:after {
+.LexicalTheme__listItemUnchecked[dir="rtl"]:after,
+.LexicalTheme__listItemChecked[dir="rtl"]:after {
   left: auto;
   right: 8px;
 }
@@ -444,8 +444,8 @@ iframe {
   vertical-align: middle;
 }
 
-[style*='text-align:justify'] .LexicalTheme__image,
-[style*='text-align: justify'] .LexicalTheme__image {
+[style*="text-align:justify"] .LexicalTheme__image,
+[style*="text-align: justify"] .LexicalTheme__image {
   width: 100%;
 }
 
@@ -466,7 +466,7 @@ iframe {
   height: auto;
 }
 
-.LexicalTheme__image svg [fill='#ffffff'] {
+.LexicalTheme__image svg [fill="#ffffff"] {
   fill: transparent;
 }
 
@@ -529,7 +529,7 @@ iframe {
 }
 
 .LexicalTheme__hr:after {
-  content: '';
+  content: "";
   display: block;
   height: 2px;
   background-color: #ccc;
@@ -549,7 +549,7 @@ iframe {
   overflow: clip;
 }
 
-.LexicalTheme__math>.ML__latex {
+.LexicalTheme__math > .ML__latex {
   user-select: auto;
   padding: 6px 3px 6px 1px;
 }
@@ -559,7 +559,7 @@ iframe {
   overflow-y: hidden;
 }
 
-[type='page-break'] {
+[type="page-break"] {
   position: relative;
   display: block;
   overflow: unset;
@@ -569,15 +569,15 @@ iframe {
   clear: both;
 }
 
-[type='page-break']::before {
-  content: '';
+[type="page-break"]::before {
+  content: "";
   display: block;
   height: 2px;
   background-color: #ccc;
   line-height: 2px;
 }
 
-[type='page-break']::after {
+[type="page-break"]::after {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -586,14 +586,14 @@ iframe {
   padding: 2px 6px;
   border: 1px solid #ccc;
   background-color: #fff;
-  content: 'PAGE BREAK';
+  content: "PAGE BREAK";
   font-size: 12px;
   color: #000;
   font-weight: 600;
 }
 
 @media print {
-  [type='page-break'] {
+  [type="page-break"] {
     visibility: hidden;
   }
 }
@@ -617,7 +617,7 @@ iframe {
 
 /* Add divider between layout items except for the last one */
 .LexicalTheme__layoutItem:not(:last-child)::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   right: -0.25rem; /* Position in the middle of the gap */
@@ -647,14 +647,14 @@ iframe {
   margin-bottom: 8px;
 }
 
-[contenteditable='true'] .details__container[contenteditable='false'],
-[contenteditable='true'] .details__summary[contenteditable='false'] {
+[contenteditable="true"] .details__container[contenteditable="false"],
+[contenteditable="true"] .details__summary[contenteditable="false"] {
   user-select: none;
 }
 
-.details__container[contenteditable='false'] .details__summary *,
-.details__container[contenteditable='false'] .details__content *,
-.details__summary[contenteditable='false'] * {
+.details__container[contenteditable="false"] .details__summary *,
+.details__container[contenteditable="false"] .details__content *,
+.details__summary[contenteditable="false"] * {
   pointer-events: none;
 }
 
@@ -686,7 +686,7 @@ iframe {
   rotate: 45deg;
 }
 
-.details__container[open]>.details__summary:before {
+.details__container[open] > .details__summary:before {
   translate: 0 -25%;
   rotate: -135deg;
 }
@@ -695,8 +695,7 @@ iframe {
   padding: 8px 16px;
 }
 
-
-.details__container:not([open])>.details__content {
+.details__container:not([open]) > .details__content {
   display: none;
   user-select: none;
 }
@@ -713,24 +712,24 @@ iframe {
 }
 
 /* direction */
-.LexicalTheme__quote[dir='ltr'] {
+.LexicalTheme__quote[dir="ltr"] {
   padding-left: 16px;
   border-left-style: solid;
   border-left-width: 4px;
 }
 
-.LexicalTheme__quote[dir='rtl'] {
+.LexicalTheme__quote[dir="rtl"] {
   padding-right: 16px;
   border-right-style: solid;
   border-right-width: 4px;
 }
 
-.details__summary[dir='rtl'] {
+.details__summary[dir="rtl"] {
   padding-left: 32px;
   padding-right: 16px;
 }
 
-.details__summary[dir='rtl']:before {
+.details__summary[dir="rtl"]:before {
   right: auto;
   left: 16px;
 }
@@ -738,109 +737,111 @@ iframe {
 /* color theme */
 
 .LexicalTheme__textCode,
-[theme=light] .LexicalTheme__textCode {
+[theme="light"] .LexicalTheme__textCode {
   background-color: rgb(225 230 235 / 44%);
 }
 
 .LexicalTheme__quote,
-[theme=light] .LexicalTheme__quote {
+[theme="light"] .LexicalTheme__quote {
   color: rgb(101, 103, 107);
   border-left-color: rgb(206, 208, 212);
   border-right-color: rgb(206, 208, 212);
 }
 
 .LexicalTheme__link,
-[theme=light] .LexicalTheme__link {
+[theme="light"] .LexicalTheme__link {
   color: rgb(33, 111, 219);
 }
 
 .LexicalTheme__code,
-[theme=light] .LexicalTheme__code {
+[theme="light"] .LexicalTheme__code {
   background-color: rgb(240, 242, 245);
   color: inherit;
 }
 
 .LexicalTheme__code:before,
-[theme=light] .LexicalTheme__code:before {
+[theme="light"] .LexicalTheme__code:before {
   background-color: #eee;
   border-right-color: #ccc;
   color: #777;
 }
 
 .LexicalTheme__code:after,
-[theme=light] .LexicalTheme__code:after {
+[theme="light"] .LexicalTheme__code:after {
   color: rgba(0, 0, 0, 0.5);
 }
 
 .LexicalTheme__tableCell,
-[theme=light] .LexicalTheme__tableCell {
+[theme="light"] .LexicalTheme__tableCell {
   border-color: rgba(0, 0, 0, 0.2);
 }
 
 .LexicalTheme__tableCellHeader,
-[theme=light] .LexicalTheme__tableCellHeader {
+[theme="light"] .LexicalTheme__tableCellHeader {
   background-color: rgba(0, 0, 0, 0.03);
 }
 
 .details__container,
-[theme=light] .details__container {
+[theme="light"] .details__container {
   border-color: rgba(0, 0, 0, 0.12);
 }
 
 .details__summary:hover,
-.details__container[open]>.details__summary,
-[theme=light] .details__summary:hover,
-[theme=light] .details__container[open]>.details__summary {
+.details__container[open] > .details__summary,
+[theme="light"] .details__summary:hover,
+[theme="light"] .details__container[open] > .details__summary {
   background-color: rgba(0, 0, 0, 0.04);
 }
 
-[theme=light] .LexicalTheme__image.LexicalTheme__darkModeFilter :is(img, svg) {
+[theme="light"]
+  .LexicalTheme__image.LexicalTheme__darkModeFilter
+  :is(img, svg) {
   filter: none !important;
 }
 
-[theme=dark] .LexicalTheme__quote {
+[theme="dark"] .LexicalTheme__quote {
   color: #a6a6a6;
   border-left-color: #4d4d4d;
   border-right-color: #4d4d4d;
 }
 
-[theme=dark] .LexicalTheme__link {
+[theme="dark"] .LexicalTheme__link {
   color: #90caf9;
 }
 
-[theme=dark] .LexicalTheme__code {
+[theme="dark"] .LexicalTheme__code {
   background-color: rgb(30, 30, 30);
   color: #9cdcfe;
 }
 
-[theme=dark] .LexicalTheme__code:before {
+[theme="dark"] .LexicalTheme__code:before {
   background-color: #333;
   color: #858585;
   border-right-color: #1e1e1e;
 }
 
-[theme=dark] .LexicalTheme__code:after {
+[theme="dark"] .LexicalTheme__code:after {
   color: #858585;
 }
 
-[theme=dark] .LexicalTheme__tableCell {
+[theme="dark"] .LexicalTheme__tableCell {
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-[theme=dark] .LexicalTheme__tableCellHeader {
+[theme="dark"] .LexicalTheme__tableCellHeader {
   background-color: rgba(255, 255, 255, 0.03);
 }
 
-[theme='dark'] .details__container {
+[theme="dark"] .details__container {
   border-color: rgba(255, 255, 255, 0.12);
 }
 
-[theme='dark'] .details__summary:hover,
-[theme='dark'] .details__container[open]>.details__summary {
+[theme="dark"] .details__summary:hover,
+[theme="dark"] .details__container[open] > .details__summary {
   background-color: rgba(255, 255, 255, 0.08);
 }
 
-[theme=dark] .LexicalTheme__image.LexicalTheme__darkModeFilter :is(img, svg) {
+[theme="dark"] .LexicalTheme__image.LexicalTheme__darkModeFilter :is(img, svg) {
   filter: invert(93%) hue-rotate(180deg);
 }
 
@@ -889,7 +890,7 @@ iframe {
   }
 
   .details__summary:hover,
-  .details__container[open]>.details__summary {
+  .details__container[open] > .details__summary {
     background-color: rgba(255, 255, 255, 0.08);
   }
 

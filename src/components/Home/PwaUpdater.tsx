@@ -1,7 +1,7 @@
-"use client"
-import { useDispatch, actions } from '@/store';
+"use client";
+import { actions, useDispatch } from "@/store";
 import { useEffect } from "react";
-import type { Workbox } from 'workbox-window';
+import type { Workbox } from "workbox-window";
 
 declare global {
   interface Window {
@@ -20,20 +20,19 @@ const PwaUpdater = () => {
     ) {
       const wb = window.workbox;
       wb.addEventListener("waiting", () => {
-        wb.messageSkipWaiting()
+        wb.messageSkipWaiting();
       });
       wb.addEventListener("controlling", (event) => {
         dispatch(actions.announce({
-          message:
-          {
+          message: {
             title: event.isUpdate ? "Update Complete" : "App Installed",
-            subtitle: "Please refresh to use the latest version"
+            subtitle: "Please refresh to use the latest version",
           },
           timeout: 6000,
           action: {
             label: "Refresh",
-            onClick: "window.location.reload()"
-          }
+            onClick: "window.location.reload()",
+          },
         }));
       });
 
@@ -43,16 +42,16 @@ const PwaUpdater = () => {
           dispatch(actions.announce({
             message: {
               title: "Downloading Update",
-              subtitle: "App is being updated in the background"
+              subtitle: "App is being updated in the background",
             },
-            timeout: 3000
+            timeout: 3000,
           }));
-        }
+        };
       });
     }
   }, []);
 
   return null;
-}
+};
 
 export default PwaUpdater;

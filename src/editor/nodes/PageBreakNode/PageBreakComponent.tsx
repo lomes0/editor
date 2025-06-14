@@ -1,20 +1,25 @@
-"use client"
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
-import { mergeRegister } from '@lexical/utils';
+"use client";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { useLexicalNodeSelection } from "@lexical/react/useLexicalNodeSelection";
+import { mergeRegister } from "@lexical/utils";
 import {
   $getNodeByKey,
   $getSelection,
   $isNodeSelection,
-  CLICK_COMMAND, COMMAND_PRIORITY_LOW, KEY_BACKSPACE_COMMAND,
-  KEY_DELETE_COMMAND, NodeKey
-} from 'lexical';
-import { useCallback, useEffect } from 'react';
-import { $isPageBreakNode } from '.';
+  CLICK_COMMAND,
+  COMMAND_PRIORITY_LOW,
+  KEY_BACKSPACE_COMMAND,
+  KEY_DELETE_COMMAND,
+  NodeKey,
+} from "lexical";
+import { useCallback, useEffect } from "react";
+import { $isPageBreakNode } from ".";
 
-function PageBreakComponent({ nodeKey }: { nodeKey: NodeKey; }) {
+function PageBreakComponent({ nodeKey }: { nodeKey: NodeKey }) {
   const [editor] = useLexicalComposerContext();
-  const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey);
+  const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(
+    nodeKey,
+  );
 
   const onDelete = useCallback(
     (event: KeyboardEvent) => {
@@ -28,7 +33,7 @@ function PageBreakComponent({ nodeKey }: { nodeKey: NodeKey; }) {
       }
       return false;
     },
-    [isSelected, nodeKey]
+    [isSelected, nodeKey],
   );
 
   useEffect(() => {
@@ -48,25 +53,25 @@ function PageBreakComponent({ nodeKey }: { nodeKey: NodeKey; }) {
 
           return false;
         },
-        COMMAND_PRIORITY_LOW
+        COMMAND_PRIORITY_LOW,
       ),
       editor.registerCommand(
         KEY_DELETE_COMMAND,
         onDelete,
-        COMMAND_PRIORITY_LOW
+        COMMAND_PRIORITY_LOW,
       ),
       editor.registerCommand(
         KEY_BACKSPACE_COMMAND,
         onDelete,
-        COMMAND_PRIORITY_LOW
-      )
+        COMMAND_PRIORITY_LOW,
+      ),
     );
   }, [clearSelection, editor, isSelected, nodeKey, onDelete, setSelected]);
 
   useEffect(() => {
     const pbElem = editor.getElementByKey(nodeKey);
     if (pbElem !== null) {
-      pbElem.className = isSelected ? 'selected' : '';
+      pbElem.className = isSelected ? "selected" : "";
     }
   }, [editor, isSelected, nodeKey]);
 

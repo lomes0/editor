@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import GraphDialog from "./GraphDialog";
 import SketchDialog from "./Sketch";
 import ImageDialog from "./ImageDialog";
@@ -10,13 +10,13 @@ import OCRDialog from "./OCRDialog";
 import AIDialog from "./AIDialog";
 
 export {
-  GraphDialog,
-  SketchDialog,
-  ImageDialog,
-  TableDialog,
-  IFrameDialog,
-  LinkDialog,
-  LayoutDialog,
-  OCRDialog,
   AIDialog,
+  GraphDialog,
+  IFrameDialog,
+  ImageDialog,
+  LayoutDialog,
+  LinkDialog,
+  OCRDialog,
+  SketchDialog,
+  TableDialog,
 };

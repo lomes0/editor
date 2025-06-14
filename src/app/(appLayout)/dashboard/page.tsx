@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Dashboard from "@/components/Dashboard";
 
 export const metadata: Metadata = {
-  title: 'Dashboard',
-  description: 'Manage your account on Editor'
-}
+  title: "Dashboard",
+  description: "Manage your account on Editor",
+};
 
 const page = () => <Dashboard />;
 

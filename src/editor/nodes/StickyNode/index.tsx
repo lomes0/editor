@@ -3,7 +3,6 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
  */
 
 import type {
@@ -16,16 +15,24 @@ import type {
   SerializedEditor,
   SerializedLexicalNode,
   Spread,
-} from 'lexical';
+} from "lexical";
 
-import { $createNodeSelection, $getRoot, $getSelection, $setSelection, DecoratorNode, createEditor, isHTMLElement } from 'lexical';
-import * as React from 'react';
-import { editorConfig } from './config';
+import {
+  $createNodeSelection,
+  $getRoot,
+  $getSelection,
+  $setSelection,
+  createEditor,
+  DecoratorNode,
+  isHTMLElement,
+} from "lexical";
+import * as React from "react";
+import { editorConfig } from "./config";
 import { $generateHtmlFromNodes } from "@lexical/html";
-import StickyComponent from './StickyComponent';
-import htmr from 'htmr';
+import StickyComponent from "./StickyComponent";
+import htmr from "htmr";
 import { JSX } from "react";
-import { getStyleObjectFromRawCSS, floatWrapperElement } from '../utils';
+import { floatWrapperElement, getStyleObjectFromRawCSS } from "../utils";
 
 export interface StickyPayload {
   editor?: SerializedEditor;
@@ -34,8 +41,8 @@ export interface StickyPayload {
 
 export type SerializedStickyNode = Spread<
   {
-    editor: SerializedEditor,
-    style: string,
+    editor: SerializedEditor;
+    style: string;
   },
   SerializedLexicalNode
 >;
@@ -45,7 +52,7 @@ export class StickyNode extends DecoratorNode<JSX.Element> {
   __style: string;
 
   static getType(): string {
-    return 'sticky';
+    return "sticky";
   }
 
   static clone(node: StickyNode): StickyNode {
@@ -60,11 +67,15 @@ export class StickyNode extends DecoratorNode<JSX.Element> {
     const node = $createStickyNode({ style });
     const nestedEditor = node.__editor;
     try {
-      const editorState = nestedEditor.parseEditorState(editor?.editorState);
+      const editorState = nestedEditor.parseEditorState(
+        editor?.editorState,
+      );
       if (!editorState.isEmpty()) {
         nestedEditor.setEditorState(editorState);
       }
-    } catch (e) { console.error(e) }
+    } catch (e) {
+      console.error(e);
+    }
     return node;
   }
 
@@ -82,7 +93,7 @@ export class StickyNode extends DecoratorNode<JSX.Element> {
     return {
       editor: this.__editor.toJSON(),
       style: this.__style,
-      type: 'sticky',
+      type: "sticky",
       version: 1,
     };
   }
@@ -96,16 +107,16 @@ export class StickyNode extends DecoratorNode<JSX.Element> {
       });
     }
     return { element };
-  };
+  }
 
   createDOM(config: EditorConfig, editor: LexicalEditor): HTMLElement {
     this.__editor._parentEditor = editor;
-    const dom = document.createElement('div');
-    dom.className = 'sticky-note';
-    dom.setAttribute('theme', 'light');
+    const dom = document.createElement("div");
+    dom.className = "sticky-note";
+    dom.setAttribute("theme", "light");
     const style = getStyleObjectFromRawCSS(this.__style);
     const color = style.color;
-    const backgroundColor = style['background-color'];
+    const backgroundColor = style["background-color"];
     const float = style.float;
     dom.style.color = color;
     dom.style.backgroundColor = backgroundColor;
@@ -113,11 +124,15 @@ export class StickyNode extends DecoratorNode<JSX.Element> {
     return dom;
   }
 
-  updateDOM(prevNode: StickyNode, dom: HTMLElement, config: EditorConfig): boolean {
+  updateDOM(
+    prevNode: StickyNode,
+    dom: HTMLElement,
+    config: EditorConfig,
+  ): boolean {
     if (this.__style !== prevNode.__style) {
       const style = getStyleObjectFromRawCSS(this.__style);
       const color = style.color;
-      const backgroundColor = style['background-color'];
+      const backgroundColor = style["background-color"];
       const float = style.float;
       dom.style.color = color;
       dom.style.backgroundColor = backgroundColor;
@@ -162,9 +177,10 @@ export class StickyNode extends DecoratorNode<JSX.Element> {
     }
   }
 
-
   decorate(): JSX.Element {
-    const html = this.__editor.getEditorState().read(() => $generateHtmlFromNodes(this.__editor));
+    const html = this.__editor.getEditorState().read(() =>
+      $generateHtmlFromNodes(this.__editor)
+    );
     const children = htmr(html);
 
     return (
@@ -189,11 +205,13 @@ export function $isStickyNode(
 }
 
 export function $createStickyNode(payload?: StickyPayload): StickyNode {
-  const style = payload?.style ?? 'float: right; background-color: #bceac4;';
+  const style = payload?.style ?? "float: right; background-color: #bceac4;";
   const node = new StickyNode(style);
   if (payload?.editor) {
     const nestedEditor = node.__editor;
-    const editorState = nestedEditor.parseEditorState(payload.editor.editorState);
+    const editorState = nestedEditor.parseEditorState(
+      payload.editor.editorState,
+    );
     if (!editorState.isEmpty()) {
       nestedEditor.setEditorState(editorState);
     }

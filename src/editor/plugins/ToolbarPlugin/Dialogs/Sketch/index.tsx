@@ -1,36 +1,66 @@
-"use client"
-import type { LexicalEditor } from 'lexical';
-import { INSERT_SKETCH_COMMAND, InsertSketchPayload } from '@/editor/plugins/SketchPlugin';
-import { useEffect, useState, memo, useCallback } from 'react';
-import { $isSketchNode } from '@/editor/nodes/SketchNode';
-import { SET_DIALOGS_COMMAND } from '../commands';
-import { getImageDimensions } from '@/editor/nodes/utils';
-import { useTheme } from '@mui/material/styles';
-import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, debounce } from '@mui/material';
-import dynamic from 'next/dynamic';
-import { ImageNode } from '@/editor/nodes/ImageNode';
-import { ALERT_COMMAND } from '@/editor/commands';
-import { v4 as uuid } from 'uuid';
-import { ExcalidrawElement, ExcalidrawImageElement, FileId } from '@excalidraw/excalidraw/element/types';
-import { ImportedLibraryData } from '@excalidraw/excalidraw/data/types';
-import type { ExcalidrawImperativeAPI, ExcalidrawProps, DataURL, LibraryItems, BinaryFiles, AppState, BinaryFileData } from '@excalidraw/excalidraw/types';
-import '@excalidraw/excalidraw/index.css';
+"use client";
+import type { LexicalEditor } from "lexical";
+import {
+  INSERT_SKETCH_COMMAND,
+  InsertSketchPayload,
+} from "@/editor/plugins/SketchPlugin";
+import { memo, useCallback, useEffect, useState } from "react";
+import { $isSketchNode } from "@/editor/nodes/SketchNode";
+import { SET_DIALOGS_COMMAND } from "../commands";
+import { getImageDimensions } from "@/editor/nodes/utils";
+import { useTheme } from "@mui/material/styles";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  debounce,
+  Dialog,
+  DialogActions,
+  DialogContent,
+} from "@mui/material";
+import dynamic from "next/dynamic";
+import { ImageNode } from "@/editor/nodes/ImageNode";
+import { ALERT_COMMAND } from "@/editor/commands";
+import { v4 as uuid } from "uuid";
+import {
+  ExcalidrawElement,
+  ExcalidrawImageElement,
+  FileId,
+} from "@excalidraw/excalidraw/element/types";
+import { ImportedLibraryData } from "@excalidraw/excalidraw/data/types";
+import type {
+  AppState,
+  BinaryFileData,
+  BinaryFiles,
+  DataURL,
+  ExcalidrawImperativeAPI,
+  ExcalidrawProps,
+  LibraryItems,
+} from "@excalidraw/excalidraw/types";
+import "@excalidraw/excalidraw/index.css";
 
-const Excalidraw = dynamic<ExcalidrawProps>(() => import('@excalidraw/excalidraw').then((module) => ({ default: module.Excalidraw })), { ssr: false });
-const AddLibraries = dynamic(() => import('./AddLibraries'), { ssr: false });
+const Excalidraw = dynamic<ExcalidrawProps>(
+  () =>
+    import("@excalidraw/excalidraw").then((module) => ({
+      default: module.Excalidraw,
+    })),
+  { ssr: false },
+);
+const AddLibraries = dynamic(() => import("./AddLibraries"), { ssr: false });
 
-export type ExcalidrawElementFragment = { isDeleted?: boolean; };
+export type ExcalidrawElementFragment = { isDeleted?: boolean };
 declare global {
   interface Window {
     EXCALIDRAW_ASSET_PATH: string;
   }
 }
 
-window.EXCALIDRAW_ASSET_PATH = "/"
+window.EXCALIDRAW_ASSET_PATH = "/";
 
 export const useCallbackRefState = () => {
-  const [refValue, setRefValue] =
-    useState<ExcalidrawImperativeAPI | null>(null);
+  const [refValue, setRefValue] = useState<ExcalidrawImperativeAPI | null>(
+    null,
+  );
   const refCallback = useCallback(
     (value: ExcalidrawImperativeAPI | null) => setRefValue(value),
     [],
@@ -38,7 +68,9 @@ export const useCallbackRefState = () => {
   return [refValue, refCallback] as const;
 };
 
-function SketchDialog({ editor, node }: { editor: LexicalEditor, node: ImageNode | null; }) {
+function SketchDialog(
+  { editor, node }: { editor: LexicalEditor; node: ImageNode | null },
+) {
   const [excalidrawAPI, excalidrawAPIRefCallback] = useCallbackRefState();
   const [lastSceneVersion, setLastSceneVersion] = useState(0);
   const theme = useTheme();
@@ -50,15 +82,16 @@ function SketchDialog({ editor, node }: { editor: LexicalEditor, node: ImageNode
 
   const insertSketch = (payload: InsertSketchPayload) => {
     if (!$isSketchNode(node)) {
-      editor.dispatchCommand(INSERT_SKETCH_COMMAND, payload,);
-    }
-    else editor.update(() => node.update(payload));
+      editor.dispatchCommand(INSERT_SKETCH_COMMAND, payload);
+    } else editor.update(() => node.update(payload));
   };
 
   const handleSubmit = async () => {
     const elements = excalidrawAPI?.getSceneElements();
     const files = excalidrawAPI?.getFiles();
-    const exportToSvg = await import('@excalidraw/excalidraw').then((module) => module.exportToSvg).catch(console.error);
+    const exportToSvg = await import("@excalidraw/excalidraw").then((
+      module,
+    ) => module.exportToSvg).catch(console.error);
     if (!elements || !files || !exportToSvg) return;
     const element: SVGElement = await exportToSvg({
       appState: {
@@ -82,8 +115,10 @@ function SketchDialog({ editor, node }: { editor: LexicalEditor, node: ImageNode
   };
 
   const closeDialog = () => {
-    editor.dispatchCommand(SET_DIALOGS_COMMAND, { sketch: { open: false } });
-  }
+    editor.dispatchCommand(SET_DIALOGS_COMMAND, {
+      sketch: { open: false },
+    });
+  };
 
   const handleClose = async () => {
     function discard() {
@@ -101,7 +136,7 @@ function SketchDialog({ editor, node }: { editor: LexicalEditor, node: ImageNode
         actions: [
           { label: "Cancel", id: uuid() },
           { label: "Discard", id: uuid() },
-        ]
+        ],
       };
       editor.dispatchCommand(ALERT_COMMAND, alert);
       const id = await new Promise((resolve) => {
@@ -109,25 +144,43 @@ function SketchDialog({ editor, node }: { editor: LexicalEditor, node: ImageNode
           const target = event.target as HTMLElement;
           const button = target.closest("button");
           const paper = target.closest(".MuiDialog-paper");
-          if (paper && !button) return document.addEventListener("click", handler, { once: true });
+          if (paper && !button) {
+            return document.addEventListener("click", handler, {
+              once: true,
+            });
+          }
           resolve(button?.id ?? null);
         };
-        setTimeout(() => { document.addEventListener("click", handler, { once: true }); }, 0);
+        setTimeout(() => {
+          document.addEventListener("click", handler, { once: true });
+        }, 0);
       });
       if (id === alert.actions[1].id) discard();
     } else cancel();
-  }
+  };
 
   async function restoreSerializedScene(serialized: string) {
     const scene = JSON.parse(serialized);
     const files = Object.values(scene.files) as BinaryFileData[];
     if (files.length) excalidrawAPI?.addFiles(files);
-    const { getNonDeletedElements, isLinearElement } = await import('@excalidraw/excalidraw')
-      .then((module) => ({ getNonDeletedElements: module.getNonDeletedElements, isLinearElement: module.isLinearElement }));
-    const elements = getNonDeletedElements(scene.elements).map((element: ExcalidrawElement) =>
-      isLinearElement(element) ? { ...element, lastCommittedPoint: null } : element,
+    const { getNonDeletedElements, isLinearElement } = await import(
+      "@excalidraw/excalidraw"
+    )
+      .then((module) => ({
+        getNonDeletedElements: module.getNonDeletedElements,
+        isLinearElement: module.isLinearElement,
+      }));
+    const elements = getNonDeletedElements(scene.elements).map((
+      element: ExcalidrawElement,
+    ) =>
+      isLinearElement(element)
+        ? { ...element, lastCommittedPoint: null }
+        : element
     );
-    return excalidrawAPI?.updateScene({ elements, appState: { theme: theme.palette.mode } });
+    return excalidrawAPI?.updateScene({
+      elements,
+      appState: { theme: theme.palette.mode },
+    });
   }
 
   const loadSceneOrLibrary = async () => {
@@ -135,11 +188,12 @@ function SketchDialog({ editor, node }: { editor: LexicalEditor, node: ImageNode
     if (unsavedScene) {
       const alert = {
         title: "Restore last unsaved Changes",
-        content: "You've unsaved changes from last session. Do you want to restore them?",
+        content:
+          "You've unsaved changes from last session. Do you want to restore them?",
         actions: [
           { label: "Discard", id: uuid() },
           { label: "Restore", id: uuid() },
-        ]
+        ],
       };
       editor.dispatchCommand(ALERT_COMMAND, alert);
       const id = await new Promise((resolve) => {
@@ -147,16 +201,24 @@ function SketchDialog({ editor, node }: { editor: LexicalEditor, node: ImageNode
           const target = event.target as HTMLElement;
           const button = target.closest("button");
           const paper = target.closest(".MuiDialog-paper");
-          if (paper && !button) return document.addEventListener("click", handler, { once: true });
+          if (paper && !button) {
+            return document.addEventListener("click", handler, {
+              once: true,
+            });
+          }
           resolve(button?.id ?? null);
         };
-        setTimeout(() => { document.addEventListener("click", handler, { once: true }); }, 0);
+        setTimeout(() => {
+          document.addEventListener("click", handler, { once: true });
+        }, 0);
       });
       if (!id || id === alert.actions[0].id) {
         clearLocalStorage();
         tryLoadSceneFromNode();
       }
-      if (id === alert.actions[1].id) restoreSerializedScene(unsavedScene);
+      if (id === alert.actions[1].id) {
+        restoreSerializedScene(unsavedScene);
+      }
     } else tryLoadSceneFromNode();
   };
 
@@ -165,23 +227,44 @@ function SketchDialog({ editor, node }: { editor: LexicalEditor, node: ImageNode
     if (!src) return;
     const blob = await (await fetch(src)).blob();
     try {
-      const loadSceneOrLibraryFromBlob = await import('@excalidraw/excalidraw').then((module) => module.loadSceneOrLibraryFromBlob);
-      const MIME_TYPES = await import('@excalidraw/excalidraw').then((module) => module.MIME_TYPES);
-      const getSceneVersion = await import('@excalidraw/excalidraw').then((module) => module.getSceneVersion);
+      const loadSceneOrLibraryFromBlob = await import(
+        "@excalidraw/excalidraw"
+      ).then((module) => module.loadSceneOrLibraryFromBlob);
+      const MIME_TYPES = await import("@excalidraw/excalidraw").then((
+        module,
+      ) => module.MIME_TYPES);
+      const getSceneVersion = await import("@excalidraw/excalidraw").then(
+        (module) => module.getSceneVersion,
+      );
       if ($isSketchNode(node)) {
         const elements = node.getValue();
         if (elements) {
           setLastSceneVersion(getSceneVersion(elements));
-          excalidrawAPI?.updateScene({ elements, appState: { theme: theme.palette.mode } })
+          excalidrawAPI?.updateScene({
+            elements,
+            appState: { theme: theme.palette.mode },
+          });
         } else {
-          const contents = await loadSceneOrLibraryFromBlob(blob, null, elements ?? null);
+          const contents = await loadSceneOrLibraryFromBlob(
+            blob,
+            null,
+            elements ?? null,
+          );
           if (contents.type === MIME_TYPES.excalidraw) {
-            excalidrawAPI?.addFiles(Object.values(contents.data.files));
-            setLastSceneVersion(getSceneVersion(contents.data.elements));
-            excalidrawAPI?.updateScene({ ...contents.data as any, appState: { theme: theme.palette.mode } });
+            excalidrawAPI?.addFiles(
+              Object.values(contents.data.files),
+            );
+            setLastSceneVersion(
+              getSceneVersion(contents.data.elements),
+            );
+            excalidrawAPI?.updateScene({
+              ...contents.data as any,
+              appState: { theme: theme.palette.mode },
+            });
           } else if (contents.type === MIME_TYPES.excalidrawlib) {
             excalidrawAPI?.updateLibrary({
-              libraryItems: (contents.data as ImportedLibraryData).libraryItems!,
+              libraryItems: (contents.data as ImportedLibraryData)
+                .libraryItems!,
               openLibraryMenu: true,
             });
           }
@@ -196,13 +279,18 @@ function SketchDialog({ editor, node }: { editor: LexicalEditor, node: ImageNode
 
   async function convertImagetoSketch(src: string) {
     const now = Date.now();
-    const dimensions = { width: node?.getWidth() ?? 0, height: node?.getHeight() ?? 0 }
+    const dimensions = {
+      width: node?.getWidth() ?? 0,
+      height: node?.getHeight() ?? 0,
+    };
     if (!dimensions.width || !dimensions.height) {
       const size = await getImageDimensions(src);
       dimensions.width = size.width;
       dimensions.height = size.height;
     }
-    const getSceneVersion = await import('@excalidraw/excalidraw').then((module) => module.getSceneVersion);
+    const getSceneVersion = await import("@excalidraw/excalidraw").then((
+      module,
+    ) => module.getSceneVersion);
     fetch(src).then((res) => res.blob()).then((blob) => {
       const mimeType = blob.type;
       const reader = new FileReader();
@@ -253,10 +341,15 @@ function SketchDialog({ editor, node }: { editor: LexicalEditor, node: ImageNode
           excalidrawAPI?.updateScene({
             elements: [imageElement],
             appState: {
-              activeTool: { type: "freedraw", lastActiveTool: null, customType: null, locked: true },
+              activeTool: {
+                type: "freedraw",
+                lastActiveTool: null,
+                customType: null,
+                locked: true,
+              },
               currentItemStrokeWidth: 0.5,
-              theme: theme.palette.mode
-            }
+              theme: theme.palette.mode,
+            },
           });
         }
       };
@@ -273,16 +366,25 @@ function SketchDialog({ editor, node }: { editor: LexicalEditor, node: ImageNode
     localStorage.setItem("excalidraw-library", serializedItems);
   };
 
-  const saveToLocalStorage = debounce(async (elements: readonly ExcalidrawElement[], appState: AppState, files: BinaryFiles) => {
-    if (elements.length === 0) return;
-    const scene = { elements, files };
-    const getSceneVersion = await import('@excalidraw/excalidraw').then((module) => module.getSceneVersion);
-    const sceneVersion = getSceneVersion(elements);
-    if (lastSceneVersion && sceneVersion === lastSceneVersion) return;
-    setLastSceneVersion(sceneVersion);
-    const serialized = JSON.stringify(scene);
-    localStorage.setItem("excalidraw", serialized);
-  }, 300);
+  const saveToLocalStorage = debounce(
+    async (
+      elements: readonly ExcalidrawElement[],
+      appState: AppState,
+      files: BinaryFiles,
+    ) => {
+      if (elements.length === 0) return;
+      const scene = { elements, files };
+      const getSceneVersion = await import("@excalidraw/excalidraw").then(
+        (module) => module.getSceneVersion,
+      );
+      const sceneVersion = getSceneVersion(elements);
+      if (lastSceneVersion && sceneVersion === lastSceneVersion) return;
+      setLastSceneVersion(sceneVersion);
+      const serialized = JSON.stringify(scene);
+      localStorage.setItem("excalidraw", serialized);
+    },
+    300,
+  );
 
   const clearLocalStorage = () => {
     localStorage.removeItem("excalidraw");
@@ -295,42 +397,66 @@ function SketchDialog({ editor, node }: { editor: LexicalEditor, node: ImageNode
     if (!navigation) return;
 
     const preventBackNavigation = (event: any) => {
-      if (event.navigationType === 'push') return;
+      if (event.navigationType === "push") return;
       event.preventDefault();
       handleClose();
     };
 
-    navigation.addEventListener('navigate', preventBackNavigation);
+    navigation.addEventListener("navigate", preventBackNavigation);
     return () => {
-      document.body.classList.remove('fullscreen');
-      navigation.removeEventListener('navigate', preventBackNavigation);
+      document.body.classList.remove("fullscreen");
+      navigation.removeEventListener("navigate", preventBackNavigation);
     };
   }, []);
 
-  return <Dialog open fullScreen={true} onClose={handleClose} disableEscapeKeyDown
-    TransitionProps={{
-      onEntered() { document.body.classList.add('fullscreen') },
-    }}>
-    <DialogContent sx={{ p: 0, overflow: "hidden" }}>
-      {loading && <Box sx={{ display: 'flex', height: '100%', justifyContent: 'center', alignItems: 'center' }}><CircularProgress size={36} disableShrink /></Box>}
-      <Excalidraw
-        excalidrawAPI={excalidrawAPIRefCallback}
-        theme={theme.palette.mode}
-        onLibraryChange={onLibraryChange}
-        onChange={saveToLocalStorage}
-        langCode='en'
-      />
-      {excalidrawAPI && <AddLibraries excalidrawAPI={excalidrawAPI} />}
-    </DialogContent>
-    <DialogActions>
-      <Button autoFocus onClick={handleClose}>
-        Cancel
-      </Button>
-      <Button onClick={handleSubmit}>
-        {!node ? "Insert" : "Update"}
-      </Button>
-    </DialogActions>
-  </Dialog>;
+  return (
+    <Dialog
+      open
+      fullScreen={true}
+      onClose={handleClose}
+      disableEscapeKeyDown
+      TransitionProps={{
+        onEntered() {
+          document.body.classList.add("fullscreen");
+        },
+      }}
+    >
+      <DialogContent sx={{ p: 0, overflow: "hidden" }}>
+        {loading && (
+          <Box
+            sx={{
+              display: "flex",
+              height: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <CircularProgress size={36} disableShrink />
+          </Box>
+        )}
+        <Excalidraw
+          excalidrawAPI={excalidrawAPIRefCallback}
+          theme={theme.palette.mode}
+          onLibraryChange={onLibraryChange}
+          onChange={saveToLocalStorage}
+          langCode="en"
+        />
+        {excalidrawAPI && (
+          <AddLibraries
+            excalidrawAPI={excalidrawAPI}
+          />
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button autoFocus onClick={handleClose}>
+          Cancel
+        </Button>
+        <Button onClick={handleSubmit}>
+          {!node ? "Insert" : "Update"}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 }
 
 export default memo(SketchDialog);

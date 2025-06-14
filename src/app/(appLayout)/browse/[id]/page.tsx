@@ -2,18 +2,20 @@ import type { Metadata } from "next";
 import DocumentBrowser from "@/components/DocumentBrowser";
 
 export const metadata: Metadata = {
-  title: 'Folder Contents | MathEditor',
-  description: 'Browse and manage documents and folders in this directory'
-}
+  title: "Folder Contents | MathEditor",
+  description: "Browse and manage documents and folders in this directory",
+};
 
 // Define the page component props
 type Props = {
-  params: Promise<{
-    id: string;
-  }> | {
-    id: string;
-  }
-}
+  params:
+    | Promise<{
+      id: string;
+    }>
+    | {
+      id: string;
+    };
+};
 
 // Make the component async and properly handle params
 export default async function DirectoryPage({ params }: Props) {

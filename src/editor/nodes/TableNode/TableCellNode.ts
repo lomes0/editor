@@ -1,8 +1,8 @@
 import {
-  TableCellNode as LexicalTableCellNode,
   SerializedTableCellNode as LexicalSerializedTableCellNode,
   TableCellHeaderStates,
-} from '@lexical/table';
+  TableCellNode as LexicalTableCellNode,
+} from "@lexical/table";
 
 import type {
   DOMConversionMap,
@@ -12,7 +12,7 @@ import type {
   LexicalEditor,
   LexicalNode,
   NodeKey,
-} from 'lexical';
+} from "lexical";
 
 import {
   $applyNodeReplacement,
@@ -21,9 +21,9 @@ import {
   $isLineBreakNode,
   $isTextNode,
   isHTMLElement,
-} from 'lexical';
+} from "lexical";
 
-import { getStyleObjectFromRawCSS } from '../utils';
+import { getStyleObjectFromRawCSS } from "../utils";
 
 export type TableCellHeaderState =
   typeof TableCellHeaderStates[keyof typeof TableCellHeaderStates];
@@ -36,7 +36,7 @@ export type SerializedTableCellNode = LexicalSerializedTableCellNode & {
 export class TableCellNode extends LexicalTableCellNode {
   __style: string;
   static getType(): string {
-    return 'matheditor-tablecell';
+    return "matheditor-tablecell";
   }
 
   static clone(node: TableCellNode): TableCellNode {
@@ -78,7 +78,7 @@ export class TableCellNode extends LexicalTableCellNode {
     cellNode.__style = serializedNode.style;
     // set the background color from the style for selection highlight in base lexical node
     const styles = getStyleObjectFromRawCSS(cellNode.__style);
-    const backgroundColor = styles['background-color'];
+    const backgroundColor = styles["background-color"];
     if (backgroundColor) {
       cellNode.__backgroundColor = backgroundColor;
     }
@@ -92,15 +92,15 @@ export class TableCellNode extends LexicalTableCellNode {
     key?: NodeKey,
   ) {
     super(headerState, colSpan, width, key);
-    this.__style = '';
+    this.__style = "";
   }
 
   createDOM(config: EditorConfig): HTMLTableCellElement {
     const element = super.createDOM(config);
     const styles = getStyleObjectFromRawCSS(this.__style);
     const color = styles.color;
-    const backgroundColor = styles['background-color'];
-    const writingMode = styles['writing-mode'];
+    const backgroundColor = styles["background-color"];
+    const writingMode = styles["writing-mode"];
     element.style.color = color;
     element.style.backgroundColor = backgroundColor;
     element.style.writingMode = writingMode;
@@ -112,23 +112,23 @@ export class TableCellNode extends LexicalTableCellNode {
 
     if (element && isHTMLElement(element)) {
       element.setAttribute(
-        'data-temporary-table-cell-lexical-key',
+        "data-temporary-table-cell-lexical-key",
         this.getKey(),
       );
       const styles = getStyleObjectFromRawCSS(this.__style);
       const color = styles.color;
-      const backgroundColor = styles['background-color'];
-      const writingMode = styles['writing-mode'];
+      const backgroundColor = styles["background-color"];
+      const writingMode = styles["writing-mode"];
       element.style.color = color;
       element.style.backgroundColor = backgroundColor;
       element.style.writingMode = writingMode;
 
       // linkedom does not implement setting colSpan and rowSpan
       if (this.__colSpan > 1) {
-        element.setAttribute('colspan', this.__colSpan.toString());
+        element.setAttribute("colspan", this.__colSpan.toString());
       }
       if (this.__rowSpan > 1) {
-        element.setAttribute('rowspan', this.__rowSpan.toString());
+        element.setAttribute("rowspan", this.__rowSpan.toString());
       }
     }
 
@@ -145,7 +145,6 @@ export class TableCellNode extends LexicalTableCellNode {
     };
   }
 
-
   getStyle(): string {
     return this.getLatest().__style;
   }
@@ -155,20 +154,19 @@ export class TableCellNode extends LexicalTableCellNode {
     self.__style = style;
     // set the background color from the style for selection highlight in base lexical node
     const styles = getStyleObjectFromRawCSS(style);
-    const backgroundColor = styles['background-color'];
+    const backgroundColor = styles["background-color"];
     if (backgroundColor) {
       self.__backgroundColor = backgroundColor;
     }
     return self;
   }
-  
+
   updateDOM(prevNode: this): boolean {
     return (
       super.updateDOM(prevNode) ||
       prevNode.__style !== this.__style
     );
   }
-
 }
 
 export function $convertTableCellNodeElement(
@@ -185,7 +183,7 @@ export function $convertTableCellNodeElement(
   }
 
   const tableCellNode = $createTableCellNode(
-    nodeName === 'th'
+    nodeName === "th"
       ? TableCellHeaderStates.ROW
       : TableCellHeaderStates.NO_STATUS,
     domNode_.colSpan,
@@ -197,12 +195,14 @@ export function $convertTableCellNodeElement(
   tableCellNode.__style = cssText;
 
   const style = domNode_.style;
-  const textDecoration = style.textDecoration.split(' ');
-  const hasBoldFontWeight =
-    style.fontWeight === '700' || style.fontWeight === 'bold';
-  const hasLinethroughTextDecoration = textDecoration.includes('line-through');
-  const hasItalicFontStyle = style.fontStyle === 'italic';
-  const hasUnderlineTextDecoration = textDecoration.includes('underline');
+  const textDecoration = style.textDecoration.split(" ");
+  const hasBoldFontWeight = style.fontWeight === "700" ||
+    style.fontWeight === "bold";
+  const hasLinethroughTextDecoration = textDecoration.includes(
+    "line-through",
+  );
+  const hasItalicFontStyle = style.fontStyle === "italic";
+  const hasUnderlineTextDecoration = textDecoration.includes("underline");
   return {
     after: (childLexicalNodes) => {
       if (childLexicalNodes.length === 0) {
@@ -211,26 +211,29 @@ export function $convertTableCellNodeElement(
       return childLexicalNodes;
     },
     forChild: (lexicalNode, parentLexicalNode) => {
-      if ($isTableCellNode(parentLexicalNode) && !$isElementNode(lexicalNode)) {
+      if (
+        $isTableCellNode(parentLexicalNode) &&
+        !$isElementNode(lexicalNode)
+      ) {
         const paragraphNode = $createParagraphNode();
         if (
           $isLineBreakNode(lexicalNode) &&
-          lexicalNode.getTextContent() === '\n'
+          lexicalNode.getTextContent() === "\n"
         ) {
           return null;
         }
         if ($isTextNode(lexicalNode)) {
           if (hasBoldFontWeight) {
-            lexicalNode.toggleFormat('bold');
+            lexicalNode.toggleFormat("bold");
           }
           if (hasLinethroughTextDecoration) {
-            lexicalNode.toggleFormat('strikethrough');
+            lexicalNode.toggleFormat("strikethrough");
           }
           if (hasItalicFontStyle) {
-            lexicalNode.toggleFormat('italic');
+            lexicalNode.toggleFormat("italic");
           }
           if (hasUnderlineTextDecoration) {
-            lexicalNode.toggleFormat('underline');
+            lexicalNode.toggleFormat("underline");
           }
         }
         paragraphNode.append(lexicalNode);
@@ -248,7 +251,9 @@ export function $createTableCellNode(
   colSpan = 1,
   width?: number,
 ): TableCellNode {
-  return $applyNodeReplacement(new TableCellNode(headerState, colSpan, width));
+  return $applyNodeReplacement(
+    new TableCellNode(headerState, colSpan, width),
+  );
 }
 
 export function $isTableCellNode(

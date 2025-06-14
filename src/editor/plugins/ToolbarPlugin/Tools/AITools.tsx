@@ -1,29 +1,67 @@
-"use client"
-import { $addUpdateTag, $getPreviousSelection, $getSelection, $isRangeSelection, $setSelection, BLUR_COMMAND, CLICK_COMMAND, COMMAND_PRIORITY_CRITICAL, KEY_DOWN_COMMAND, LexicalEditor, LexicalNode, SELECTION_CHANGE_COMMAND, SerializedParagraphNode, } from "lexical";
+"use client";
+import {
+  $addUpdateTag,
+  $getPreviousSelection,
+  $getSelection,
+  $isRangeSelection,
+  $setSelection,
+  BLUR_COMMAND,
+  CLICK_COMMAND,
+  COMMAND_PRIORITY_CRITICAL,
+  KEY_DOWN_COMMAND,
+  LexicalEditor,
+  LexicalNode,
+  SELECTION_CHANGE_COMMAND,
+  SerializedParagraphNode,
+} from "lexical";
 import { mergeRegister } from "@lexical/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Menu, Button, MenuItem, ListItemText, Typography, TextField, CircularProgress, IconButton, ListItemIcon } from "@mui/material";
-import { AutoAwesome, UnfoldMore, UnfoldLess, PlayArrow, ImageSearch, Autorenew, ArrowDropDown, ArrowDropUp, Send, Settings } from "@mui/icons-material";
-import { SxProps, Theme } from '@mui/material/styles';
+import {
+  Button,
+  CircularProgress,
+  IconButton,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  TextField,
+  Typography,
+} from "@mui/material";
+import {
+  ArrowDropDown,
+  ArrowDropUp,
+  AutoAwesome,
+  Autorenew,
+  ImageSearch,
+  PlayArrow,
+  Send,
+  Settings,
+  UnfoldLess,
+  UnfoldMore,
+} from "@mui/icons-material";
+import { SxProps, Theme } from "@mui/material/styles";
 import { useCompletion } from "@ai-sdk/react";
 import { SET_DIALOGS_COMMAND } from "../Dialogs/commands";
 import { ANNOUNCE_COMMAND, UPDATE_DOCUMENT_COMMAND } from "@/editor/commands";
 import { Announcement } from "@/types";
 import { throttle } from "@/editor/utils/throttle";
-import { $convertFromMarkdownString, createTransformers } from "../../MarkdownPlugin";
+import {
+  $convertFromMarkdownString,
+  createTransformers,
+} from "../../MarkdownPlugin";
 import { createHeadlessEditor } from "@lexical/headless";
 import { $generateNodesFromSerializedNodes } from "@lexical/clipboard";
 
 const getLlmConfig = () => {
-  const initialValue = { provider: 'google', model: 'gemini-2.0-flash' };
+  const initialValue = { provider: "google", model: "gemini-2.0-flash" };
   try {
-    const item = window.localStorage.getItem('llm');
+    const item = window.localStorage.getItem("llm");
     return item ? JSON.parse(item) : initialValue;
   } catch (error) {
     console.log(error);
     return initialValue;
   }
-}
+};
 
 const serializedParagraph: SerializedParagraphNode = {
   children: [],
@@ -33,10 +71,12 @@ const serializedParagraph: SerializedParagraphNode = {
   type: "paragraph",
   version: 1,
   textFormat: 0,
-  textStyle: ""
-}
+  textStyle: "",
+};
 
-export default function AITools({ editor, sx }: { editor: LexicalEditor, sx?: SxProps<Theme> }) {
+export default function AITools(
+  { editor, sx }: { editor: LexicalEditor; sx?: SxProps<Theme> },
+) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -49,18 +89,28 @@ export default function AITools({ editor, sx }: { editor: LexicalEditor, sx?: Sx
         const selection = $getSelection() || $getPreviousSelection();
         if (!selection) return;
         $setSelection(selection.clone());
-      }, { discrete: true, onUpdate() { editor.focus(undefined, { defaultSelection: "rootStart" }) } });
+      }, {
+        discrete: true,
+        onUpdate() {
+          editor.focus(undefined, { defaultSelection: "rootStart" });
+        },
+      });
     }, 0);
   }, [editor]);
 
   const promptRef = useRef<HTMLTextAreaElement>(null);
 
   const { completion, complete, isLoading, stop } = useCompletion({
-    api: '/api/completion',
-    streamProtocol: 'text',
+    api: "/api/completion",
+    streamProtocol: "text",
     onError(error) {
-      annouunce({ message: { title: "Something went wrong", subtitle: "Please try again later" } });
-    }
+      annouunce({
+        message: {
+          title: "Something went wrong",
+          subtitle: "Please try again later",
+        },
+      });
+    },
   });
 
   const annouunce = useCallback((announcement: Announcement) => {
@@ -72,16 +122,20 @@ export default function AITools({ editor, sx }: { editor: LexicalEditor, sx?: Sx
 
   const handlePrompt = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const textarea = e.currentTarget;
-    const isNavigatingUp = textarea.selectionStart === 0 && e.key === "ArrowUp";
-    const isNavigatingDown = textarea.selectionStart === textarea.value.length && e.key === "ArrowDown";
+    const isNavigatingUp = textarea.selectionStart === 0 &&
+      e.key === "ArrowUp";
+    const isNavigatingDown =
+      textarea.selectionStart === textarea.value.length &&
+      e.key === "ArrowDown";
     if (!isNavigatingUp && !isNavigatingDown) e.stopPropagation();
     if (isNavigatingDown) textarea.closest("li")?.focus();
     const command = textarea.value;
-    const isSubmit = e.key === "Enter" && !e.shiftKey && command.trim().length > 0;
+    const isSubmit = e.key === "Enter" && !e.shiftKey &&
+      command.trim().length > 0;
     if (!isSubmit) return;
     e.preventDefault();
     handleSubmit();
-  }
+  };
 
   const handleSubmit = () => {
     const command = promptRef.current?.value;
@@ -94,13 +148,17 @@ export default function AITools({ editor, sx }: { editor: LexicalEditor, sx?: Sx
       let currentNode: LexicalNode | null | undefined = anchorNode;
       let textContent = "";
       while (currentNode && textContent.length < 1024) {
-        textContent = currentNode.getTextContent() + "\n\n" + textContent;
-        currentNode = currentNode.getPreviousSibling() || currentNode.getParent()?.getPreviousSibling();
+        textContent = currentNode.getTextContent() + "\n\n" +
+          textContent;
+        currentNode = currentNode.getPreviousSibling() ||
+          currentNode.getParent()?.getPreviousSibling();
       }
       const { provider, model } = getLlmConfig();
-      complete(textContent, { body: { option: "zap", command, provider, model } });
+      complete(textContent, {
+        body: { option: "zap", command, provider, model },
+      });
     });
-  }
+  };
 
   const handleRewrite = () => {
     handleClose();
@@ -109,9 +167,11 @@ export default function AITools({ editor, sx }: { editor: LexicalEditor, sx?: Sx
       if (!$isRangeSelection(selection)) return;
       const textContent = selection.getTextContent();
       const { provider, model } = getLlmConfig();
-      complete(textContent, { body: { option: "improve", provider, model } });
+      complete(textContent, {
+        body: { option: "improve", provider, model },
+      });
     });
-  }
+  };
 
   const handleShorter = () => {
     handleClose();
@@ -120,9 +180,11 @@ export default function AITools({ editor, sx }: { editor: LexicalEditor, sx?: Sx
       if (!$isRangeSelection(selection)) return;
       const textContent = selection.getTextContent();
       const { provider, model } = getLlmConfig();
-      complete(textContent, { body: { option: "shorter", provider, model } });
+      complete(textContent, {
+        body: { option: "shorter", provider, model },
+      });
     });
-  }
+  };
 
   const handleLonger = () => {
     handleClose();
@@ -131,9 +193,11 @@ export default function AITools({ editor, sx }: { editor: LexicalEditor, sx?: Sx
       if (!$isRangeSelection(selection)) return;
       const textContent = selection.getTextContent();
       const { provider, model } = getLlmConfig();
-      complete(textContent, { body: { option: "longer", provider, model } });
+      complete(textContent, {
+        body: { option: "longer", provider, model },
+      });
     });
-  }
+  };
 
   const handleContinue = () => {
     handleClose();
@@ -144,24 +208,33 @@ export default function AITools({ editor, sx }: { editor: LexicalEditor, sx?: Sx
       let currentNode: LexicalNode | null | undefined = anchorNode;
       let textContent = "";
       while (currentNode && textContent.length < 1024) {
-        textContent = currentNode.getTextContent() + "\n\n" + textContent;
-        currentNode = currentNode.getPreviousSibling() || currentNode.getParent()?.getPreviousSibling();
+        textContent = currentNode.getTextContent() + "\n\n" +
+          textContent;
+        currentNode = currentNode.getPreviousSibling() ||
+          currentNode.getParent()?.getPreviousSibling();
       }
       const isCollapsed = selection.isCollapsed();
-      if (!isCollapsed) (selection.isBackward() ? selection.anchor : selection.focus).getNode().selectEnd();
+      if (!isCollapsed) {
+        (selection.isBackward() ? selection.anchor : selection.focus)
+          .getNode().selectEnd();
+      }
       const { provider, model } = getLlmConfig();
-      complete(textContent, { body: { option: "continue", provider, model } });
+      complete(textContent, {
+        body: { option: "continue", provider, model },
+      });
     });
-  }
+  };
 
   const handleOCR = () => {
     handleClose();
-    editor.dispatchCommand(SET_DIALOGS_COMMAND, ({ ocr: { open: true } }));
-  }
+    editor.dispatchCommand(SET_DIALOGS_COMMAND, { ocr: { open: true } });
+  };
 
   const convertMarkdownToJSON = useCallback((markdown: string) => {
     const transformers = createTransformers(editor);
-    const nodes = Array.from(editor._nodes.values()).map(registry => registry.klass);
+    const nodes = Array.from(editor._nodes.values()).map((registry) =>
+      registry.klass
+    );
     const config = { nodes };
     const headlessEditor = createHeadlessEditor(config);
     headlessEditor.update(() => {
@@ -170,23 +243,31 @@ export default function AITools({ editor, sx }: { editor: LexicalEditor, sx?: Sx
     return headlessEditor.getEditorState().toJSON();
   }, [editor]);
 
-
   useEffect(() => {
     if (completion.length === 0) return;
-    if (!isLoading) { offsetRef.current = 0; return; }
+    if (!isLoading) {
+      offsetRef.current = 0;
+      return;
+    }
     editor.update(() => {
       const selection = $getSelection();
       if (!$isRangeSelection(selection)) return;
       const offset = offsetRef.current;
       if (offset) $addUpdateTag("history-merge");
-      if (offset) selection.anchor.getNode().getTopLevelElement()?.getPreviousSibling()?.remove();
+      if (offset) {
+        selection.anchor.getNode().getTopLevelElement()
+          ?.getPreviousSibling()?.remove();
+      }
 
-      const isAtNewline = selection.anchor.offset === 0 && selection.focus.offset === 0;
+      const isAtNewline = selection.anchor.offset === 0 &&
+        selection.focus.offset === 0;
       if (!offset && !isAtNewline) selection.insertParagraph();
 
       const serializedEditorState = convertMarkdownToJSON(completion);
       const serializedChildren = serializedEditorState.root.children;
-      const serializedNodes = serializedChildren.slice(offsetRef.current - 1);
+      const serializedNodes = serializedChildren.slice(
+        offsetRef.current - 1,
+      );
       serializedNodes.push(serializedParagraph);
       if (serializedNodes.length === 0) return;
       offsetRef.current = serializedChildren.length;
@@ -198,9 +279,12 @@ export default function AITools({ editor, sx }: { editor: LexicalEditor, sx?: Sx
     }, { onUpdate: updateDocument });
   }, [completion, isLoading]);
 
-  const updateDocument = useCallback(throttle(() => {
-    editor.dispatchCommand(UPDATE_DOCUMENT_COMMAND, undefined);
-  }, 1000), [editor]);
+  const updateDocument = useCallback(
+    throttle(() => {
+      editor.dispatchCommand(UPDATE_DOCUMENT_COMMAND, undefined);
+    }, 1000),
+    [editor],
+  );
 
   useEffect(() => {
     return mergeRegister(
@@ -242,123 +326,176 @@ export default function AITools({ editor, sx }: { editor: LexicalEditor, sx?: Sx
   }, [editor, isLoading, stop]);
 
   const openAiSettings = () => {
-    editor.dispatchCommand(SET_DIALOGS_COMMAND, ({ ai: { open: true } }));
-  }
+    editor.dispatchCommand(SET_DIALOGS_COMMAND, { ai: { open: true } });
+  };
 
-  return (<>
-    <Button
-      id="ai-tools-button"
-      aria-controls={open ? 'ai-tools-menu' : undefined}
-      aria-haspopup="true"
-      aria-expanded={open ? 'true' : undefined}
-      variant="outlined"
-      onClick={handleClick}
-      startIcon={<AutoAwesome color={isLoading ? "disabled" : "action"} />}
-      endIcon={isLoading ? <CircularProgress size={16} color="inherit" /> : open ? <ArrowDropUp color={isLoading ? "disabled" : "action"} /> : <ArrowDropDown color={isLoading ? "disabled" : "action"} />}
-      sx={{
-        color: 'text.primary',
-        borderColor: 'divider',
-        p: 1, minWidth: 0, height: 36,
-        '& .MuiButton-startIcon': { mr: { xs: 0, sm: 1 }, ml: 0 },
-        '& .MuiButton-endIcon': { mr: 0, ml: isLoading ? 1 : 0 },
-        '& .MuiButton-endIcon > svg': { fontSize: 20 },
-      }}
-      disabled={isLoading}
-    >
-      <Typography variant="button" sx={{ display: { xs: "none", sm: "block" } }}>AI</Typography>
-    </Button>
-    <Menu id="ai-tools-menu" aria-label="Formatting options for ai"
-      anchorEl={anchorEl}
-      open={open}
-      onClose={handleClose}
-      anchorOrigin={{
-        vertical: 'bottom',
-        horizontal: 'center',
-      }}
-      transformOrigin={{
-        vertical: 'top',
-        horizontal: 'center',
-      }}
-      sx={{
-        '& .MuiList-root': { pt: 0, },
-        '& .MuiBackdrop-root': { userSelect: 'none' },
-        '& .MuiMenuItem-root': { minHeight: 36 },
-      }}>
-      <MenuItem
-        sx={{ p: 0, mb: 1, flexDirection: 'column', backgroundColor: 'transparent !important' }}
-        disableRipple
-        disableTouchRipple
-        onFocusVisible={(e) => {
-          const currentTarget = e.currentTarget;
-          const relatedTarget = e.relatedTarget;
-          setTimeout(() => {
-            const promptInput = promptRef.current;
-            const isPromptFocused = document.activeElement === promptInput;
-            if (isPromptFocused) return;
-            if (relatedTarget !== promptInput) promptInput?.focus();
-            else currentTarget.nextElementSibling?.focus();
-          }, 0);
+  return (
+    <>
+      <Button
+        id="ai-tools-button"
+        aria-controls={open ? "ai-tools-menu" : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? "true" : undefined}
+        variant="outlined"
+        onClick={handleClick}
+        startIcon={<AutoAwesome color={isLoading ? "disabled" : "action"} />}
+        endIcon={isLoading
+          ? <CircularProgress size={16} color="inherit" />
+          : open
+          ? <ArrowDropUp color={isLoading ? "disabled" : "action"} />
+          : (
+            <ArrowDropDown
+              color={isLoading ? "disabled" : "action"}
+            />
+          )}
+        sx={{
+          color: "text.primary",
+          borderColor: "divider",
+          p: 1,
+          minWidth: 0,
+          height: 36,
+          "& .MuiButton-startIcon": { mr: { xs: 0, sm: 1 }, ml: 0 },
+          "& .MuiButton-endIcon": { mr: 0, ml: isLoading ? 1 : 0 },
+          "& .MuiButton-endIcon > svg": { fontSize: 20 },
         }}
         disabled={isLoading}
       >
-        <TextField
-          multiline
-          hiddenLabel
-          variant="filled"
-          size="small"
-          placeholder="What to do?"
-          inputRef={promptRef}
-          autoFocus
-          autoComplete="off"
-          spellCheck="false"
-          sx={{ flexGrow: 1, width: 256, "& .MuiInputBase-root": { paddingRight: 9, flexGrow: 1 } }}
-          slotProps={{
-            htmlInput: {
-              onKeyDown: handlePrompt,
-            },
+        <Typography
+          variant="button"
+          sx={{ display: { xs: "none", sm: "block" } }}
+        >
+          AI
+        </Typography>
+      </Button>
+      <Menu
+        id="ai-tools-menu"
+        aria-label="Formatting options for ai"
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}
+        sx={{
+          "& .MuiList-root": { pt: 0 },
+          "& .MuiBackdrop-root": { userSelect: "none" },
+          "& .MuiMenuItem-root": { minHeight: 36 },
+        }}
+      >
+        <MenuItem
+          sx={{
+            p: 0,
+            mb: 1,
+            flexDirection: "column",
+            backgroundColor: "transparent !important",
           }}
-        />
-        <ListItemIcon sx={{ position: 'absolute', right: 4, bottom: 6 }}>
-          <IconButton onClick={handleSubmit} disabled={isLoading} size="small">
-            <Send />
-          </IconButton>
-          <IconButton onClick={openAiSettings} disabled={isLoading} size="small">
-            <Settings />
-          </IconButton>
-        </ListItemIcon>
-      </MenuItem>
-      <MenuItem disabled={isLoading} onClick={handleContinue}>
-        <ListItemIcon>
-          <PlayArrow />
-        </ListItemIcon>
-        <ListItemText>Continue Writing</ListItemText>
-      </MenuItem>
-      <MenuItem disabled={isLoading || isCollapsed} onClick={handleRewrite}>
-        <ListItemIcon>
-          <Autorenew />
-        </ListItemIcon>
-        <ListItemText>Rewrite</ListItemText>
-      </MenuItem>
-      <MenuItem disabled={isLoading || isCollapsed} onClick={handleShorter}>
-        <ListItemIcon>
-          <UnfoldLess />
-        </ListItemIcon>
-        <ListItemText>Shorter</ListItemText>
-      </MenuItem>
-      <MenuItem disabled={isLoading || isCollapsed} onClick={handleLonger}>
-        <ListItemIcon>
-          <UnfoldMore />
-        </ListItemIcon>
-        <ListItemText>Longer</ListItemText>
-      </MenuItem>
-      <MenuItem disabled={isLoading || !isCollapsed} onClick={handleOCR}>
-        <ListItemIcon>
-          <ImageSearch />
-        </ListItemIcon>
-        <ListItemText>Image to Text</ListItemText>
-      </MenuItem>
-    </Menu>
-  </>);
-
-
+          disableRipple
+          disableTouchRipple
+          onFocusVisible={(e) => {
+            const currentTarget = e.currentTarget;
+            const relatedTarget = e.relatedTarget;
+            setTimeout(() => {
+              const promptInput = promptRef.current;
+              const isPromptFocused = document.activeElement === promptInput;
+              if (isPromptFocused) return;
+              if (relatedTarget !== promptInput) {
+                promptInput?.focus();
+              } else currentTarget.nextElementSibling?.focus();
+            }, 0);
+          }}
+          disabled={isLoading}
+        >
+          <TextField
+            multiline
+            hiddenLabel
+            variant="filled"
+            size="small"
+            placeholder="What to do?"
+            inputRef={promptRef}
+            autoFocus
+            autoComplete="off"
+            spellCheck="false"
+            sx={{
+              flexGrow: 1,
+              width: 256,
+              "& .MuiInputBase-root": {
+                paddingRight: 9,
+                flexGrow: 1,
+              },
+            }}
+            slotProps={{
+              htmlInput: {
+                onKeyDown: handlePrompt,
+              },
+            }}
+          />
+          <ListItemIcon
+            sx={{ position: "absolute", right: 4, bottom: 6 }}
+          >
+            <IconButton
+              onClick={handleSubmit}
+              disabled={isLoading}
+              size="small"
+            >
+              <Send />
+            </IconButton>
+            <IconButton
+              onClick={openAiSettings}
+              disabled={isLoading}
+              size="small"
+            >
+              <Settings />
+            </IconButton>
+          </ListItemIcon>
+        </MenuItem>
+        <MenuItem disabled={isLoading} onClick={handleContinue}>
+          <ListItemIcon>
+            <PlayArrow />
+          </ListItemIcon>
+          <ListItemText>Continue Writing</ListItemText>
+        </MenuItem>
+        <MenuItem
+          disabled={isLoading || isCollapsed}
+          onClick={handleRewrite}
+        >
+          <ListItemIcon>
+            <Autorenew />
+          </ListItemIcon>
+          <ListItemText>Rewrite</ListItemText>
+        </MenuItem>
+        <MenuItem
+          disabled={isLoading || isCollapsed}
+          onClick={handleShorter}
+        >
+          <ListItemIcon>
+            <UnfoldLess />
+          </ListItemIcon>
+          <ListItemText>Shorter</ListItemText>
+        </MenuItem>
+        <MenuItem
+          disabled={isLoading || isCollapsed}
+          onClick={handleLonger}
+        >
+          <ListItemIcon>
+            <UnfoldMore />
+          </ListItemIcon>
+          <ListItemText>Longer</ListItemText>
+        </MenuItem>
+        <MenuItem
+          disabled={isLoading || !isCollapsed}
+          onClick={handleOCR}
+        >
+          <ListItemIcon>
+            <ImageSearch />
+          </ListItemIcon>
+          <ListItemText>Image to Text</ListItemText>
+        </MenuItem>
+      </Menu>
+    </>
+  );
 }

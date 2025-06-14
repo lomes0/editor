@@ -1,15 +1,33 @@
-"use client"
-import { useDispatch, useSelector } from '@/store';
-import { useEffect, useState } from 'react';
-import { Box, Breadcrumbs, Typography, Button, Paper, Divider, Container, Fade, Tooltip } from "@mui/material";
-import Grid from '@mui/material/Grid2';
-import Link from 'next/link';
-import { CreateNewFolder, ArrowBack, Home as HomeIcon, Folder, PostAdd, Article, FilterList } from '@mui/icons-material';
-import DraggableDocumentCard from '../DocumentCard/DraggableDocumentCard';
-import { DocumentType, UserDocument } from '@/types';
-import DocumentSortControl from '../DocumentControls/SortControl';
-import { sortDocuments } from '../DocumentControls/sortDocuments';
-import { useRouter } from 'next/navigation';
+"use client";
+import { useDispatch, useSelector } from "@/store";
+import { useEffect, useState } from "react";
+import {
+  Box,
+  Breadcrumbs,
+  Button,
+  Container,
+  Divider,
+  Fade,
+  Paper,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import Grid from "@mui/material/Grid2";
+import Link from "next/link";
+import {
+  ArrowBack,
+  Article,
+  CreateNewFolder,
+  FilterList,
+  Folder,
+  Home as HomeIcon,
+  PostAdd,
+} from "@mui/icons-material";
+import DraggableDocumentCard from "../DocumentCard/DraggableDocumentCard";
+import { DocumentType, UserDocument } from "@/types";
+import DocumentSortControl from "../DocumentControls/SortControl";
+import { sortDocuments } from "../DocumentControls/sortDocuments";
+import { useRouter } from "next/navigation";
 
 interface DocumentBrowserProps {
   directoryId?: string;
@@ -18,53 +36,67 @@ interface DocumentBrowserProps {
 const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const documents = useSelector(state => state.documents);
-  const user = useSelector(state => state.user);
+  const documents = useSelector((state) => state.documents);
+  const user = useSelector((state) => state.user);
   const [loading, setLoading] = useState(directoryId ? true : false);
-  const [currentDirectory, setCurrentDirectory] = useState<UserDocument | null>(null);
+  const [currentDirectory, setCurrentDirectory] = useState<
+    UserDocument | null
+  >(null);
   const [childItems, setChildItems] = useState<UserDocument[]>([]);
-  const [breadcrumbs, setBreadcrumbs] = useState<{ id: string; name: string; }[]>([]);
-  const [sortValue, setSortValue] = useState({ key: 'updatedAt', direction: 'desc' });
-  
+  const [breadcrumbs, setBreadcrumbs] = useState<
+    { id: string; name: string }[]
+  >([]);
+  const [sortValue, setSortValue] = useState({
+    key: "updatedAt",
+    direction: "desc",
+  });
+
   // Load directory and its contents if directoryId is provided
   useEffect(() => {
     if (!directoryId) return;
-    
+
     const loadDirectory = async () => {
       setLoading(true);
-      
+
       // Find the current directory
-      const directory = documents.find(doc => 
-        (doc.local?.id === directoryId || doc.cloud?.id === directoryId) && 
-        ((doc.local?.type === DocumentType.DIRECTORY) || (doc.cloud?.type === DocumentType.DIRECTORY))
+      const directory = documents.find((doc) =>
+        (doc.local?.id === directoryId ||
+          doc.cloud?.id === directoryId) &&
+        ((doc.local?.type === DocumentType.DIRECTORY) ||
+          (doc.cloud?.type === DocumentType.DIRECTORY))
       );
-      
+
       if (directory) {
         setCurrentDirectory(directory);
-        
+
         // Build breadcrumb trail
-        const buildBreadcrumbs = (docId: string, trail: { id: string; name: string; }[] = []) => {
-          const doc = documents.find(d => d.local?.id === docId || d.cloud?.id === docId);
+        const buildBreadcrumbs = (
+          docId: string,
+          trail: { id: string; name: string }[] = [],
+        ) => {
+          const doc = documents.find((d) =>
+            d.local?.id === docId || d.cloud?.id === docId
+          );
           if (!doc) return trail;
-          
-          const name = doc.local?.name || doc.cloud?.name || '';
+
+          const name = doc.local?.name || doc.cloud?.name || "";
           const parentId = doc.local?.parentId || doc.cloud?.parentId;
-          
+
           const newTrail = [{ id: docId, name }, ...trail];
-          
+
           if (parentId) {
             return buildBreadcrumbs(parentId, newTrail);
           }
-          
+
           return newTrail;
         };
-        
+
         setBreadcrumbs(buildBreadcrumbs(directoryId));
       }
-      
+
       setLoading(false);
     };
-    
+
     loadDirectory();
   }, [directoryId, documents]);
 
@@ -72,56 +104,65 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
   useEffect(() => {
     if (directoryId) {
       // Find child documents and directories
-      const children = documents.filter(doc => {
+      const children = documents.filter((doc) => {
         const localParentId = doc.local?.parentId;
         const cloudParentId = doc.cloud?.parentId;
-        return localParentId === directoryId || cloudParentId === directoryId;
+        return localParentId === directoryId ||
+          cloudParentId === directoryId;
       });
-      
+
       setChildItems(children);
     } else {
       // Get root level documents (items without a parentId)
-      const rootItems = documents.filter(doc => {
+      const rootItems = documents.filter((doc) => {
         const localParentId = doc.local?.parentId;
         const cloudParentId = doc.cloud?.parentId;
         return !localParentId && !cloudParentId;
       });
-      
+
       setChildItems(rootItems);
     }
   }, [directoryId, documents]);
 
   // Function to determine if a document is a directory
-  const isDirectory = (doc: UserDocument) => 
-    (doc.local?.type === DocumentType.DIRECTORY) || 
+  const isDirectory = (doc: UserDocument) =>
+    (doc.local?.type === DocumentType.DIRECTORY) ||
     (doc.cloud?.type === DocumentType.DIRECTORY);
-  
+
   // Process and categorize items
   const processedIds = new Set<string>();
   const directories: UserDocument[] = [];
   const regularDocuments: UserDocument[] = [];
-  
-  childItems.forEach(doc => {
+
+  childItems.forEach((doc) => {
     if (processedIds.has(doc.id)) return;
     processedIds.add(doc.id);
-    
+
     if (isDirectory(doc)) {
       directories.push(doc);
     } else {
       regularDocuments.push(doc);
     }
   });
-  
+
   // Apply sorting
-  const sortedDirectories = sortDocuments(directories, sortValue.key, sortValue.direction);
-  const sortedDocuments = sortDocuments(regularDocuments, sortValue.key, sortValue.direction);
+  const sortedDirectories = sortDocuments(
+    directories,
+    sortValue.key,
+    sortValue.direction,
+  );
+  const sortedDocuments = sortDocuments(
+    regularDocuments,
+    sortValue.key,
+    sortValue.direction,
+  );
 
   // Handle creating a new document
   const handleCreateDocument = () => {
     if (directoryId) {
       router.push(`/new?parentId=${directoryId}`);
     } else {
-      router.push('/new');
+      router.push("/new");
     }
   };
 
@@ -130,7 +171,7 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
     if (directoryId) {
       router.push(`/new-directory/${directoryId}`);
     } else {
-      router.push('/new-directory');
+      router.push("/new-directory");
     }
   };
 
@@ -138,7 +179,7 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
   if (loading) {
     return (
       <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
           <Typography>Loading directory contents...</Typography>
         </Box>
       </Container>
@@ -149,12 +190,27 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
   if (directoryId && !currentDirectory) {
     return (
       <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 4, gap: 2 }}>
-          <Folder sx={{ width: 64, height: 64, color: 'text.secondary', opacity: 0.6 }} />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            p: 4,
+            gap: 2,
+          }}
+        >
+          <Folder
+            sx={{
+              width: 64,
+              height: 64,
+              color: "text.secondary",
+              opacity: 0.6,
+            }}
+          />
           <Typography variant="h6">Directory not found</Typography>
-          <Button 
-            component={Link} 
-            href="/browse" 
+          <Button
+            component={Link}
+            href="/browse"
             startIcon={<ArrowBack />}
             variant="contained"
             sx={{ borderRadius: 1.5, mt: 2 }}
@@ -167,124 +223,166 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
   }
 
   // Get page title - either directory name or "Home"
-  const pageTitle = directoryId 
-    ? (currentDirectory?.local?.name || currentDirectory?.cloud?.name || 'Directory')
-    : 'Root';
+  const pageTitle = directoryId
+    ? (currentDirectory?.local?.name || currentDirectory?.cloud?.name ||
+      "Directory")
+    : "Root";
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Fade in={true} timeout={600}>
-        <Box className="document-browser-container" sx={{ display: 'flex', flexDirection: 'column', gap: 4, width: '100%' }}>
+        <Box
+          className="document-browser-container"
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
+            width: "100%",
+          }}
+        >
           {/* Breadcrumb navigation */}
-          <Box sx={{ 
-            mb: 3,
-            mt: -1,
-            pl: 0.5
-          }}>
-            <Breadcrumbs 
+          <Box
+            sx={{
+              mb: 3,
+              mt: -1,
+              pl: 0.5,
+            }}
+          >
+            <Breadcrumbs
               aria-label="breadcrumb"
-              sx={{ 
-                '& .MuiBreadcrumbs-separator': { 
-                  color: 'text.disabled',
+              sx={{
+                "& .MuiBreadcrumbs-separator": {
+                  color: "text.disabled",
                   mx: 0.5,
-                  fontSize: '0.7rem'
-                }
+                  fontSize: "0.7rem",
+                },
               }}
             >
-              <Link 
-                href="/browse" 
-                style={{ 
-                  display: 'flex', 
-                  alignItems: 'center',
-                  color: 'text.primary',
-                  textDecoration: 'none',
-                  fontSize: '0.75rem',
-                  fontWeight: !directoryId ? 'medium' : 'normal'
+              <Link
+                href="/browse"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  color: "text.primary",
+                  textDecoration: "none",
+                  fontSize: "0.75rem",
+                  fontWeight: !directoryId ? "medium" : "normal",
                 }}
               >
-                <HomeIcon sx={{ mr: 0.5, fontSize: '0.75rem', opacity: 0.7 }} />
+                <HomeIcon
+                  sx={{
+                    mr: 0.5,
+                    fontSize: "0.75rem",
+                    opacity: 0.7,
+                  }}
+                />
                 Root
               </Link>
-              
+
               {/* Display directory breadcrumbs if we're in a directory */}
               {breadcrumbs.map((crumb, index) => {
                 const isLast = index === breadcrumbs.length - 1;
-                
+
                 if (isLast) {
                   return (
-                    <Typography 
-                      key={crumb.id} 
-                      color="text.primary" 
-                      sx={{ 
-                        display: 'flex', 
-                        alignItems: 'center',
-                        fontSize: '0.75rem',
-                        fontWeight: 'medium'
+                    <Typography
+                      key={crumb.id}
+                      color="text.primary"
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        fontSize: "0.75rem",
+                        fontWeight: "medium",
                       }}
                     >
-                      <Folder sx={{ mr: 0.5, fontSize: '0.75rem', opacity: 0.7 }} />
+                      <Folder
+                        sx={{
+                          mr: 0.5,
+                          fontSize: "0.75rem",
+                          opacity: 0.7,
+                        }}
+                      />
                       {crumb.name}
                     </Typography>
                   );
                 }
-                
+
                 return (
-                  <Link 
-                    key={crumb.id} 
-                    href={`/browse/${crumb.id}`} 
-                    style={{ 
-                      display: 'flex', 
-                      alignItems: 'center',
-                      color: 'text.primary',
-                      textDecoration: 'none',
-                      fontSize: '0.75rem'
+                  <Link
+                    key={crumb.id}
+                    href={`/browse/${crumb.id}`}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      color: "text.primary",
+                      textDecoration: "none",
+                      fontSize: "0.75rem",
                     }}
                   >
-                    <Folder sx={{ mr: 0.5, fontSize: '0.75rem', opacity: 0.7 }} />
+                    <Folder
+                      sx={{
+                        mr: 0.5,
+                        fontSize: "0.75rem",
+                        opacity: 0.7,
+                      }}
+                    />
                     {crumb.name}
                   </Link>
                 );
               })}
             </Breadcrumbs>
           </Box>
-      
+
           {/* Page title and controls */}
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center',
-            flexWrap: { xs: 'wrap', md: 'nowrap' },
-            gap: 2,
-            pb: 2,
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-          }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography 
-                variant="h4" 
-                component="h1" 
-                sx={{ 
-                  fontWeight: 'medium',
-                  color: 'text.primary',
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: { xs: "wrap", md: "nowrap" },
+              gap: 2,
+              pb: 2,
+              borderBottom: "1px solid",
+              borderColor: "divider",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+              }}
+            >
+              <Typography
+                variant="h4"
+                component="h1"
+                sx={{
+                  fontWeight: "medium",
+                  color: "text.primary",
                 }}
               >
                 {pageTitle}
               </Typography>
             </Box>
-            
-            <Box sx={{ 
-              display: 'flex', 
-              gap: 1.5,
-              flexWrap: { xs: 'wrap', sm: 'nowrap' },
-              width: { xs: '100%', md: 'auto' },
-              justifyContent: { xs: 'center', md: 'flex-end' },
-            }}>
+
+            <Box
+              sx={{
+                display: "flex",
+                gap: 1.5,
+                flexWrap: { xs: "wrap", sm: "nowrap" },
+                width: { xs: "100%", md: "auto" },
+                justifyContent: {
+                  xs: "center",
+                  md: "flex-end",
+                },
+              }}
+            >
               <Tooltip title="Create a new document">
-                <Button 
-                  variant="outlined" 
+                <Button
+                  variant="outlined"
                   startIcon={<PostAdd />}
                   onClick={handleCreateDocument}
-                  sx={{ 
+                  sx={{
                     borderRadius: 1.5,
                     px: 2,
                   }}
@@ -292,157 +390,240 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
                   New Document
                 </Button>
               </Tooltip>
-              
+
               <Tooltip title="Create a new folder">
-                <Button 
-                  variant="outlined" 
+                <Button
+                  variant="outlined"
                   startIcon={<CreateNewFolder />}
                   onClick={handleCreateDirectory}
-                  sx={{ 
+                  sx={{
                     borderRadius: 1.5,
-                    px: 2
+                    px: 2,
                   }}
                 >
                   New Folder
                 </Button>
               </Tooltip>
-              
+
               <Tooltip title="Sort your documents">
-                <Box sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  bgcolor: 'background.paper',
-                  borderRadius: 1.5,
-                  overflow: 'hidden',
-                  border: '1px solid',
-                  borderColor: 'divider'
-                }}>
-                  <Box sx={{ 
-                    display: { xs: 'none', sm: 'flex' }, 
-                    alignItems: 'center', 
-                    px: 1.5, 
-                    height: '100%',
-                    borderRight: '1px solid',
-                    borderColor: 'divider'
-                  }}>
-                    <FilterList fontSize="small" sx={{ mr: 0.5, color: 'text.secondary' }} />
-                    <Typography variant="body2" color="text.secondary">Sort</Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    bgcolor: "background.paper",
+                    borderRadius: 1.5,
+                    overflow: "hidden",
+                    border: "1px solid",
+                    borderColor: "divider",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: { xs: "none", sm: "flex" },
+                      alignItems: "center",
+                      px: 1.5,
+                      height: "100%",
+                      borderRight: "1px solid",
+                      borderColor: "divider",
+                    }}
+                  >
+                    <FilterList
+                      fontSize="small"
+                      sx={{
+                        mr: 0.5,
+                        color: "text.secondary",
+                      }}
+                    />
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                    >
+                      Sort
+                    </Typography>
                   </Box>
-                  <DocumentSortControl 
-                    value={sortValue} 
+                  <DocumentSortControl
+                    value={sortValue}
                     setValue={setSortValue}
                   />
                 </Box>
               </Tooltip>
             </Box>
           </Box>
-      
+
           {/* Content section */}
-          {childItems.length === 0 ? (
-            <Paper 
-              elevation={0}
-              sx={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: 'center', 
-                p: 6, 
-                gap: 2,
-                borderRadius: 2,
-                border: '1px dashed',
-                borderColor: 'divider',
-                bgcolor: 'background.default'
-              }}
-            >
-              {directoryId ? (
-                <Folder sx={{ width: 64, height: 64, color: 'text.secondary', opacity: 0.6 }} />
-              ) : (
-                <PostAdd sx={{ width: 64, height: 64, color: 'text.secondary', opacity: 0.6 }} />
-              )}
-              <Typography variant="h6">
-                {directoryId ? 'This folder is empty' : 'No content found'}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" align="center">
-                Create a new document or folder to get started
-              </Typography>
-              <Box sx={{ mt: 2 }}>
-                <Button 
-                  variant="contained" 
-                  startIcon={<PostAdd />}
-                  onClick={handleCreateDocument}
-                  sx={{ borderRadius: 1.5, mr: 2 }}
-                >
-                  New Document
-                </Button>
-                <Button 
-                  variant="outlined" 
-                  startIcon={<CreateNewFolder />}
-                  onClick={handleCreateDirectory}
-                  sx={{ borderRadius: 1.5 }}
-                >
-                  New Folder
-                </Button>
-              </Box>
-            </Paper>
-          ) : (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              {/* Display directories section */}
-              {sortedDirectories.length > 0 && (
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <Box sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: 1,
-                    mb: 1,
-                    pl: 1
-                  }}>
-                    <Folder color="primary" />
-                    <Typography variant="h6" fontWeight="medium">Folders</Typography>
-                  </Box>
-                  <Grid container spacing={2}>
-                    {sortedDirectories.map(directory => (
-                      <Grid key={directory.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                        <DraggableDocumentCard 
-                          userDocument={directory} 
-                          user={user} 
-                          currentDirectoryId={directoryId}
-                        />
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Box>
-              )}
-              
-              {/* Display documents section */}
-              {sortedDocuments.length > 0 && (
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {sortedDirectories.length > 0 && (
-                    <Divider sx={{ my: 1 }} />
+          {childItems.length === 0
+            ? (
+              <Paper
+                elevation={0}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  p: 6,
+                  gap: 2,
+                  borderRadius: 2,
+                  border: "1px dashed",
+                  borderColor: "divider",
+                  bgcolor: "background.default",
+                }}
+              >
+                {directoryId
+                  ? (
+                    <Folder
+                      sx={{
+                        width: 64,
+                        height: 64,
+                        color: "text.secondary",
+                        opacity: 0.6,
+                      }}
+                    />
+                  )
+                  : (
+                    <PostAdd
+                      sx={{
+                        width: 64,
+                        height: 64,
+                        color: "text.secondary",
+                        opacity: 0.6,
+                      }}
+                    />
                   )}
-                  <Box sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: 1,
-                    mb: 1,
-                    pl: 1
-                  }}>
-                    <Article color="primary" />
-                    <Typography variant="h6" fontWeight="medium">Documents</Typography>
-                  </Box>
-                  <Grid container spacing={2}>
-                    {sortedDocuments.map(document => (
-                      <Grid key={document.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                        <DraggableDocumentCard 
-                          userDocument={document} 
-                          user={user}
-                          currentDirectoryId={directoryId}
-                        />
-                      </Grid>
-                    ))}
-                  </Grid>
+                <Typography variant="h6">
+                  {directoryId ? "This folder is empty" : "No content found"}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  align="center"
+                >
+                  Create a new document or folder to get started
+                </Typography>
+                <Box sx={{ mt: 2 }}>
+                  <Button
+                    variant="contained"
+                    startIcon={<PostAdd />}
+                    onClick={handleCreateDocument}
+                    sx={{ borderRadius: 1.5, mr: 2 }}
+                  >
+                    New Document
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    startIcon={<CreateNewFolder />}
+                    onClick={handleCreateDirectory}
+                    sx={{ borderRadius: 1.5 }}
+                  >
+                    New Folder
+                  </Button>
                 </Box>
-              )}
-            </Box>
-          )}
+              </Paper>
+            )
+            : (
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 4,
+                }}
+              >
+                {/* Display directories section */}
+                {sortedDirectories.length > 0 && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 2,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        mb: 1,
+                        pl: 1,
+                      }}
+                    >
+                      <Folder color="primary" />
+                      <Typography
+                        variant="h6"
+                        fontWeight="medium"
+                      >
+                        Folders
+                      </Typography>
+                    </Box>
+                    <Grid container spacing={2}>
+                      {sortedDirectories.map(
+                        (directory) => (
+                          <Grid
+                            key={directory.id}
+                            size={{
+                              xs: 12,
+                              sm: 6,
+                              md: 4,
+                            }}
+                          >
+                            <DraggableDocumentCard
+                              userDocument={directory}
+                              user={user}
+                              currentDirectoryId={directoryId}
+                            />
+                          </Grid>
+                        ),
+                      )}
+                    </Grid>
+                  </Box>
+                )}
+
+                {/* Display documents section */}
+                {sortedDocuments.length > 0 && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 2,
+                    }}
+                  >
+                    {sortedDirectories.length > 0 && <Divider sx={{ my: 1 }} />}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        mb: 1,
+                        pl: 1,
+                      }}
+                    >
+                      <Article color="primary" />
+                      <Typography
+                        variant="h6"
+                        fontWeight="medium"
+                      >
+                        Documents
+                      </Typography>
+                    </Box>
+                    <Grid container spacing={2}>
+                      {sortedDocuments.map((document) => (
+                        <Grid
+                          key={document.id}
+                          size={{
+                            xs: 12,
+                            sm: 6,
+                            md: 4,
+                          }}
+                        >
+                          <DraggableDocumentCard
+                            userDocument={document}
+                            user={user}
+                            currentDirectoryId={directoryId}
+                          />
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Box>
+                )}
+              </Box>
+            )}
         </Box>
       </Fade>
     </Container>

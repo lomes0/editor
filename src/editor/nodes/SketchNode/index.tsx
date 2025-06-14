@@ -3,31 +3,39 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
  */
 
-import { DOMExportOutput, isHTMLElement, LexicalEditor, LexicalNode, NodeKey, Spread, } from 'lexical';
-import { NonDeleted, ExcalidrawElement } from '@excalidraw/excalidraw/element/types';
+import {
+  DOMExportOutput,
+  isHTMLElement,
+  LexicalEditor,
+  LexicalNode,
+  NodeKey,
+  Spread,
+} from "lexical";
+import {
+  ExcalidrawElement,
+  NonDeleted,
+} from "@excalidraw/excalidraw/element/types";
 
-import { ImageNode, ImagePayload, SerializedImageNode } from '../ImageNode';
+import { ImageNode, ImagePayload, SerializedImageNode } from "../ImageNode";
 import { $generateHtmlFromNodes } from "@lexical/html";
 
-import ImageComponent from '../ImageNode/ImageComponent';
-import htmr from 'htmr';
+import ImageComponent from "../ImageNode/ImageComponent";
+import htmr from "htmr";
 import { JSX } from "react";
 
 export type SketchPayload = Spread<{
   /**
- * @deprecated The value is now embedded in the src
- */
-  value?: NonDeleted<ExcalidrawElement>[]
-}, ImagePayload>
-
+   * @deprecated The value is now embedded in the src
+   */
+  value?: NonDeleted<ExcalidrawElement>[];
+}, ImagePayload>;
 
 export type SerializedSketchNode = Spread<
   {
     value?: NonDeleted<ExcalidrawElement>[];
-    type: 'sketch';
+    type: "sketch";
     version: 1;
   },
   SerializedImageNode
@@ -37,7 +45,7 @@ export class SketchNode extends ImageNode {
   __value?: NonDeleted<ExcalidrawElement>[];
 
   static getType(): string {
-    return 'sketch';
+    return "sketch";
   }
 
   static clone(node: SketchNode): SketchNode {
@@ -56,8 +64,17 @@ export class SketchNode extends ImageNode {
   }
 
   static importJSON(serializedNode: SerializedSketchNode): SketchNode {
-    const { width, height, src, value, style, id, showCaption, caption, altText } =
-      serializedNode;
+    const {
+      width,
+      height,
+      src,
+      value,
+      style,
+      id,
+      showCaption,
+      caption,
+      altText,
+    } = serializedNode;
     const node = $createSketchNode({
       src,
       value,
@@ -71,27 +88,40 @@ export class SketchNode extends ImageNode {
     try {
       if (caption) {
         const nestedEditor = node.__caption;
-        const editorState = nestedEditor.parseEditorState(caption.editorState);
+        const editorState = nestedEditor.parseEditorState(
+          caption.editorState,
+        );
         if (!editorState.isEmpty()) {
           nestedEditor.setEditorState(editorState);
         }
       }
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error(e);
+    }
     return node;
   }
 
   exportDOM(editor: LexicalEditor): DOMExportOutput {
     const element = super.createDOM(editor._config, editor);
     if (element && isHTMLElement(element)) {
-      const html = decodeURIComponent(this.__src.split(',')[1]);
-      element.innerHTML = html.replace(/<!-- payload-start -->\s*(.+?)\s*<!-- payload-end -->/, "");
+      const html = decodeURIComponent(this.__src.split(",")[1]);
+      element.innerHTML = html.replace(
+        /<!-- payload-start -->\s*(.+?)\s*<!-- payload-end -->/,
+        "",
+      );
       const svg = element.firstElementChild!;
-      const styles = svg.querySelectorAll('style');
-      styles.forEach(style => { style.remove(); });
-      if (this.__width) svg.setAttribute('width', this.__width.toString());
-      if (this.__height) svg.setAttribute('height', this.__height.toString());
+      const styles = svg.querySelectorAll("style");
+      styles.forEach((style) => {
+        style.remove();
+      });
+      if (this.__width) {
+        svg.setAttribute("width", this.__width.toString());
+      }
+      if (this.__height) {
+        svg.setAttribute("height", this.__height.toString());
+      }
       if (!this.__showCaption) return { element };
-      const caption = document.createElement('figcaption');
+      const caption = document.createElement("figcaption");
       this.__caption.getEditorState().read(() => {
         caption.innerHTML = $generateHtmlFromNodes(this.__caption);
       });
@@ -112,7 +142,17 @@ export class SketchNode extends ImageNode {
     caption?: LexicalEditor,
     key?: NodeKey,
   ) {
-    super(src, altText, width, height, style, id, showCaption, caption, key);
+    super(
+      src,
+      altText,
+      width,
+      height,
+      style,
+      id,
+      showCaption,
+      caption,
+      key,
+    );
     this.__value = value;
   }
 
@@ -120,10 +160,9 @@ export class SketchNode extends ImageNode {
     return {
       ...super.exportJSON(),
       value: this.__value,
-      type: 'sketch',
+      type: "sketch",
       version: 1,
     };
-
   }
 
   update(payload: Partial<SketchPayload>): void {
@@ -132,16 +171,20 @@ export class SketchNode extends ImageNode {
     writable.__value = payload.value ?? writable.__value;
   }
 
-
   getValue(): NonDeleted<ExcalidrawElement>[] | undefined {
     return this.__value;
   }
 
   decorate(): JSX.Element {
     const self = this.getLatest();
-    const html = self.__caption.getEditorState().read(() => $generateHtmlFromNodes(self.__caption));
+    const html = self.__caption.getEditorState().read(() =>
+      $generateHtmlFromNodes(self.__caption)
+    );
     const children = htmr(html);
-    const decoded = decodeURIComponent(self.__src.split(',')[1]).replace(/<!-- payload-start -->\s*(.+?)\s*<!-- payload-end -->/, "").replaceAll('//dist','');
+    const decoded = decodeURIComponent(self.__src.split(",")[1]).replace(
+      /<!-- payload-start -->\s*(.+?)\s*<!-- payload-end -->/,
+      "",
+    ).replaceAll("//dist", "");
     const src = `data:image/svg+xml,${encodeURIComponent(decoded)}`;
     return (
       <ImageComponent
@@ -152,7 +195,7 @@ export class SketchNode extends ImageNode {
         nodeKey={self.__key}
         showCaption={self.__showCaption}
         caption={self.__caption}
-        element='svg'
+        element="svg"
       >
         {children}
       </ImageComponent>

@@ -1,15 +1,20 @@
-"use client"
+"use client";
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
  */
-import { $createParagraphNode, $insertNodes, $isRootOrShadowRoot, LexicalCommand, LexicalEditor } from 'lexical';
+import {
+  $createParagraphNode,
+  $insertNodes,
+  $isRootOrShadowRoot,
+  LexicalCommand,
+  LexicalEditor,
+} from "lexical";
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $wrapNodeInElement, mergeRegister } from '@lexical/utils';
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { $wrapNodeInElement, mergeRegister } from "@lexical/utils";
 import {
   $createRangeSelection,
   $getSelection,
@@ -22,26 +27,32 @@ import {
   DRAGOVER_COMMAND,
   DRAGSTART_COMMAND,
   DROP_COMMAND,
-} from 'lexical';
-import { useEffect } from 'react';
+} from "lexical";
+import { useEffect } from "react";
 
-import { $createImageNode, $isImageNode, ImageNode, ImagePayload, } from '@/editor/nodes/ImageNode';
-import { INSERT_GRAPH_COMMAND } from '../GraphPlugin';
-import { INSERT_IFRAME_COMMAND } from '../IFramePlugin';
-import { INSERT_SKETCH_COMMAND } from '../SketchPlugin';
-import { GraphNode } from '@/editor/nodes/GraphNode';
-import { SketchNode } from '@/editor/nodes/SketchNode';
-import { IFrameNode } from '@/editor/nodes/IFrameNode';
+import {
+  $createImageNode,
+  $isImageNode,
+  ImageNode,
+  ImagePayload,
+} from "@/editor/nodes/ImageNode";
+import { INSERT_GRAPH_COMMAND } from "../GraphPlugin";
+import { INSERT_IFRAME_COMMAND } from "../IFramePlugin";
+import { INSERT_SKETCH_COMMAND } from "../SketchPlugin";
+import { GraphNode } from "@/editor/nodes/GraphNode";
+import { SketchNode } from "@/editor/nodes/SketchNode";
+import { IFrameNode } from "@/editor/nodes/IFrameNode";
 
 export type InsertImagePayload = Readonly<ImagePayload>;
 
-export const INSERT_IMAGE_COMMAND: LexicalCommand<InsertImagePayload> = createCommand();
+export const INSERT_IMAGE_COMMAND: LexicalCommand<InsertImagePayload> =
+  createCommand();
 export default function ImagesPlugin() {
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
     if (!editor.hasNodes([ImageNode])) {
-      throw new Error('ImagesPlugin: ImageNode not registered on editor');
+      throw new Error("ImagesPlugin: ImageNode not registered on editor");
     }
 
     return mergeRegister(
@@ -51,7 +62,8 @@ export default function ImagesPlugin() {
           const imageNode = $createImageNode(payload);
           $insertNodes([imageNode]);
           if ($isRootOrShadowRoot(imageNode.getParentOrThrow())) {
-            $wrapNodeInElement(imageNode, $createParagraphNode).selectEnd();
+            $wrapNodeInElement(imageNode, $createParagraphNode)
+              .selectEnd();
           }
           return true;
         },
@@ -85,7 +97,7 @@ export default function ImagesPlugin() {
     const handleSelectionChange = () => {
       const domSelection = document.getSelection();
       if (!domSelection) return false;
-      const figures = document.querySelectorAll('figure');
+      const figures = document.querySelectorAll("figure");
       figures.forEach((figure) => {
         const isSelected = domSelection.containsNode(figure);
         figure.classList.toggle("selection-highlight", isSelected);
@@ -94,7 +106,10 @@ export default function ImagesPlugin() {
 
     document.addEventListener("selectionchange", handleSelectionChange);
     return () => {
-      document.removeEventListener("selectionchange", handleSelectionChange);
+      document.removeEventListener(
+        "selectionchange",
+        handleSelectionChange,
+      );
     };
   }, []);
 
@@ -103,8 +118,8 @@ export default function ImagesPlugin() {
 
 function onDragStart(event: DragEvent): boolean {
   const TRANSPARENT_IMAGE =
-    'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-  const img = document.createElement('img');
+    "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+  const img = document.createElement("img");
   img.src = TRANSPARENT_IMAGE;
 
   const node = getImageNodeInSelection();
@@ -115,10 +130,10 @@ function onDragStart(event: DragEvent): boolean {
   if (!dataTransfer) {
     return false;
   }
-  dataTransfer.setData('text/plain', '_');
+  dataTransfer.setData("text/plain", "_");
   dataTransfer.setDragImage(img, 0, 0);
   dataTransfer.setData(
-    'application/x-lexical-drag',
+    "application/x-lexical-drag",
     JSON.stringify({
       data: {
         key: node.getKey(),
@@ -155,7 +170,7 @@ function onDrop(event: DragEvent, editor: LexicalEditor): boolean {
   if (!node) {
     return false;
   }
-  const dragData = event.dataTransfer?.getData('application/x-lexical-drag');
+  const dragData = event.dataTransfer?.getData("application/x-lexical-drag");
   if (!dragData) {
     return false;
   }
@@ -173,13 +188,13 @@ function onDrop(event: DragEvent, editor: LexicalEditor): boolean {
     }
     $setSelection(rangeSelection);
     switch (type) {
-      case 'graph':
+      case "graph":
         editor.dispatchCommand(INSERT_GRAPH_COMMAND, data);
         break;
-      case 'sketch':
+      case "sketch":
         editor.dispatchCommand(INSERT_SKETCH_COMMAND, data);
         break;
-      case 'iframe':
+      case "iframe":
         editor.dispatchCommand(INSERT_IFRAME_COMMAND, data);
         break;
       default:
@@ -189,7 +204,12 @@ function onDrop(event: DragEvent, editor: LexicalEditor): boolean {
   return true;
 }
 
-function getImageNodeInSelection(): ImageNode | GraphNode | SketchNode | IFrameNode | null {
+function getImageNodeInSelection():
+  | ImageNode
+  | GraphNode
+  | SketchNode
+  | IFrameNode
+  | null {
   const selection = $getSelection();
   if (!$isNodeSelection(selection)) {
     return null;
@@ -211,9 +231,9 @@ function canDropImage(event: DragEvent): boolean {
   return !!(
     target &&
     target instanceof HTMLElement &&
-    !target.closest('code, figure.LexicalTheme__image') &&
+    !target.closest("code, figure.LexicalTheme__image") &&
     target.parentElement &&
-    target.parentElement.closest('div.editor-input')
+    target.parentElement.closest("div.editor-input")
   );
 }
 

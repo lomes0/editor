@@ -3,7 +3,6 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
  */
 
 import type {
@@ -13,24 +12,20 @@ import type {
   LexicalCommand,
   LexicalNode,
   SerializedLexicalNode,
-} from 'lexical';
+} from "lexical";
 
-import {
-  $applyNodeReplacement,
-  createCommand,
-  DecoratorNode,
-} from 'lexical';
-import { lazy, JSX } from 'react';
-import HorizontalRuleComponent from './HorizontalRuleComponent';
+import { $applyNodeReplacement, createCommand, DecoratorNode } from "lexical";
+import { JSX, lazy } from "react";
+import HorizontalRuleComponent from "./HorizontalRuleComponent";
 
 export type SerializedHorizontalRuleNode = SerializedLexicalNode;
 
 export const INSERT_HORIZONTAL_RULE_COMMAND: LexicalCommand<void> =
-  createCommand('INSERT_HORIZONTAL_RULE_COMMAND');
+  createCommand("INSERT_HORIZONTAL_RULE_COMMAND");
 
 export class HorizontalRuleNode extends DecoratorNode<JSX.Element> {
   static getType(): string {
-    return 'horizontalrule';
+    return "horizontalrule";
   }
 
   static clone(node: HorizontalRuleNode): HorizontalRuleNode {
@@ -54,13 +49,13 @@ export class HorizontalRuleNode extends DecoratorNode<JSX.Element> {
 
   exportJSON(): SerializedLexicalNode {
     return {
-      type: 'horizontalrule',
+      type: "horizontalrule",
       version: 1,
     };
   }
 
   createDOM(config: EditorConfig): HTMLElement {
-    const dom = document.createElement('hr');
+    const dom = document.createElement("hr");
     const className = config.theme.hr;
     if (className !== undefined) {
       dom.className = className;
@@ -69,7 +64,7 @@ export class HorizontalRuleNode extends DecoratorNode<JSX.Element> {
   }
 
   getTextContent(): string {
-    return '\n';
+    return "\n";
   }
 
   isInline(): false {

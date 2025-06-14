@@ -1,7 +1,19 @@
-"use client"
-import * as React from 'react';
-import { MenuItem, ListItemText, ToggleButton, Menu, ListItemIcon } from '@mui/material';
-import { FormatColorFill, CircleOutlined, FormatClear, FormatColorReset, Circle } from '@mui/icons-material';
+"use client";
+import * as React from "react";
+import {
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  ToggleButton,
+} from "@mui/material";
+import {
+  Circle,
+  CircleOutlined,
+  FormatClear,
+  FormatColorFill,
+  FormatColorReset,
+} from "@mui/icons-material";
 
 export const textPalette = [
   "#d7170b",
@@ -18,7 +30,7 @@ export const textPalette = [
   "#A6A6A6",
   "#d4d5d2",
   "#ffffff",
-]
+];
 
 export const backgroundPalette = [
   "#fbbbb6",
@@ -37,16 +49,25 @@ export const backgroundPalette = [
   "#ffffff",
 ];
 
-export default function ColorPicker({ onColorChange, onOpen, onClose, toggle = "togglebutton", label = "Color", textColor, backgroundColor }
-  : {
-    onColorChange: (key: string, value: string) => void,
-    onOpen?: () => void,
-    onClose?: () => void,
-    toggle?: "togglebutton" | "menuitem",
-    label?: string,
-    textColor?: string,
-    backgroundColor?: string
-  }) {
+export default function ColorPicker(
+  {
+    onColorChange,
+    onOpen,
+    onClose,
+    toggle = "togglebutton",
+    label = "Color",
+    textColor,
+    backgroundColor,
+  }: {
+    onColorChange: (key: string, value: string) => void;
+    onOpen?: () => void;
+    onClose?: () => void;
+    toggle?: "togglebutton" | "menuitem";
+    label?: string;
+    textColor?: string;
+    backgroundColor?: string;
+  },
+) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -60,43 +81,89 @@ export default function ColorPicker({ onColorChange, onOpen, onClose, toggle = "
   };
   const onChange = (key: string, value: string) => {
     onColorChange(key, value);
-  }
+  };
 
   return (
     <>
-      {toggle === "menuitem" && <MenuItem onClick={handleClick}>
-        <ListItemIcon>
-          <FormatColorFill />
-        </ListItemIcon>
-        <ListItemText>{label}</ListItemText>
-      </MenuItem>
-      }
-      {toggle === "togglebutton" && <ToggleButton size='small' value="color" onClick={handleClick} className="MuiToggleButtonGroup-grouped MuiToggleButtonGroup-groupedHorizontal" selected={open}>
-        <FormatColorFill fontSize='small' />
-      </ToggleButton>}
-      <Menu anchorEl={anchorEl} open={open} onClose={handleClose} disableRestoreFocus
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+      {toggle === "menuitem" && (
+        <MenuItem onClick={handleClick}>
+          <ListItemIcon>
+            <FormatColorFill />
+          </ListItemIcon>
+          <ListItemText>{label}</ListItemText>
+        </MenuItem>
+      )}
+      {toggle === "togglebutton" && (
+        <ToggleButton
+          size="small"
+          value="color"
+          onClick={handleClick}
+          className="MuiToggleButtonGroup-grouped MuiToggleButtonGroup-groupedHorizontal"
+          selected={open}
+        >
+          <FormatColorFill fontSize="small" />
+        </ToggleButton>
+      )}
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        disableRestoreFocus
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        transformOrigin={{ vertical: "top", horizontal: "center" }}
         sx={{
-          'ul': { pt: 0, display: 'flex', flexWrap: 'wrap', width: 280 },
-          '& .MuiBackdrop-root': { userSelect: 'none' }
+          "ul": {
+            pt: 0,
+            display: "flex",
+            flexWrap: "wrap",
+            width: 280,
+          },
+          "& .MuiBackdrop-root": { userSelect: "none" },
         }}
-
       >
         {textPalette.map((color, index) => (
-          <MenuItem key={index} onClick={e => { onChange("text", color); }} selected={color === textColor}>
+          <MenuItem
+            key={index}
+            onClick={(e) => {
+              onChange("text", color);
+            }}
+            selected={color === textColor}
+          >
             <CircleOutlined style={{ color }} />
           </MenuItem>
         ))}
-        <MenuItem key="clear-color" onClick={e => { onChange("text", 'inherit'); }} selected={textColor === 'inherit'}>
+        <MenuItem
+          key="clear-color"
+          onClick={(e) => {
+            onChange("text", "inherit");
+          }}
+          selected={textColor === "inherit"}
+        >
           <FormatClear />
         </MenuItem>
         {backgroundPalette.map((color, index) => (
-          <MenuItem key={index} onClick={e => { onChange("background", color); }} selected={color === backgroundColor}>
-            <Circle style={{ backgroundColor: color, color: 'transparent' }} />
+          <MenuItem
+            key={index}
+            onClick={(e) => {
+              onChange("background", color);
+            }}
+            selected={color === backgroundColor}
+          >
+            <Circle
+              style={{
+                backgroundColor: color,
+                color: "transparent",
+              }}
+            />
           </MenuItem>
         ))}
-        <MenuItem key="clear-background" onClick={e => { onChange("background", 'inherit'); }} selected={backgroundColor === 'inherit'}>
+        <MenuItem
+          key="clear-background"
+          onClick={(e) => {
+            onChange("background", "inherit");
+          }}
+          selected={backgroundColor === "inherit"}
+        >
           <FormatColorReset />
         </MenuItem>
       </Menu>

@@ -31,9 +31,9 @@ module.exports = [
             const page = pathname.split("/")[1];
             const rsc = request.headers.get("RSC") === "1";
             return `/${page}${rsc ? `?_rsc` : ""}`;
-          }
+          },
         },
-      ]
+      ],
     },
   },
   {
@@ -80,8 +80,8 @@ module.exports = [
       plugins: [
         {
           cacheWillUpdate: async () => void 0,
-        }
-      ]
+        },
+      ],
     },
   },
 ];

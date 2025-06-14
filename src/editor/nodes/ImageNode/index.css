@@ -16,13 +16,13 @@
   touch-action: none;
 }
 
-.image-control-wrapper>img,
-.image-control-wrapper>svg {
+.image-control-wrapper > img,
+.image-control-wrapper > svg {
   scroll-margin-top: 88px;
   scroll-margin-bottom: 24px;
 }
 
-.image-control-wrapper>svg {
+.image-control-wrapper > svg {
   user-select: none;
 }
 

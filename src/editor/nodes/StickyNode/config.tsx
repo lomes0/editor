@@ -6,8 +6,8 @@ import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { HorizontalRuleNode } from "@/editor/nodes/HorizontalRuleNode";
 import { MathNode } from "../MathNode";
 import { ImageNode } from "../ImageNode";
-import { SketchNode } from '../SketchNode';
-import { GraphNode } from '../GraphNode';
+import { SketchNode } from "../SketchNode";
+import { GraphNode } from "../GraphNode";
 import theme from "@/editor/theme";
 import { IFrameNode } from "../IFrameNode";
 import { LayoutContainerNode, LayoutItemNode } from "../LayoutNode";
@@ -19,7 +19,11 @@ import {
   LexicalTableNode,
   LexicalTableRowNode,
 } from "@/editor/nodes/TableNode";
-import { DetailsContainerNode, DetailsContentNode , DetailsSummaryNode } from "../DetailsNode";
+import {
+  DetailsContainerNode,
+  DetailsContentNode,
+  DetailsSummaryNode,
+} from "../DetailsNode";
 
 export const editorConfig = {
   namespace: "matheditor",

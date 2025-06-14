@@ -34,9 +34,11 @@ const buildCustomWorker = ({
 
   if (customWorkerEntries.length > 1) {
     console.warn(
-      `> [PWA] WARNING: More than one custom worker found (${customWorkerEntries.join(
-        ","
-      )}), not building a custom worker`
+      `> [PWA] WARNING: More than one custom worker found (${
+        customWorkerEntries.join(
+          ",",
+        )
+      }), not building a custom worker`,
     );
     return;
   }
@@ -113,15 +115,17 @@ const buildCustomWorker = ({
     ].concat(plugins),
     optimization: minify
       ? {
-          minimize: true,
-          minimizer: [new TerserPlugin()],
-        }
+        minimize: true,
+        minimizer: [new TerserPlugin()],
+      }
       : undefined,
   };
 
   let config = baseConfig;
   if (typeof customWebpack === "function") {
-    console.log("> [PWA] Using provided webpack config to build custom worker");
+    console.log(
+      "> [PWA] Using provided webpack config to build custom worker",
+    );
     config = customWebpack(baseConfig);
   }
 

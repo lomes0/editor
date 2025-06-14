@@ -3,18 +3,24 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
  */
 
-import { useEffect, useMemo, type JSX } from 'react';
+import { type JSX, useEffect, useMemo } from "react";
 
-import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin';
-import * as React from 'react';
+import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
+import * as React from "react";
 
-import { createTransformers } from './MarkdownTransformers';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { PASTE_COMMAND, $getSelection, $createParagraphNode, $isRangeSelection, $setSelection, COMMAND_PRIORITY_LOW } from 'lexical';
-import { $convertFromMarkdownString } from '.';
+import { createTransformers } from "./MarkdownTransformers";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import {
+  $createParagraphNode,
+  $getSelection,
+  $isRangeSelection,
+  $setSelection,
+  COMMAND_PRIORITY_LOW,
+  PASTE_COMMAND,
+} from "lexical";
+import { $convertFromMarkdownString } from ".";
 
 export default function MarkdownPlugin(): JSX.Element {
   const [editor] = useLexicalComposerContext();
@@ -25,9 +31,9 @@ export default function MarkdownPlugin(): JSX.Element {
       PASTE_COMMAND,
       (event: ClipboardEvent) => {
         if (!event.clipboardData) return false;
-        const html = event.clipboardData.getData('text/html');
+        const html = event.clipboardData.getData("text/html");
         if (html) return false;
-        const text = event.clipboardData.getData('text/plain');
+        const text = event.clipboardData.getData("text/plain");
         const selection = $getSelection();
         if (!$isRangeSelection(selection)) return false;
         const parent = $createParagraphNode();
@@ -37,9 +43,9 @@ export default function MarkdownPlugin(): JSX.Element {
         selection.insertNodes(children);
         return true;
       },
-      COMMAND_PRIORITY_LOW
+      COMMAND_PRIORITY_LOW,
     );
-  }, [editor])
+  }, [editor]);
 
   return <MarkdownShortcutPlugin transformers={transformers} />;
 }

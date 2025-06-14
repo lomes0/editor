@@ -1,22 +1,47 @@
-"use client"
-import { LexicalEditor, } from "lexical";
+"use client";
+import { LexicalEditor } from "lexical";
 import { useEffect, useState } from "react";
-import { ToggleButtonGroup, ToggleButton, SvgIcon, Menu, Button, MenuItem, ListItemIcon, ListItemText, Typography, Divider } from "@mui/material";
+import {
+  Button,
+  Divider,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  SvgIcon,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
+} from "@mui/material";
 import { ArrowDropDown, Delete, Note } from "@mui/icons-material";
-import { $getNodeStyleValueForProperty, $patchStyle } from "@/editor/nodes/utils";
+import {
+  $getNodeStyleValueForProperty,
+  $patchStyle,
+} from "@/editor/nodes/utils";
 import ColorPicker from "./ColorPicker";
 import { StickyNode } from "@/editor/nodes/StickyNode";
 
-const FormatImageRight = () => <SvgIcon viewBox='0 -960 960 960' fontSize="small" >
-  <path xmlns="http://www.w3.org/2000/svg" d="M450-285v-390h390v390H450Zm60-60h270v-270H510v270ZM120-120v-60h720v60H120Zm0-165v-60h270v60H120Zm0-165v-60h270v60H120Zm0-165v-60h270v60H120Zm0-165v-60h720v60H120Z" />
-</SvgIcon>;
+const FormatImageRight = () => (
+  <SvgIcon viewBox="0 -960 960 960" fontSize="small">
+    <path
+      xmlns="http://www.w3.org/2000/svg"
+      d="M450-285v-390h390v390H450Zm60-60h270v-270H510v270ZM120-120v-60h720v60H120Zm0-165v-60h270v60H120Zm0-165v-60h270v60H120Zm0-165v-60h270v60H120Zm0-165v-60h720v60H120Z"
+    />
+  </SvgIcon>
+);
 
-const FormatImageLeft = () => <SvgIcon viewBox='0 -960 960 960' fontSize="small" >
-  <path xmlns="http://www.w3.org/2000/svg" d="M120-285v-390h390v390H120Zm60-60h270v-270H180v270Zm-60-435v-60h720v60H120Zm450 165v-60h270v60H570Zm0 165v-60h270v60H570Zm0 165v-60h270v60H570ZM120-120v-60h720v60H120Z" />
-</SvgIcon>;
+const FormatImageLeft = () => (
+  <SvgIcon viewBox="0 -960 960 960" fontSize="small">
+    <path
+      xmlns="http://www.w3.org/2000/svg"
+      d="M120-285v-390h390v390H120Zm60-60h270v-270H180v270Zm-60-435v-60h720v60H120Zm450 165v-60h270v60H570Zm0 165v-60h270v60H570Zm0 165v-60h270v60H570ZM120-120v-60h720v60H120Z"
+    />
+  </SvgIcon>
+);
 
-
-export default function NoteTools({ editor, node }: { editor: LexicalEditor, node: StickyNode }) {
+export default function NoteTools(
+  { editor, node }: { editor: LexicalEditor; node: StickyNode },
+) {
   const [float, setFloat] = useState<string>();
   const [textColor, setTextColor] = useState<string>();
   const [backgroundColor, setBackgroundColor] = useState<string>();
@@ -25,11 +50,14 @@ export default function NoteTools({ editor, node }: { editor: LexicalEditor, nod
 
   useEffect(() => {
     editor.getEditorState().read(() => {
-      const float = $getNodeStyleValueForProperty(node, 'float');
+      const float = $getNodeStyleValueForProperty(node, "float");
       setFloat(float);
-      const color = $getNodeStyleValueForProperty(node, 'color');
+      const color = $getNodeStyleValueForProperty(node, "color");
       setTextColor(color);
-      const backgroundColor = $getNodeStyleValueForProperty(node, 'background-color');
+      const backgroundColor = $getNodeStyleValueForProperty(
+        node,
+        "background-color",
+      );
       setBackgroundColor(backgroundColor);
     });
   }, [node]);
@@ -40,14 +68,14 @@ export default function NoteTools({ editor, node }: { editor: LexicalEditor, nod
       node.remove();
       handleClose();
     });
-  }
+  };
 
   const updateNoteColor = (key: string, value: string) => {
-    const styleKey = key === 'text' ? 'color' : 'background-color';
+    const styleKey = key === "text" ? "color" : "background-color";
     updateColor(styleKey, value);
   };
 
-  function updateFloat(newFloat: 'left' | 'right' | 'none') {
+  function updateFloat(newFloat: "left" | "right" | "none") {
     setFloat(newFloat);
     editor.update(() => {
       node.select();
@@ -55,8 +83,8 @@ export default function NoteTools({ editor, node }: { editor: LexicalEditor, nod
     });
   }
 
-  function updateColor(key: 'color' | 'background-color', value: string) {
-    key === 'color' ? setTextColor(value) : setBackgroundColor(value);
+  function updateColor(key: "color" | "background-color", value: string) {
+    key === "color" ? setTextColor(value) : setBackgroundColor(value);
     editor.update(() => {
       node.select();
       $patchStyle(node, { [key]: value });
@@ -77,7 +105,7 @@ export default function NoteTools({ editor, node }: { editor: LexicalEditor, nod
   };
 
   useEffect(() => {
-    if (!open) return
+    if (!open) return;
     editor.update(() => {
       node.select();
     });
@@ -86,53 +114,73 @@ export default function NoteTools({ editor, node }: { editor: LexicalEditor, nod
     <>
       <Button
         id="note-tools-button"
-        aria-controls={open ? 'note-tools-menu' : undefined}
+        aria-controls={open ? "note-tools-menu" : undefined}
         aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
+        aria-expanded={open ? "true" : undefined}
         variant="outlined"
         onClick={handleClick}
         startIcon={<Note />}
         endIcon={<ArrowDropDown />}
         sx={{
-          color: 'text.primary',
-          borderColor: 'divider',
-          p: 1, minWidth: 0, height: 36,
-          '& .MuiButton-startIcon': { mr: { xs: 0, sm: 1 }, ml: 0 },
-          '& .MuiButton-endIcon': { mr: 0, ml: 0 },
-          '& .MuiButton-endIcon > svg': { fontSize: 20 },
+          color: "text.primary",
+          borderColor: "divider",
+          p: 1,
+          minWidth: 0,
+          height: 36,
+          "& .MuiButton-startIcon": { mr: { xs: 0, sm: 1 }, ml: 0 },
+          "& .MuiButton-endIcon": { mr: 0, ml: 0 },
+          "& .MuiButton-endIcon > svg": { fontSize: 20 },
         }}
       >
-        <Typography variant="button" sx={{ display: { xs: "none", sm: "block" } }}>Note</Typography>
+        <Typography
+          variant="button"
+          sx={{ display: { xs: "none", sm: "block" } }}
+        >
+          Note
+        </Typography>
       </Button>
-      <Menu id="note-tools-menu" aria-label="Formatting options for note"
+      <Menu
+        id="note-tools-menu"
+        aria-label="Formatting options for note"
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
         anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'center',
+          vertical: "bottom",
+          horizontal: "center",
         }}
         transformOrigin={{
-          vertical: 'top',
-          horizontal: 'center',
+          vertical: "top",
+          horizontal: "center",
         }}
         sx={{
-          '& .MuiMenuItem-root': { minHeight: 36 },
-          '& .MuiBackdrop-root': { userSelect: 'none' },
+          "& .MuiMenuItem-root": { minHeight: 36 },
+          "& .MuiBackdrop-root": { userSelect: "none" },
         }}
       >
         <MenuItem>
-          <ToggleButtonGroup size="small" sx={{ width: "100%", justifyContent: "center" }}>
-            <ToggleButton value="float-left" key="float-left" selected={float === "left"}
+          <ToggleButtonGroup
+            size="small"
+            sx={{ width: "100%", justifyContent: "center" }}
+          >
+            <ToggleButton
+              value="float-left"
+              key="float-left"
+              selected={float === "left"}
               onClick={() => {
                 updateFloat("left");
-              }}>
+              }}
+            >
               <FormatImageLeft />
             </ToggleButton>
-            <ToggleButton value="float-right" key="float-right" selected={float === "right"}
+            <ToggleButton
+              value="float-right"
+              key="float-right"
+              selected={float === "right"}
               onClick={() => {
                 updateFloat("right");
-              }}>
+              }}
+            >
               <FormatImageRight />
             </ToggleButton>
           </ToggleButtonGroup>
@@ -141,7 +189,7 @@ export default function NoteTools({ editor, node }: { editor: LexicalEditor, nod
         <ColorPicker
           onColorChange={updateNoteColor}
           toggle="menuitem"
-          label='Note color'
+          label="Note color"
           textColor={textColor}
           backgroundColor={backgroundColor}
         />
@@ -153,6 +201,5 @@ export default function NoteTools({ editor, node }: { editor: LexicalEditor, nod
         </MenuItem>
       </Menu>
     </>
-
   );
 }

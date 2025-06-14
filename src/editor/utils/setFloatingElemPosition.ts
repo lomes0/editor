@@ -1,10 +1,9 @@
-"use client"
+"use client";
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
  */
 const VERTICAL_GAP = 10;
 const HORIZONTAL_OFFSET = 5;
@@ -19,8 +18,8 @@ export function setFloatingElemPosition(
   const scrollerElem = anchorElem.parentElement;
 
   if (targetRect === null || !scrollerElem) {
-    floatingElem.style.opacity = '0';
-    floatingElem.style.transform = 'translate(-10000px, -10000px)';
+    floatingElem.style.opacity = "0";
+    floatingElem.style.transform = "translate(-10000px, -10000px)";
     return;
   }
 
@@ -36,12 +35,13 @@ export function setFloatingElemPosition(
   }
 
   if (left + floatingElemRect.width > editorScrollerRect.right) {
-    left = editorScrollerRect.right - floatingElemRect.width - horizontalOffset;
+    left = editorScrollerRect.right - floatingElemRect.width -
+      horizontalOffset;
   }
 
   top -= anchorElementRect.top;
   left -= anchorElementRect.left;
 
-  floatingElem.style.opacity = '1';
+  floatingElem.style.opacity = "1";
   floatingElem.style.transform = `translate(${left}px, ${top}px)`;
 }

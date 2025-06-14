@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { NextAuthOptions } from "next-auth";
-import { PrismaAdapter } from '@next-auth/prisma-adapter';
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import GitHubProvider from "next-auth/providers/github";
 import { findUserByEmail, updateUser } from "@/repositories/user";
 
@@ -40,7 +40,7 @@ export const authOptions: NextAuthOptions = {
           lastLogin: new Date(),
         });
       }
-      return session
-    }
-  }
+      return session;
+    },
+  },
 };

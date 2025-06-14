@@ -1,38 +1,44 @@
-export function msqrt (element, targetParent, previousSibling, nextSibling, ancestors) {
+export function msqrt(
+  element,
+  targetParent,
+  previousSibling,
+  nextSibling,
+  ancestors,
+) {
   const targetElement = {
-    name: 'm:e',
-    type: 'tag',
+    name: "m:e",
+    type: "tag",
     attribs: {},
-    children: []
-  }
+    children: [],
+  };
   targetParent.children.push({
-    name: 'm:rad',
-    type: 'tag',
+    name: "m:rad",
+    type: "tag",
     attribs: {},
     children: [
       {
-        name: 'm:radPr',
-        type: 'tag',
+        name: "m:radPr",
+        type: "tag",
         attribs: {},
         children: [
           {
-            name: 'm:degHide',
-            type: 'tag',
+            name: "m:degHide",
+            type: "tag",
             attribs: {
-              'm:val': 'on'
+              "m:val": "on",
             },
-            children: []
-          }
-        ]
+            children: [],
+          },
+        ],
       },
       {
-        name: 'm:deg',
-        type: 'tag',
+        name: "m:deg",
+        type: "tag",
         attribs: {},
-        children: []
+        children: [],
       },
-      targetElement
-    ]
-  })
-  return targetElement
+      targetElement,
+    ],
+  });
+  return targetElement;
 }

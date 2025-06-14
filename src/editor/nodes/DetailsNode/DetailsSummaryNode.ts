@@ -3,7 +3,6 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
  */
 
 import {
@@ -17,12 +16,12 @@ import {
   LexicalNode,
   RangeSelection,
   SerializedElementNode,
-} from 'lexical';
-import { IS_CHROME } from '@lexical/utils';
-import invariant from '@/shared/invariant';
+} from "lexical";
+import { IS_CHROME } from "@lexical/utils";
+import invariant from "@/shared/invariant";
 
-import { $isDetailsContainerNode } from './DetailsContainerNode';
-import { $isDetailsContentNode } from './DetailsContentNode';
+import { $isDetailsContainerNode } from "./DetailsContainerNode";
+import { $isDetailsContentNode } from "./DetailsContentNode";
 
 type SerializedDetailsSummaryNode = SerializedElementNode & {
   editable: boolean;
@@ -40,7 +39,7 @@ export function $convertSummaryElement(
 export class DetailsSummaryNode extends ElementNode {
   __editable: boolean;
   static getType(): string {
-    return 'details-summary';
+    return "details-summary";
   }
 
   static clone(node: DetailsSummaryNode): DetailsSummaryNode {
@@ -55,30 +54,32 @@ export class DetailsSummaryNode extends ElementNode {
   }
 
   createDOM(config: EditorConfig, editor: LexicalEditor): HTMLElement {
-    const dom = document.createElement('summary');
-    dom.classList.add('details__summary');
+    const dom = document.createElement("summary");
+    dom.classList.add("details__summary");
     if (IS_CHROME) {
-      dom.addEventListener('click', () => {
+      dom.addEventListener("click", () => {
         editor.update(() => {
           const Details = this.getLatest().getParentOrThrow();
           invariant(
             $isDetailsContainerNode(Details),
-            'Expected parent node to be a DetailsContainerNode',
+            "Expected parent node to be a DetailsContainerNode",
           );
           Details.toggleOpen();
         });
       });
     }
-    if (this.__editable === false) dom.setAttribute('contenteditable', 'false');
+    if (this.__editable === false) {
+      dom.setAttribute("contenteditable", "false");
+    }
     return dom;
   }
 
   updateDOM(prevNode: DetailsSummaryNode, dom: HTMLElement): boolean {
     if (prevNode.__editable !== this.__editable) {
       if (this.__editable) {
-        dom.removeAttribute('contenteditable');
+        dom.removeAttribute("contenteditable");
       } else {
-        dom.setAttribute('contenteditable', 'false');
+        dom.setAttribute("contenteditable", "false");
       }
     }
     return false;
@@ -107,7 +108,7 @@ export class DetailsSummaryNode extends ElementNode {
     return {
       ...super.exportJSON(),
       editable: this.__editable,
-      type: 'details-summary',
+      type: "details-summary",
       version: 1,
     };
   }
@@ -121,7 +122,7 @@ export class DetailsSummaryNode extends ElementNode {
     return (node: LexicalNode) => {
       invariant(
         $isDetailsSummaryNode(node),
-        'node is not a DetailsSummaryNode',
+        "node is not a DetailsSummaryNode",
       );
       if (node.isEmpty()) {
         node.remove();
@@ -134,7 +135,7 @@ export class DetailsSummaryNode extends ElementNode {
 
     if (!$isDetailsContainerNode(containerNode)) {
       throw new Error(
-        'DetailsSummaryNode expects to be child of DetailsContainerNode',
+        "DetailsSummaryNode expects to be child of DetailsContainerNode",
       );
     }
 
@@ -142,7 +143,7 @@ export class DetailsSummaryNode extends ElementNode {
       const contentNode = this.getNextSibling();
       if (!$isDetailsContentNode(contentNode)) {
         throw new Error(
-          'DetailsSummaryNode expects to have DetailsContentNode sibling',
+          "DetailsSummaryNode expects to have DetailsContentNode sibling",
         );
       }
 
@@ -169,7 +170,6 @@ export class DetailsSummaryNode extends ElementNode {
   getEditable(): boolean {
     return this.getLatest().__editable;
   }
-
 }
 
 export function $createDetailsSummaryNode(): DetailsSummaryNode {

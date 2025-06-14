@@ -1,15 +1,14 @@
-"use client"
+"use client";
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
  */
 
-import { $isCodeHighlightNode } from '@lexical/code';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { mergeRegister } from '@lexical/utils';
+import { $isCodeHighlightNode } from "@lexical/code";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { mergeRegister } from "@lexical/utils";
 import {
   $getSelection,
   $isRangeSelection,
@@ -17,16 +16,18 @@ import {
   COMMAND_PRIORITY_LOW,
   LexicalEditor,
   SELECTION_CHANGE_COMMAND,
-} from 'lexical';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { getDOMRangeRect } from '@/editor/utils/getDOMRangeRect';
-import { getSelectedNode } from '@/editor/utils/getSelectedNode';
-import { setFloatingElemPosition } from '@/editor/utils/setFloatingElemPosition';
-import TextFormatToggles from '../ToolbarPlugin/Tools/TextFormatToggles';
-import { Paper } from '@mui/material';
+} from "lexical";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { getDOMRangeRect } from "@/editor/utils/getDOMRangeRect";
+import { getSelectedNode } from "@/editor/utils/getSelectedNode";
+import { setFloatingElemPosition } from "@/editor/utils/setFloatingElemPosition";
+import TextFormatToggles from "../ToolbarPlugin/Tools/TextFormatToggles";
+import { Paper } from "@mui/material";
 
-function FloatingToolbar({ editor, anchorElem }: { editor: LexicalEditor; anchorElem: HTMLElement; }) {
+function FloatingToolbar(
+  { editor, anchorElem }: { editor: LexicalEditor; anchorElem: HTMLElement },
+) {
   const popupCharStylesEditorRef = useRef<HTMLDivElement | null>(null);
 
   function mouseMoveListener(e: MouseEvent) {
@@ -34,34 +35,42 @@ function FloatingToolbar({ editor, anchorElem }: { editor: LexicalEditor; anchor
       popupCharStylesEditorRef?.current &&
       (e.buttons === 1 || e.buttons === 3)
     ) {
-      if (popupCharStylesEditorRef.current.style.pointerEvents !== 'none') {
+      if (
+        popupCharStylesEditorRef.current.style.pointerEvents !== "none"
+      ) {
         const x = e.clientX;
         const y = e.clientY;
         const elementUnderMouse = document.elementFromPoint(x, y);
 
-        if (!popupCharStylesEditorRef.current.contains(elementUnderMouse)) {
+        if (
+          !popupCharStylesEditorRef.current.contains(
+            elementUnderMouse,
+          )
+        ) {
           // Mouse is not over the target element => not a normal click, but probably a drag
-          popupCharStylesEditorRef.current.style.pointerEvents = 'none';
+          popupCharStylesEditorRef.current.style.pointerEvents = "none";
         }
       }
     }
   }
   function mouseUpListener(e: MouseEvent) {
     if (popupCharStylesEditorRef?.current) {
-      if (popupCharStylesEditorRef.current.style.pointerEvents !== 'auto') {
-        popupCharStylesEditorRef.current.style.pointerEvents = 'auto';
+      if (
+        popupCharStylesEditorRef.current.style.pointerEvents !== "auto"
+      ) {
+        popupCharStylesEditorRef.current.style.pointerEvents = "auto";
       }
     }
   }
 
   useEffect(() => {
     if (popupCharStylesEditorRef?.current) {
-      document.addEventListener('mousemove', mouseMoveListener);
-      document.addEventListener('mouseup', mouseUpListener);
+      document.addEventListener("mousemove", mouseMoveListener);
+      document.addEventListener("mouseup", mouseUpListener);
 
       return () => {
-        document.removeEventListener('mousemove', mouseMoveListener);
-        document.removeEventListener('mouseup', mouseUpListener);
+        document.removeEventListener("mousemove", mouseMoveListener);
+        document.removeEventListener("mouseup", mouseUpListener);
       };
     }
   }, [popupCharStylesEditorRef]);
@@ -86,10 +95,13 @@ function FloatingToolbar({ editor, anchorElem }: { editor: LexicalEditor; anchor
     ) {
       const rangeRect = getDOMRangeRect(nativeSelection, rootElement);
 
-      setFloatingElemPosition(rangeRect, popupCharStylesEditorElem, anchorElem);
+      setFloatingElemPosition(
+        rangeRect,
+        popupCharStylesEditorElem,
+        anchorElem,
+      );
     }
   }, [editor, anchorElem]);
-
 
   useEffect(() => {
     const scrollerElem = anchorElem.parentElement;
@@ -100,15 +112,15 @@ function FloatingToolbar({ editor, anchorElem }: { editor: LexicalEditor; anchor
       });
     };
 
-    window.addEventListener('resize', update);
+    window.addEventListener("resize", update);
     if (scrollerElem) {
-      scrollerElem.addEventListener('scroll', update);
+      scrollerElem.addEventListener("scroll", update);
     }
 
     return () => {
-      window.removeEventListener('resize', update);
+      window.removeEventListener("resize", update);
       if (scrollerElem) {
-        scrollerElem.removeEventListener('scroll', update);
+        scrollerElem.removeEventListener("scroll", update);
       }
     };
   }, [editor, updateFloatingToolbar, anchorElem]);
@@ -123,7 +135,6 @@ function FloatingToolbar({ editor, anchorElem }: { editor: LexicalEditor; anchor
           updateFloatingToolbar();
         });
       }),
-
       editor.registerCommand(
         SELECTION_CHANGE_COMMAND,
         () => {
@@ -136,7 +147,19 @@ function FloatingToolbar({ editor, anchorElem }: { editor: LexicalEditor; anchor
   }, [editor, updateFloatingToolbar]);
 
   return (
-    <Paper className='floating-toolbar' ref={popupCharStylesEditorRef} sx={{ display: ['none', 'flex'], position: "absolute", top: 0, left: 0, zIndex: 1000, willChange: "transform", displayPrint: "none" }}>
+    <Paper
+      className="floating-toolbar"
+      ref={popupCharStylesEditorRef}
+      sx={{
+        display: ["none", "flex"],
+        position: "absolute",
+        top: 0,
+        left: 0,
+        zIndex: 1000,
+        willChange: "transform",
+        displayPrint: "none",
+      }}
+    >
       <TextFormatToggles editor={editor} />
     </Paper>
   );
@@ -176,15 +199,18 @@ function useFloatingToolbar(
 
       if (
         !$isCodeHighlightNode(selection.anchor.getNode()) &&
-        selection.getTextContent() !== ''
+        selection.getTextContent() !== ""
       ) {
         setIsText($isTextNode(node));
       } else {
         setIsText(false);
       }
 
-      const rawTextContent = selection.getTextContent().replace(/\n/g, '');
-      if (!selection.isCollapsed() && rawTextContent === '') {
+      const rawTextContent = selection.getTextContent().replace(
+        /\n/g,
+        "",
+      );
+      if (!selection.isCollapsed() && rawTextContent === "") {
         setIsText(false);
         return;
       }
@@ -192,9 +218,9 @@ function useFloatingToolbar(
   }, [editor]);
 
   useEffect(() => {
-    document.addEventListener('selectionchange', updatePopup);
+    document.addEventListener("selectionchange", updatePopup);
     return () => {
-      document.removeEventListener('selectionchange', updatePopup);
+      document.removeEventListener("selectionchange", updatePopup);
     };
   }, [updatePopup]);
 
@@ -215,7 +241,10 @@ function useFloatingToolbar(
     return null;
   }
 
-  return createPortal(<FloatingToolbar editor={editor} anchorElem={anchorElem} />, anchorElem);
+  return createPortal(
+    <FloatingToolbar editor={editor} anchorElem={anchorElem} />,
+    anchorElem,
+  );
 }
 
 export default function FloatingTextFormatToolbarPlugin({

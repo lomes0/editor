@@ -3,7 +3,6 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
  */
 
 import {
@@ -18,11 +17,11 @@ import {
   NodeKey,
   SerializedElementNode,
   Spread,
-} from 'lexical';
-import { IS_CHROME } from '@lexical/utils';
-import invariant from '@/shared/invariant';
+} from "lexical";
+import { IS_CHROME } from "@lexical/utils";
+import invariant from "@/shared/invariant";
 
-import { setDomHiddenUntilFound } from './utils';
+import { setDomHiddenUntilFound } from "./utils";
 
 export type SerializedDetailsContainerNode = Spread<
   {
@@ -53,7 +52,7 @@ export class DetailsContainerNode extends ElementNode {
   }
 
   static getType(): string {
-    return 'details-container';
+    return "details-container";
   }
 
   static clone(node: DetailsContainerNode): DetailsContainerNode {
@@ -66,13 +65,13 @@ export class DetailsContainerNode extends ElementNode {
     // details is not well supported in Chrome #5582
     let dom: HTMLElement;
     if (IS_CHROME) {
-      dom = document.createElement('div');
-      dom.setAttribute('open', '');
-      if (!this.__open) dom.removeAttribute('open');
+      dom = document.createElement("div");
+      dom.setAttribute("open", "");
+      if (!this.__open) dom.removeAttribute("open");
     } else {
-      const detailsDom = document.createElement('details');
+      const detailsDom = document.createElement("details");
       detailsDom.open = this.__open;
-      detailsDom.addEventListener('toggle', () => {
+      detailsDom.addEventListener("toggle", () => {
         const open = editor.getEditorState().read(() => this.getOpen());
         if (open !== detailsDom.open) {
           editor.update(() => this.toggleOpen());
@@ -80,8 +79,10 @@ export class DetailsContainerNode extends ElementNode {
       });
       dom = detailsDom;
     }
-    dom.classList.add('details__container');
-    if (this.__editable === false) dom.setAttribute('contenteditable', 'false');
+    dom.classList.add("details__container");
+    if (this.__editable === false) {
+      dom.setAttribute("contenteditable", "false");
+    }
     return dom;
   }
 
@@ -96,13 +97,13 @@ export class DetailsContainerNode extends ElementNode {
         const contentDom = dom.children[1];
         invariant(
           isHTMLElement(contentDom),
-          'Expected contentDom to be an HTMLElement',
+          "Expected contentDom to be an HTMLElement",
         );
         if (currentOpen) {
-          dom.setAttribute('open', '');
+          dom.setAttribute("open", "");
           contentDom.hidden = false;
         } else {
-          dom.removeAttribute('open');
+          dom.removeAttribute("open");
           setDomHiddenUntilFound(contentDom);
         }
       } else {
@@ -111,9 +112,9 @@ export class DetailsContainerNode extends ElementNode {
     }
     if (prevNode.__editable !== this.__editable) {
       if (this.__editable) {
-        dom.removeAttribute('contenteditable');
+        dom.removeAttribute("contenteditable");
       } else {
-        dom.setAttribute('contenteditable', 'false');
+        dom.setAttribute("contenteditable", "false");
       }
     }
     return false;
@@ -139,11 +140,13 @@ export class DetailsContainerNode extends ElementNode {
   }
 
   exportDOM(): DOMExportOutput {
-    const element = document.createElement('details');
-    element.classList.add('details__container');
-    element.setAttribute('open', '');
-    if (!this.__open) element.removeAttribute('open');
-    if (this.__editable === false) element.setAttribute('contenteditable', 'false');
+    const element = document.createElement("details");
+    element.classList.add("details__container");
+    element.setAttribute("open", "");
+    if (!this.__open) element.removeAttribute("open");
+    if (this.__editable === false) {
+      element.setAttribute("contenteditable", "false");
+    }
     return { element };
   }
 
@@ -152,7 +155,7 @@ export class DetailsContainerNode extends ElementNode {
       ...super.exportJSON(),
       open: this.__open,
       editable: this.__editable,
-      type: 'details-container',
+      type: "details-container",
       version: 1,
     };
   }
@@ -178,7 +181,6 @@ export class DetailsContainerNode extends ElementNode {
   getEditable(): boolean {
     return this.getLatest().__editable;
   }
-
 }
 
 export function $createDetailsContainerNode(

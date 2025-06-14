@@ -2,14 +2,14 @@ import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { TableCellNode, TableNode } from "./nodes/TableNode";
 import { ListItemNode, ListNode } from "@lexical/list";
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
-import 'prismjs/components/prism-csharp';
+import "prismjs/components/prism-csharp";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { HorizontalRuleNode } from "@/editor/nodes/HorizontalRuleNode";
 import { MathNode } from "./nodes/MathNode";
 import { ImageNode } from "./nodes/ImageNode";
-import { SketchNode } from './nodes/SketchNode';
-import { GraphNode } from './nodes/GraphNode';
-import { StickyNode } from './nodes/StickyNode';
+import { SketchNode } from "./nodes/SketchNode";
+import { GraphNode } from "./nodes/GraphNode";
+import { StickyNode } from "./nodes/StickyNode";
 import theme from "./theme";
 import { PageBreakNode } from "./nodes/PageBreakNode";
 import { IFrameNode } from "./nodes/IFrameNode";
@@ -22,7 +22,11 @@ import {
   LexicalTableNode,
   LexicalTableRowNode,
 } from "@/editor/nodes/TableNode";
-import { DetailsContainerNode, DetailsContentNode, DetailsSummaryNode } from "./nodes/DetailsNode";
+import {
+  DetailsContainerNode,
+  DetailsContentNode,
+  DetailsSummaryNode,
+} from "./nodes/DetailsNode";
 
 export const editorConfig = {
   namespace: "matheditor",

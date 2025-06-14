@@ -44,22 +44,30 @@ const getFallbackEnvs = ({ fallbacks, basedir, id, pageExtensions }) => {
   if (Object.values(envs).filter((v) => !!v).length === 0) return;
 
   console.log(
-    "> [PWA] Fallback to precache routes when fetch failed from cache or network:"
+    "> [PWA] Fallback to precache routes when fetch failed from cache or network:",
   );
-  if (envs.__PWA_FALLBACK_DOCUMENT__)
-    console.log(`> [PWA]   document (page): ${envs.__PWA_FALLBACK_DOCUMENT__}`);
-  if (envs.__PWA_FALLBACK_IMAGE__)
-    console.log(`> [PWA]   image: ${envs.__PWA_FALLBACK_IMAGE__}`);
-  if (envs.__PWA_FALLBACK_AUDIO__)
-    console.log(`> [PWA]   audio: ${envs.__PWA_FALLBACK_AUDIO__}`);
-  if (envs.__PWA_FALLBACK_VIDEO__)
-    console.log(`> [PWA]   video: ${envs.__PWA_FALLBACK_VIDEO__}`);
-  if (envs.__PWA_FALLBACK_FONT__)
-    console.log(`> [PWA]   font: ${envs.__PWA_FALLBACK_FONT__}`);
-  if (envs.__PWA_FALLBACK_DATA__)
+  if (envs.__PWA_FALLBACK_DOCUMENT__) {
     console.log(
-      `> [PWA]   data (/_next/data/**/*.json): ${envs.__PWA_FALLBACK_DATA__}`
+      `> [PWA]   document (page): ${envs.__PWA_FALLBACK_DOCUMENT__}`,
     );
+  }
+  if (envs.__PWA_FALLBACK_IMAGE__) {
+    console.log(`> [PWA]   image: ${envs.__PWA_FALLBACK_IMAGE__}`);
+  }
+  if (envs.__PWA_FALLBACK_AUDIO__) {
+    console.log(`> [PWA]   audio: ${envs.__PWA_FALLBACK_AUDIO__}`);
+  }
+  if (envs.__PWA_FALLBACK_VIDEO__) {
+    console.log(`> [PWA]   video: ${envs.__PWA_FALLBACK_VIDEO__}`);
+  }
+  if (envs.__PWA_FALLBACK_FONT__) {
+    console.log(`> [PWA]   font: ${envs.__PWA_FALLBACK_FONT__}`);
+  }
+  if (envs.__PWA_FALLBACK_DATA__) {
+    console.log(
+      `> [PWA]   data (/_next/data/**/*.json): ${envs.__PWA_FALLBACK_DATA__}`,
+    );
+  }
 
   return envs;
 };
@@ -148,9 +156,9 @@ const buildFallbackWorker = ({
     ],
     optimization: minify
       ? {
-          minimize: true,
-          minimizer: [new TerserPlugin()],
-        }
+        minimize: true,
+        minimizer: [new TerserPlugin()],
+      }
       : undefined,
   }).run((error, status) => {
     if (error || status.hasErrors()) {
@@ -160,7 +168,11 @@ const buildFallbackWorker = ({
     }
   });
 
-  return { fallbacks, name, precaches: Object.values(envs).filter((v) => !!v) };
+  return {
+    fallbacks,
+    name,
+    precaches: Object.values(envs).filter((v) => !!v),
+  };
 };
 
 module.exports = buildFallbackWorker;

@@ -3,7 +3,6 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
  */
 
 import type {
@@ -14,22 +13,31 @@ import type {
   LexicalNode,
   NodeKey,
   Spread,
-} from 'lexical';
+} from "lexical";
 
 import { JSX } from "react";
-import { ImageNode, ImagePayload, SerializedImageNode } from '../ImageNode';
+import { ImageNode, ImagePayload, SerializedImageNode } from "../ImageNode";
 import { $generateHtmlFromNodes } from "@lexical/html";
-import ImageComponent from '../ImageNode/ImageComponent';
+import ImageComponent from "../ImageNode/ImageComponent";
 
-function convertIFrameElement(domNode: HTMLElement,): null | DOMConversionOutput {
-  const src = domNode.getAttribute('data-lexical-iFrame');
+function convertIFrameElement(
+  domNode: HTMLElement,
+): null | DOMConversionOutput {
+  const src = domNode.getAttribute("data-lexical-iFrame");
   if (src) {
-    const width = +(domNode.getAttribute('width') || '560');
-    const height = +(domNode.getAttribute('height') || '315');
+    const width = +(domNode.getAttribute("width") || "560");
+    const height = +(domNode.getAttribute("height") || "315");
     const style = domNode.style.cssText;
     const altText = domNode.title;
     const id = domNode.id;
-    const node = $createIFrameNode({ src, width, height, style, id, altText });
+    const node = $createIFrameNode({
+      src,
+      width,
+      height,
+      style,
+      id,
+      altText,
+    });
     return { node };
   }
   return null;
@@ -38,16 +46,15 @@ function convertIFrameElement(domNode: HTMLElement,): null | DOMConversionOutput
 export type IFramePayload = ImagePayload;
 export type SerializedIFrameNode = Spread<
   {
-    type: 'iframe';
+    type: "iframe";
     version: 1;
   },
   SerializedImageNode
 >;
 
 export class IFrameNode extends ImageNode {
-
   static getType(): string {
-    return 'iframe';
+    return "iframe";
   }
 
   static clone(node: IFrameNode): IFrameNode {
@@ -62,7 +69,6 @@ export class IFrameNode extends ImageNode {
       node.__caption,
       node.__key,
     );
-
   }
 
   static importJSON(serializedNode: SerializedIFrameNode): IFrameNode {
@@ -75,24 +81,28 @@ export class IFrameNode extends ImageNode {
       style,
       id,
       showCaption,
-      altText
+      altText,
     });
     try {
       if (caption) {
         const nestedEditor = node.__caption;
-        const editorState = nestedEditor.parseEditorState(caption.editorState);
+        const editorState = nestedEditor.parseEditorState(
+          caption.editorState,
+        );
         if (!editorState.isEmpty()) {
           nestedEditor.setEditorState(editorState);
         }
       }
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error(e);
+    }
     return node;
   }
 
   exportJSON(): SerializedIFrameNode {
     return {
       ...super.exportJSON(),
-      type: 'iframe',
+      type: "iframe",
       version: 1,
     };
   }
@@ -108,29 +118,50 @@ export class IFrameNode extends ImageNode {
     caption?: LexicalEditor,
     key?: NodeKey,
   ) {
-    super(src, altText, width, height, style, id, showCaption, caption, key);
+    super(
+      src,
+      altText,
+      width,
+      height,
+      style,
+      id,
+      showCaption,
+      caption,
+      key,
+    );
   }
 
   exportDOM(editor: LexicalEditor): DOMExportOutput {
     const element = super.createDOM(editor._config, editor);
     if (!element) return { element };
-    const iframe = document.createElement('iframe');
-    iframe.setAttribute('data-lexical-iFrame', this.__src);
-    if (this.__width) iframe.setAttribute('width', this.__width.toString());
-    if (this.__height) iframe.setAttribute('height', this.__height.toString());
-    const matchYoutube = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/.exec(this.__src);
-    const videoId = matchYoutube ? (matchYoutube?.[2].length === 11 ? matchYoutube[2] : null) : null;
-    iframe.setAttribute('src', videoId ? `https://www.youtube-nocookie.com/embed/${videoId}` : this.__src);
-    iframe.setAttribute('frameborder', '0');
+    const iframe = document.createElement("iframe");
+    iframe.setAttribute("data-lexical-iFrame", this.__src);
+    if (this.__width) iframe.setAttribute("width", this.__width.toString());
+    if (this.__height) {
+      iframe.setAttribute("height", this.__height.toString());
+    }
+    const matchYoutube =
+      /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
+        .exec(this.__src);
+    const videoId = matchYoutube
+      ? (matchYoutube?.[2].length === 11 ? matchYoutube[2] : null)
+      : null;
     iframe.setAttribute(
-      'allow',
-      'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture',
+      "src",
+      videoId
+        ? `https://www.youtube-nocookie.com/embed/${videoId}`
+        : this.__src,
     );
-    iframe.setAttribute('allowfullscreen', 'true');
-    iframe.setAttribute('title', this.__altText);
+    iframe.setAttribute("frameborder", "0");
+    iframe.setAttribute(
+      "allow",
+      "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
+    );
+    iframe.setAttribute("allowfullscreen", "true");
+    iframe.setAttribute("title", this.__altText);
     element.appendChild(iframe);
     if (!this.__showCaption) return { element };
-    const caption = document.createElement('figcaption');
+    const caption = document.createElement("figcaption");
     this.__caption.getEditorState().read(() => {
       caption.innerHTML = $generateHtmlFromNodes(this.__caption);
     });
@@ -141,7 +172,7 @@ export class IFrameNode extends ImageNode {
   static importDOM(): DOMConversionMap | null {
     return {
       iframe: (domNode: HTMLElement) => {
-        if (!domNode.hasAttribute('data-lexical-iFrame')) {
+        if (!domNode.hasAttribute("data-lexical-iFrame")) {
           return null;
         }
         return {
@@ -161,9 +192,15 @@ export class IFrameNode extends ImageNode {
 
   decorate(): JSX.Element {
     const self = this.getLatest();
-    const matchYoutube = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/.exec(self.__src);
-    const videoId = matchYoutube ? (matchYoutube?.[2].length === 11 ? matchYoutube[2] : null) : null;
-    const src = videoId ? `https://www.youtube-nocookie.com/embed/${videoId}` : self.__src;
+    const matchYoutube =
+      /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
+        .exec(self.__src);
+    const videoId = matchYoutube
+      ? (matchYoutube?.[2].length === 11 ? matchYoutube[2] : null)
+      : null;
+    const src = videoId
+      ? `https://www.youtube-nocookie.com/embed/${videoId}`
+      : self.__src;
 
     return (
       <ImageComponent
@@ -174,15 +211,35 @@ export class IFrameNode extends ImageNode {
         nodeKey={self.__key}
         showCaption={self.__showCaption}
         caption={self.__caption}
-        element='iframe'
+        element="iframe"
       />
     );
   }
 }
 
 export function $createIFrameNode(payload: IFramePayload): IFrameNode {
-  const { src, altText = "iframe", width, height, style, id, showCaption, caption, key } = payload;
-  return new IFrameNode(src, altText, width, height, style, id, showCaption, caption, key);
+  const {
+    src,
+    altText = "iframe",
+    width,
+    height,
+    style,
+    id,
+    showCaption,
+    caption,
+    key,
+  } = payload;
+  return new IFrameNode(
+    src,
+    altText,
+    width,
+    height,
+    style,
+    id,
+    showCaption,
+    caption,
+    key,
+  );
 }
 
 export function $isIFrameNode(

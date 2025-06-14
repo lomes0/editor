@@ -1,13 +1,15 @@
-import { useState, useRef, useCallback } from "react";
+import { useCallback, useRef, useState } from "react";
 
 export function useMeasure<T extends HTMLElement>(): [
   React.RefCallback<T>,
   {
     width: number | null;
     height: number | null;
-  }
+  },
 ] {
-  const [dimensions, setDimensions] = useState<{ width: number | null; height: number | null }>({
+  const [dimensions, setDimensions] = useState<
+    { width: number | null; height: number | null }
+  >({
     width: null,
     height: null,
   });

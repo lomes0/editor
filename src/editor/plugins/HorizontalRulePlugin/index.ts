@@ -1,24 +1,23 @@
-"use client"
+"use client";
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
  */
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   $createHorizontalRuleNode,
   INSERT_HORIZONTAL_RULE_COMMAND,
-} from '@/editor/nodes/HorizontalRuleNode';
-import { $insertNodeToNearestRoot } from '@lexical/utils';
+} from "@/editor/nodes/HorizontalRuleNode";
+import { $insertNodeToNearestRoot } from "@lexical/utils";
 import {
   $getSelection,
   $isRangeSelection,
   COMMAND_PRIORITY_EDITOR,
-} from 'lexical';
-import { useEffect } from 'react';
+} from "lexical";
+import { useEffect } from "react";
 
 export default function HorizontalRulePlugin(): null {
   const [editor] = useLexicalComposerContext();

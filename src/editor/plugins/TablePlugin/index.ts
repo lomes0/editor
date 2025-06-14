@@ -3,17 +3,16 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
  */
 
-import type { JSX } from 'react';
+import type { JSX } from "react";
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   registerTablePlugin,
   registerTableSelectionObserver,
-} from './LexicalTablePluginHelpers';
-import { useEffect } from 'react';
+} from "./LexicalTablePluginHelpers";
+import { useEffect } from "react";
 
 /**
  * A plugin to enable all of the features of Lexical's TableNode.
@@ -26,7 +25,7 @@ export function TablePlugin(): JSX.Element | null {
 
   useEffect(() => registerTablePlugin(editor), [editor]);
 
-  useEffect(() => registerTableSelectionObserver(editor, true), [editor],);
+  useEffect(() => registerTableSelectionObserver(editor, true), [editor]);
 
   return null;
 }

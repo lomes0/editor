@@ -9,33 +9,51 @@ import SplashScreen from "@/components/SplashScreen";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 
-const getCachedUserDocument = cache(async (id: string, revisions?: string) => await findUserDocument(id, revisions));
+const getCachedUserDocument = cache(async (id: string, revisions?: string) =>
+  await findUserDocument(id, revisions)
+);
 const getCachedSession = cache(async () => await getServerSession(authOptions));
 
 export async function generateMetadata(
-  props: { params: Promise<{ id: string }>, searchParams: Promise<{ v?: string }> }
+  props: {
+    params: Promise<{ id: string }>;
+    searchParams: Promise<{ v?: string }>;
+  },
 ): Promise<Metadata> {
   const searchParams = await props.searchParams;
   const params = await props.params;
-  if (!(params.id && params.id[0])) return {
-    title: "New Document",
-    description: "Create a new document on Math Editor",
-  };
-  const metadata: OgMetadata = { id: params.id[0], title: 'Math Editor' };
+  if (!(params.id && params.id[0])) {
+    return {
+      title: "New Document",
+      description: "Create a new document on Math Editor",
+    };
+  }
+  const metadata: OgMetadata = { id: params.id[0], title: "Math Editor" };
   const document = await getCachedUserDocument(params.id[0], searchParams.v);
   if (document) {
     if (document.collab || document.published) {
       metadata.title = `Fork ${document.name}`;
-      metadata.subtitle = `Last updated: ${new Date(document.updatedAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })} (UTC)`;
-      metadata.user = { name: document.author.name, image: document.author.image!, email: document.author.email };
+      metadata.subtitle = `Last updated: ${
+        new Date(document.updatedAt).toLocaleString(undefined, {
+          dateStyle: "medium",
+          timeStyle: "short",
+        })
+      } (UTC)`;
+      metadata.user = {
+        name: document.author.name,
+        image: document.author.image!,
+        email: document.author.email,
+      };
     } else {
-      metadata.title = 'Fork a Document';
+      metadata.title = "Fork a Document";
     }
   } else {
-    metadata.title = 'Fork a Document';
+    metadata.title = "Fork a Document";
   }
   const { title, subtitle, description } = metadata;
-  const image = `/api/og?metadata=${encodeURIComponent(JSON.stringify(metadata))}`;
+  const image = `/api/og?metadata=${
+    encodeURIComponent(JSON.stringify(metadata))
+  }`;
 
   return {
     title: `${title}`,
@@ -43,11 +61,14 @@ export async function generateMetadata(
     openGraph: {
       images: [image],
     },
-  }
+  };
 }
 
 export default async function Page(
-  props: { params: Promise<{ id?: string }>, searchParams: Promise<{ v?: string }> }
+  props: {
+    params: Promise<{ id?: string }>;
+    searchParams: Promise<{ v?: string }>;
+  },
 ) {
   const params = await props.params;
   const searchParams = await props.searchParams;
@@ -59,13 +80,35 @@ export default async function Page(
   const isPrivate = document.private;
   const isCollab = document.collab;
   const session = await getCachedSession();
-  if (!session && !isPublished && !isCollab) return <SplashScreen title="This document is not published" subtitle="Please sign in to Fork it" />
+  if (!session && !isPublished && !isCollab) {
+    return (
+      <SplashScreen
+        title="This document is not published"
+        subtitle="Please sign in to Fork it"
+      />
+    );
+  }
   const user = session && session.user;
   const isAuthor = user && user.id === document.author.id;
-  const isCoauthor = user && document.coauthors.some(coauthor => coauthor.id === user.id);
+  const isCoauthor = user &&
+    document.coauthors.some((coauthor) => coauthor.id === user.id);
   if (user && !isAuthor && !isCoauthor) {
-    if (isPrivate) return <SplashScreen title="This document is private" subtitle="You are not authorized to Fork this document" />
-    if (!isPublished && !isCollab) return <SplashScreen title="This document is not published" subtitle="You are not authorized to Fork this document" />
+    if (isPrivate) {
+      return (
+        <SplashScreen
+          title="This document is private"
+          subtitle="You are not authorized to Fork this document"
+        />
+      );
+    }
+    if (!isPublished && !isCollab) {
+      return (
+        <SplashScreen
+          title="This document is not published"
+          subtitle="You are not authorized to Fork this document"
+        />
+      );
+    }
   }
   const revisionId = searchParams.v || document.head;
   const thumbnails = {
@@ -76,4 +119,4 @@ export default async function Page(
       <NewDocument cloudDocument={document} />
     </ThumbnailProvider>
   );
-} 
+}

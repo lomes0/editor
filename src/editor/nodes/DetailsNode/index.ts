@@ -1,19 +1,18 @@
-
-export type { SerializedDetailsContainerNode } from './DetailsContainerNode'
+export type { SerializedDetailsContainerNode } from "./DetailsContainerNode";
 export {
-  DetailsContainerNode,
   $createDetailsContainerNode,
   $isDetailsContainerNode,
-} from './DetailsContainerNode'
+  DetailsContainerNode,
+} from "./DetailsContainerNode";
 
 export {
-  DetailsSummaryNode,
   $createDetailsSummaryNode,
   $isDetailsSummaryNode,
-} from './DetailsSummaryNode'
+  DetailsSummaryNode,
+} from "./DetailsSummaryNode";
 
 export {
-  DetailsContentNode,
   $createDetailsContentNode,
   $isDetailsContentNode,
-} from './DetailsContentNode'
+  DetailsContentNode,
+} from "./DetailsContentNode";

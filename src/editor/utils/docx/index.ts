@@ -1,5 +1,23 @@
-import { convertInchesToTwip, Document, FileChild, IParagraphOptions, Packer, PageBreak, Paragraph, ParagraphChild, Table, TextRun } from "docx";
-import { $getRoot, LexicalNode, $isElementNode, $isTextNode, $isParagraphNode, $isLineBreakNode } from "lexical";
+import {
+  convertInchesToTwip,
+  Document,
+  FileChild,
+  IParagraphOptions,
+  Packer,
+  PageBreak,
+  Paragraph,
+  ParagraphChild,
+  Table,
+  TextRun,
+} from "docx";
+import {
+  $getRoot,
+  $isElementNode,
+  $isLineBreakNode,
+  $isParagraphNode,
+  $isTextNode,
+  LexicalNode,
+} from "lexical";
 import { $convertMathNode } from "./math";
 import { $convertCodeHighlightNode, $convertCodeNode } from "./code";
 import { $convertTableNode } from "./table";
@@ -14,7 +32,7 @@ import { $convertStickyNode } from "./sticky";
 import { $convertDetailsNode } from "./details";
 import { $isCodeHighlightNode, $isCodeNode } from "@lexical/code";
 import { $isHeadingNode, $isQuoteNode } from "@lexical/rich-text";
-import { $isListNode, $isListItemNode, ListNode } from "@lexical/list";
+import { $isListItemNode, $isListNode, ListNode } from "@lexical/list";
 import { $isLinkNode } from "@lexical/link";
 
 import { $isDetailsContainerNode } from "@/editor/nodes/DetailsNode";
@@ -35,34 +53,50 @@ export function $convertEditortoDocx() {
   return elements as FileChild[];
 }
 
-export function $convertNodeToDocx(node: LexicalNode): FileChild | ParagraphChild | ParagraphChild[] | null {
+export function $convertNodeToDocx(
+  node: LexicalNode,
+): FileChild | ParagraphChild | ParagraphChild[] | null {
   const element = $mapNodeToDocx(node);
   if (!$isElementNode(node)) return element;
   const childNodes = node.getChildren();
-  const shouldSkipChildren = (
-    $isLinkNode(node) ||
+  const shouldSkipChildren = $isLinkNode(node) ||
     $isTableNode(node) ||
     $isLayoutContainerNode(node) ||
-    $isDetailsContainerNode(node)
-  );
+    $isDetailsContainerNode(node);
   if (shouldSkipChildren) return element;
   if (childNodes.length === 0) return element;
-  const children = childNodes.map($convertNodeToDocx).filter(Boolean).flat() as FileChild[];
+  const children = childNodes.map($convertNodeToDocx).filter(Boolean)
+    .flat() as FileChild[];
   if (!element) return children;
-  const rootChildren = children.filter((child) => child instanceof Table || child instanceof Paragraph);
-  const paragraphChildren = children.filter((child) => !(child instanceof Table) && !(child instanceof Paragraph));
-  if (element instanceof FileChild) paragraphChildren.forEach((child) => element.addChildElement(child));
-  if (Array.isArray(element)) { return [...rootChildren, ...element]; }
+  const rootChildren = children.filter((child) =>
+    child instanceof Table || child instanceof Paragraph
+  );
+  const paragraphChildren = children.filter((child) =>
+    !(child instanceof Table) && !(child instanceof Paragraph)
+  );
+  if (element instanceof FileChild) {
+    paragraphChildren.forEach((child) => element.addChildElement(child));
+  }
+  if (Array.isArray(element)) return [...rootChildren, ...element];
   if (rootChildren.length && !paragraphChildren.length) return rootChildren;
   return [...rootChildren, element];
 }
 
-function $mapNodeToDocx(node: LexicalNode): FileChild | ParagraphChild | ParagraphChild[] | null {
+function $mapNodeToDocx(
+  node: LexicalNode,
+): FileChild | ParagraphChild | ParagraphChild[] | null {
   if ($isParagraphNode(node)) {
-    const alignment = node.getFormatType().replace('justify', 'both') as IParagraphOptions['alignment'];
+    const alignment = node.getFormatType().replace(
+      "justify",
+      "both",
+    ) as IParagraphOptions["alignment"];
     const indent = node.getIndent() || 0;
     const dir = node.getDirection();
-    return new Paragraph({ alignment, indent: { left: convertInchesToTwip(indent / 2), }, bidirectional: dir === 'rtl' });
+    return new Paragraph({
+      alignment,
+      indent: { left: convertInchesToTwip(indent / 2) },
+      bidirectional: dir === "rtl",
+    });
   }
   if ($isHeadingNode(node)) {
     return $convertHeadingNode(node);
@@ -77,7 +111,7 @@ function $mapNodeToDocx(node: LexicalNode): FileChild | ParagraphChild | Paragra
     return $convertImageNode(node);
   }
   if ($isListNode(node)) {
-    if (node.getType() === 'check') return null;
+    if (node.getType() === "check") return null;
     listNodes.set(node.getKey(), node);
     return null;
   }
@@ -86,14 +120,14 @@ function $mapNodeToDocx(node: LexicalNode): FileChild | ParagraphChild | Paragra
   }
 
   if ($isLineBreakNode(node)) {
-    return new TextRun({ text: '', break: 1 });
+    return new TextRun({ text: "", break: 1 });
   }
 
   if ($isHorizontalRuleNode(node)) {
     return new Paragraph({
-      spacing: { after: 8 * 15, line: 2 * 15, },
+      spacing: { after: 8 * 15, line: 2 * 15 },
       border: {
-        top: { color: '#cccccc', space: 1, size: 6, style: 'single', },
+        top: { color: "#cccccc", space: 1, size: 6, style: "single" },
       },
     });
   }
@@ -106,21 +140,36 @@ function $mapNodeToDocx(node: LexicalNode): FileChild | ParagraphChild | Paragra
   }
 
   if ($isQuoteNode(node)) {
-    const alignment = node.getFormatType().replace('justify', 'both') as IParagraphOptions['alignment'];
+    const alignment = node.getFormatType().replace(
+      "justify",
+      "both",
+    ) as IParagraphOptions["alignment"];
     const indent = node.getIndent() || 0;
     const dir = node.getDirection();
     return new Paragraph({
-      style: 'Quote',
+      style: "Quote",
       alignment,
       indent: {
         start: 24 * 15 * (indent + 1),
       },
-      bidirectional: dir === 'rtl',
+      bidirectional: dir === "rtl",
       border: {
-        left: dir === 'rtl' ? undefined : { size: 30, color: '#ced0d4', style: 'single', space: 12 + 24 * 0.75 * indent },
-        right: dir === 'rtl' ? { size: 30, color: '#ced0d4', style: 'single', space: 12 + 24 * 0.75 * indent } : undefined,
-        top: { space: 4, style: 'none' },
-        bottom: { space: 2, style: 'none' },
+        left: dir === "rtl" ? undefined : {
+          size: 30,
+          color: "#ced0d4",
+          style: "single",
+          space: 12 + 24 * 0.75 * indent,
+        },
+        right: dir === "rtl"
+          ? {
+            size: 30,
+            color: "#ced0d4",
+            style: "single",
+            space: 12 + 24 * 0.75 * indent,
+          }
+          : undefined,
+        top: { space: 4, style: "none" },
+        bottom: { space: 2, style: "none" },
       },
     });
   }
@@ -174,19 +223,22 @@ export async function $generateDocxBlob(): Promise<Blob> {
         heading5: heading(5),
         heading6: heading(6),
         hyperlink: {
-          run: { color: '#216fdb', underline: undefined, },
+          run: { color: "#216fdb", underline: undefined },
         },
         document: {
-          run: { size: 12 * 2, font: "Roboto", },
+          run: { size: 12 * 2, font: "Roboto" },
           paragraph: {
-            spacing: { line: 20 * 15, after: 8 * 15, },
+            spacing: { line: 20 * 15, after: 8 * 15 },
           },
         },
       },
       paragraphStyles: [
         {
-          id: 'Quote', name: 'Quote', basedOn: 'Normal', quickFormat: true,
-          run: { color: '#65676b', },
+          id: "Quote",
+          name: "Quote",
+          basedOn: "Normal",
+          quickFormat: true,
+          run: { color: "#65676b" },
           paragraph: {
             spacing: { after: 10 * 15 },
           },
@@ -198,16 +250,19 @@ export async function $generateDocxBlob(): Promise<Blob> {
       config: [...listNodes.entries()].map(([key, node]) => (
         {
           reference: key,
-          levels: (node.getListType() === 'number' ? numbered : bullets).map(level => ({
-            ...level,
-            start: node.getStart(),
-          }))
+          levels: (node.getListType() === "number" ? numbered : bullets)
+            .map((level) => ({
+              ...level,
+              start: node.getStart(),
+            })),
         }
       )),
-
-    }
+    },
   });
 
   const buffer = await Packer.toBuffer(doc);
-  return new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+  return new Blob([buffer], {
+    type:
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  });
 }

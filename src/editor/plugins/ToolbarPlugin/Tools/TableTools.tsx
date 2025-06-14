@@ -1,11 +1,69 @@
-"use client"
-import { $createParagraphNode, $getPreviousSelection, $getSelection, $isElementNode, $isParagraphNode, $isRangeSelection, $isTextNode, $setSelection, ElementFormatType, ElementNode, LexicalEditor, } from "lexical";
+"use client";
+import {
+  $createParagraphNode,
+  $getPreviousSelection,
+  $getSelection,
+  $isElementNode,
+  $isParagraphNode,
+  $isRangeSelection,
+  $isTextNode,
+  $setSelection,
+  ElementFormatType,
+  ElementNode,
+  LexicalEditor,
+} from "lexical";
 import { useCallback, useEffect, useState } from "react";
-import { ToggleButtonGroup, ToggleButton, SvgIcon, Menu, Button, MenuItem, ListItemIcon, ListItemText, Typography, Divider } from "@mui/material";
-import { ViewHeadline, Delete, TableChart, Texture, ArrowDropDown } from "@mui/icons-material";
-import { $deleteTableColumn__EXPERIMENTAL, $deleteTableRow__EXPERIMENTAL, $getNodeTriplet, $getTableCellNodeFromLexicalNode, $getTableColumnIndexFromTableCellNode, $getTableNodeFromLexicalNodeOrThrow, $getTableRowIndexFromTableCellNode, $insertTableColumn__EXPERIMENTAL, $insertTableRow__EXPERIMENTAL, $isTableCellNode, $isTableRowNode, $isTableSelection, $unmergeCell, getTableObserverFromTableElement, HTMLTableElementWithWithTableSelectionState, TableCellHeaderStates, TableCellNode, TableNode, TableRowNode, TableSelection } from "@/editor/nodes/TableNode";
-import { FormatAlignLeft, FormatAlignCenter, FormatAlignRight } from '@mui/icons-material';
-import { $getNodeStyleValueForProperty, $patchStyle, getStyleObjectFromCSS } from "@/editor/nodes/utils";
+import {
+  Button,
+  Divider,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  SvgIcon,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
+} from "@mui/material";
+import {
+  ArrowDropDown,
+  Delete,
+  TableChart,
+  Texture,
+  ViewHeadline,
+} from "@mui/icons-material";
+import {
+  $deleteTableColumn__EXPERIMENTAL,
+  $deleteTableRow__EXPERIMENTAL,
+  $getNodeTriplet,
+  $getTableCellNodeFromLexicalNode,
+  $getTableColumnIndexFromTableCellNode,
+  $getTableNodeFromLexicalNodeOrThrow,
+  $getTableRowIndexFromTableCellNode,
+  $insertTableColumn__EXPERIMENTAL,
+  $insertTableRow__EXPERIMENTAL,
+  $isTableCellNode,
+  $isTableRowNode,
+  $isTableSelection,
+  $unmergeCell,
+  getTableObserverFromTableElement,
+  HTMLTableElementWithWithTableSelectionState,
+  TableCellHeaderStates,
+  TableCellNode,
+  TableNode,
+  TableRowNode,
+  TableSelection,
+} from "@/editor/nodes/TableNode";
+import {
+  FormatAlignCenter,
+  FormatAlignLeft,
+  FormatAlignRight,
+} from "@mui/icons-material";
+import {
+  $getNodeStyleValueForProperty,
+  $patchStyle,
+  getStyleObjectFromCSS,
+} from "@/editor/nodes/utils";
 import ColorPicker from "./ColorPicker";
 
 function computeSelectionCount(selection: TableSelection): {
@@ -23,7 +81,8 @@ function $canUnmerge(): boolean {
   const selection = $getSelection();
   if (
     ($isRangeSelection(selection) && !selection.isCollapsed()) ||
-    ($isTableSelection(selection) && !selection.anchor.is(selection.focus)) ||
+    ($isTableSelection(selection) &&
+      !selection.anchor.is(selection.focus)) ||
     (!$isRangeSelection(selection) && !$isTableSelection(selection))
   ) {
     return false;
@@ -54,65 +113,117 @@ function $selectLastDescendant(node: ElementNode): void {
   }
 }
 
-const FormatImageRight = () => <SvgIcon viewBox='0 -960 960 960' fontSize="small" >
-  <path xmlns="http://www.w3.org/2000/svg" d="M450-285v-390h390v390H450Zm60-60h270v-270H510v270ZM120-120v-60h720v60H120Zm0-165v-60h270v60H120Zm0-165v-60h270v60H120Zm0-165v-60h270v60H120Zm0-165v-60h720v60H120Z" />
-</SvgIcon>;
+const FormatImageRight = () => (
+  <SvgIcon viewBox="0 -960 960 960" fontSize="small">
+    <path
+      xmlns="http://www.w3.org/2000/svg"
+      d="M450-285v-390h390v390H450Zm60-60h270v-270H510v270ZM120-120v-60h720v60H120Zm0-165v-60h270v60H120Zm0-165v-60h270v60H120Zm0-165v-60h270v60H120Zm0-165v-60h720v60H120Z"
+    />
+  </SvgIcon>
+);
 
-const FormatImageLeft = () => <SvgIcon viewBox='0 -960 960 960' fontSize="small" >
-  <path xmlns="http://www.w3.org/2000/svg" d="M120-285v-390h390v390H120Zm60-60h270v-270H180v270Zm-60-435v-60h720v60H120Zm450 165v-60h270v60H570Zm0 165v-60h270v60H570Zm0 165v-60h270v60H570ZM120-120v-60h720v60H120Z" />
-</SvgIcon>;
+const FormatImageLeft = () => (
+  <SvgIcon viewBox="0 -960 960 960" fontSize="small">
+    <path
+      xmlns="http://www.w3.org/2000/svg"
+      d="M120-285v-390h390v390H120Zm60-60h270v-270H180v270Zm-60-435v-60h720v60H120Zm450 165v-60h270v60H570Zm0 165v-60h270v60H570Zm0 165v-60h270v60H570ZM120-120v-60h720v60H120Z"
+    />
+  </SvgIcon>
+);
 
-const CellMerge = () => <SvgIcon viewBox='0 -960 960 960' fontSize="small" >
-  <path d="M120-120v-240h80v160h160v80H120Zm480 0v-80h160v-160h80v240H600ZM287-327l-57-56 57-57H80v-80h207l-57-57 57-56 153 153-153 153Zm386 0L520-480l153-153 57 56-57 57h207v80H673l57 57-57 56ZM120-600v-240h240v80H200v160h-80Zm640 0v-160H600v-80h240v240h-80Z" />
-</SvgIcon>;
+const CellMerge = () => (
+  <SvgIcon viewBox="0 -960 960 960" fontSize="small">
+    <path d="M120-120v-240h80v160h160v80H120Zm480 0v-80h160v-160h80v240H600ZM287-327l-57-56 57-57H80v-80h207l-57-57 57-56 153 153-153 153Zm386 0L520-480l153-153 57 56-57 57h207v80H673l57 57-57 56ZM120-600v-240h240v80H200v160h-80Zm640 0v-160H600v-80h240v240h-80Z" />
+  </SvgIcon>
+);
 
-const TextRotationNone = () => <SvgIcon viewBox='0 -960 960 960' fontSize="small" >
-  <path d="M160-200v-80h528l-42-42 56-56 138 138-138 138-56-56 42-42H160Zm116-200 164-440h80l164 440h-76l-38-112H392l-40 112h-76Zm138-176h132l-64-182h-4l-64 182Z" />
-</SvgIcon>;
+const TextRotationNone = () => (
+  <SvgIcon viewBox="0 -960 960 960" fontSize="small">
+    <path d="M160-200v-80h528l-42-42 56-56 138 138-138 138-56-56 42-42H160Zm116-200 164-440h80l164 440h-76l-38-112H392l-40 112h-76Zm138-176h132l-64-182h-4l-64 182Z" />
+  </SvgIcon>
+);
 
-const TextRotationVertical = () => <SvgIcon viewBox='0 -960 960 960' fontSize="small" >
-  <path d="m436-320 164-440h80l164 440h-76l-40-112H552l-40 112h-76Zm138-176h132l-64-182h-4l-64 182ZM240-160 100-300l56-56 44 42v-526h80v526l44-42 56 56-140 140Z" />
-</SvgIcon>;
+const TextRotationVertical = () => (
+  <SvgIcon viewBox="0 -960 960 960" fontSize="small">
+    <path d="m436-320 164-440h80l164 440h-76l-40-112H552l-40 112h-76Zm138-176h132l-64-182h-4l-64 182ZM240-160 100-300l56-56 44 42v-526h80v526l44-42 56 56-140 140Z" />
+  </SvgIcon>
+);
 
-const AddRowAbove = () => <SvgIcon viewBox='0 -960 960 960' fontSize="small" >
-  <path d="M200-160h560v-240H200v240Zm640 80H120v-720h160v80h-80v240h560v-240h-80v-80h160v720ZM480-480Zm0 80v-80 80Zm0 0Zm-40-240v-80h-80v-80h80v-80h80v80h80v80h-80v80h-80Z" />
-</SvgIcon>;
+const AddRowAbove = () => (
+  <SvgIcon viewBox="0 -960 960 960" fontSize="small">
+    <path d="M200-160h560v-240H200v240Zm640 80H120v-720h160v80h-80v240h560v-240h-80v-80h160v720ZM480-480Zm0 80v-80 80Zm0 0Zm-40-240v-80h-80v-80h80v-80h80v80h80v80h-80v80h-80Z" />
+  </SvgIcon>
+);
 
-const AddRowBelow = () => <SvgIcon viewBox='0 -960 960 960' fontSize="small" >
-  <path d="M200-560h560v-240H200v240Zm-80 400v-720h720v720H680v-80h80v-240H200v240h80v80H120Zm360-320Zm0-80v80-80Zm0 0ZM440-80v-80h-80v-80h80v-80h80v80h80v80h-80v80h-80Z" />
-</SvgIcon>;
+const AddRowBelow = () => (
+  <SvgIcon viewBox="0 -960 960 960" fontSize="small">
+    <path d="M200-560h560v-240H200v240Zm-80 400v-720h720v720H680v-80h80v-240H200v240h80v80H120Zm360-320Zm0-80v80-80Zm0 0ZM440-80v-80h-80v-80h80v-80h80v80h80v80h-80v80h-80Z" />
+  </SvgIcon>
+);
 
-const AddColumnLeft = () => <SvgIcon viewBox='0 -960 960 960' fontSize="small" >
-  <path d="M800-200v-560H560v560h240Zm-640 80v-160h80v80h240v-560H240v80h-80v-160h720v720H160Zm320-360Zm80 0h-80 80Zm0 0ZM160-360v-80H80v-80h80v-80h80v80h80v80h-80v80h-80Z" />
-</SvgIcon>;
+const AddColumnLeft = () => (
+  <SvgIcon viewBox="0 -960 960 960" fontSize="small">
+    <path d="M800-200v-560H560v560h240Zm-640 80v-160h80v80h240v-560H240v80h-80v-160h720v720H160Zm320-360Zm80 0h-80 80Zm0 0ZM160-360v-80H80v-80h80v-80h80v80h80v80h-80v80h-80Z" />
+  </SvgIcon>
+);
 
-const AddColumnRight = () => <SvgIcon viewBox='0 -960 960 960' fontSize="small" >
-  <path d="M160-760v560h240v-560H160ZM80-120v-720h720v160h-80v-80H480v560h240v-80h80v160H80Zm400-360Zm-80 0h80-80Zm0 0Zm320 120v-80h-80v-80h80v-80h80v80h80v80h-80v80h-80Z" />
-</SvgIcon>;
+const AddColumnRight = () => (
+  <SvgIcon viewBox="0 -960 960 960" fontSize="small">
+    <path d="M160-760v560h240v-560H160ZM80-120v-720h720v160h-80v-80H480v560h240v-80h80v160H80Zm400-360Zm-80 0h80-80Zm0 0Zm320 120v-80h-80v-80h80v-80h80v80h80v80h-80v80h-80Z" />
+  </SvgIcon>
+);
 
-const RemoveRow = () => <SvgIcon viewBox='0 -960 960 960' fontSize="small" >
-  <path d="M560-280H120v-400h720v120h-80v-40H200v240h360v80Zm-360-80v-240 240Zm440 104 84-84-84-84 56-56 84 84 84-84 56 56-83 84 83 84-56 56-84-83-84 83-56-56Z" />
-</SvgIcon>;
+const RemoveRow = () => (
+  <SvgIcon viewBox="0 -960 960 960" fontSize="small">
+    <path d="M560-280H120v-400h720v120h-80v-40H200v240h360v80Zm-360-80v-240 240Zm440 104 84-84-84-84 56-56 84 84 84-84 56 56-83 84 83 84-56 56-84-83-84 83-56-56Z" />
+  </SvgIcon>
+);
 
-const RemoveColumn = () => <SvgIcon viewBox='0 -960 960 960' sx={{ transform: 'rotate(90deg)' }} fontSize="small" >
-  <path d="M560-280H120v-400h720v120h-80v-40H200v240h360v80Zm-360-80v-240 240Zm440 104 84-84-84-84 56-56 84 84 84-84 56 56-83 84 83 84-56 56-84-83-84 83-56-56Z" />
-</SvgIcon>;
+const RemoveColumn = () => (
+  <SvgIcon
+    viewBox="0 -960 960 960"
+    sx={{ transform: "rotate(90deg)" }}
+    fontSize="small"
+  >
+    <path d="M560-280H120v-400h720v120h-80v-40H200v240h360v80Zm-360-80v-240 240Zm440 104 84-84-84-84 56-56 84 84 84-84 56 56-83 84 83 84-56 56-84-83-84 83-56-56Z" />
+  </SvgIcon>
+);
 
-const RemoveRowHeader = () => <SvgIcon viewBox='0 -960 960 960' fontSize="small" >
-  <path d="M120-280v-400h720v400H120Zm80-80h560v-240H200v240Zm0 0v-240 240Z" />
-</SvgIcon>;
+const RemoveRowHeader = () => (
+  <SvgIcon viewBox="0 -960 960 960" fontSize="small">
+    <path d="M120-280v-400h720v400H120Zm80-80h560v-240H200v240Zm0 0v-240 240Z" />
+  </SvgIcon>
+);
 
-const RemoveColumnHeader = () => <SvgIcon viewBox='0 -960 960 960' sx={{ transform: 'rotate(90deg)' }} fontSize="small" >
-  <path d="M120-280v-400h720v400H120Zm80-80h560v-240H200v240Zm0 0v-240 240Z" />
-</SvgIcon>;
+const RemoveColumnHeader = () => (
+  <SvgIcon
+    viewBox="0 -960 960 960"
+    sx={{ transform: "rotate(90deg)" }}
+    fontSize="small"
+  >
+    <path d="M120-280v-400h720v400H120Zm80-80h560v-240H200v240Zm0 0v-240 240Z" />
+  </SvgIcon>
+);
 
-const AddRowHeader = () => <SvgIcon viewBox='0 -960 960 960' sx={{ transform: 'rotate(45deg)' }} fontSize="small" >
-  <path d="m272-104-38-38-42 42q-19 19-46.5 19.5T100-100q-19-19-19-46t19-46l42-42-38-40 554-554q12-12 29-12t29 12l112 112q12 12 12 29t-12 29L272-104Zm172-396L216-274l58 58 226-228-56-56Z" />
-</SvgIcon>;
+const AddRowHeader = () => (
+  <SvgIcon
+    viewBox="0 -960 960 960"
+    sx={{ transform: "rotate(45deg)" }}
+    fontSize="small"
+  >
+    <path d="m272-104-38-38-42 42q-19 19-46.5 19.5T100-100q-19-19-19-46t19-46l42-42-38-40 554-554q12-12 29-12t29 12l112 112q12 12 12 29t-12 29L272-104Zm172-396L216-274l58 58 226-228-56-56Z" />
+  </SvgIcon>
+);
 
-const AddColumnHeader = () => <SvgIcon viewBox='0 -960 960 960' sx={{ transform: 'rotate(-45deg)' }} fontSize="small" >
-  <path d="m272-104-38-38-42 42q-19 19-46.5 19.5T100-100q-19-19-19-46t19-46l42-42-38-40 554-554q12-12 29-12t29 12l112 112q12 12 12 29t-12 29L272-104Zm172-396L216-274l58 58 226-228-56-56Z" />
-</SvgIcon>;
+const AddColumnHeader = () => (
+  <SvgIcon
+    viewBox="0 -960 960 960"
+    sx={{ transform: "rotate(-45deg)" }}
+    fontSize="small"
+  >
+    <path d="m272-104-38-38-42 42q-19 19-46.5 19.5T100-100q-19-19-19-46t19-46l42-42-38-40 554-554q12-12 29-12t29 12l112 112q12 12 12 29t-12 29L272-104Zm172-396L216-274l58 58 226-228-56-56Z" />
+  </SvgIcon>
+);
 
 const $getSelectedTableCell = (editor: LexicalEditor): TableCellNode | null => {
   const selection = $getSelection();
@@ -154,19 +265,27 @@ const $getSelectedTableCell = (editor: LexicalEditor): TableCellNode | null => {
   return null;
 };
 
-
-export default function TableTools({ editor, node }: { editor: LexicalEditor, node: TableNode }) {
+export default function TableTools(
+  { editor, node }: { editor: LexicalEditor; node: TableNode },
+) {
   const [formatType, setFormatType] = useState<ElementFormatType>();
   const [float, setFloat] = useState<string>();
-  const [selectionCounts, setSelectionCounts] = useState({ columns: 1, rows: 1, });
+  const [selectionCounts, setSelectionCounts] = useState({
+    columns: 1,
+    rows: 1,
+  });
   const [canMergeCells, setCanMergeCells] = useState(false);
   const [canUnmergeCell, setCanUnmergeCell] = useState(false);
-  const [tableCellNode, setTableCellNode] = useState<TableCellNode | null>(null);
-  const [tableCellStyle, setTableCellStyle] = useState<Record<string, string> | null>(null);
+  const [tableCellNode, setTableCellNode] = useState<TableCellNode | null>(
+    null,
+  );
+  const [tableCellStyle, setTableCellStyle] = useState<
+    Record<string, string> | null
+  >(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const textColor = tableCellStyle?.color;
-  const backgroundColor = tableCellStyle?.['background-color'];
+  const backgroundColor = tableCellStyle?.["background-color"];
 
   useEffect(() => {
     return editor.registerUpdateListener(() => {
@@ -179,18 +298,21 @@ export default function TableTools({ editor, node }: { editor: LexicalEditor, no
 
   useEffect(() => {
     if (tableCellNode === null) return;
-    return editor.registerMutationListener(TableCellNode, (nodeMutations) => {
-      const nodeUpdated =
-        nodeMutations.get(tableCellNode.getKey()) === 'updated';
+    return editor.registerMutationListener(
+      TableCellNode,
+      (nodeMutations) => {
+        const nodeUpdated =
+          nodeMutations.get(tableCellNode.getKey()) === "updated";
 
-      if (nodeUpdated) {
-        editor.getEditorState().read(() => {
-          setTableCellNode(tableCellNode.getLatest());
-        });
-        const cellStyle = getCellStyle();
-        setTableCellStyle(cellStyle);
-      }
-    });
+        if (nodeUpdated) {
+          editor.getEditorState().read(() => {
+            setTableCellNode(tableCellNode.getLatest());
+          });
+          const cellStyle = getCellStyle();
+          setTableCellStyle(cellStyle);
+        }
+      },
+    );
   }, [editor, tableCellNode]);
 
   useEffect(() => {
@@ -202,7 +324,8 @@ export default function TableTools({ editor, node }: { editor: LexicalEditor, no
         const currentSelectionCounts = computeSelectionCount(selection);
         setSelectionCounts(currentSelectionCounts);
         setCanMergeCells(
-          currentSelectionCounts.columns > 1 || currentSelectionCounts.rows > 1,
+          currentSelectionCounts.columns > 1 ||
+            currentSelectionCounts.rows > 1,
         );
       } else {
         setSelectionCounts({ columns: 1, rows: 1 });
@@ -222,10 +345,12 @@ export default function TableTools({ editor, node }: { editor: LexicalEditor, no
         ) as HTMLTableElementWithWithTableSelectionState;
 
         if (!tableElement) {
-          throw new Error('Expected to find tableElement in DOM');
+          throw new Error("Expected to find tableElement in DOM");
         }
 
-        const tableObserver = getTableObserverFromTableElement(tableElement);
+        const tableObserver = getTableObserverFromTableElement(
+          tableElement,
+        );
         if (tableObserver !== null) {
           tableObserver.$clearHighlight();
         }
@@ -233,7 +358,6 @@ export default function TableTools({ editor, node }: { editor: LexicalEditor, no
         node.markDirty();
         setTableCellNode(tableCellNode.getLatest());
       }
-
     });
   }, [editor, node, tableCellNode]);
 
@@ -254,7 +378,9 @@ export default function TableTools({ editor, node }: { editor: LexicalEditor, no
               let firstChild;
               if (
                 isEmpty &&
-                $isParagraphNode((firstChild = node.getFirstChild()))
+                $isParagraphNode(
+                  firstChild = node.getFirstChild(),
+                )
               ) {
                 firstChild.remove();
               }
@@ -356,42 +482,50 @@ export default function TableTools({ editor, node }: { editor: LexicalEditor, no
   const toggleTableRowIsHeader = useCallback(() => {
     if (tableCellNode === null) return;
     editor.update(() => {
-      const tableNode = $getTableNodeFromLexicalNodeOrThrow(tableCellNode);
+      const tableNode = $getTableNodeFromLexicalNodeOrThrow(
+        tableCellNode,
+      );
 
-      const tableRowIndex = $getTableRowIndexFromTableCellNode(tableCellNode as any);
+      const tableRowIndex = $getTableRowIndexFromTableCellNode(
+        tableCellNode as any,
+      );
 
       const tableRows = tableNode.getChildren();
 
       if (tableRowIndex >= tableRows.length || tableRowIndex < 0) {
-        throw new Error('Expected table cell to be inside of table row.');
+        throw new Error(
+          "Expected table cell to be inside of table row.",
+        );
       }
 
       const tableRow = tableRows[tableRowIndex];
 
       if (!$isTableRowNode(tableRow)) {
-        throw new Error('Expected table row');
+        throw new Error("Expected table row");
       }
 
-      const newStyle =
-        tableCellNode.getHeaderStyles() ^ TableCellHeaderStates.ROW;
+      const newStyle = tableCellNode.getHeaderStyles() ^
+        TableCellHeaderStates.ROW;
       tableRow.getChildren().forEach((tableCell) => {
         if (!$isTableCellNode(tableCell)) {
-          throw new Error('Expected table cell');
+          throw new Error("Expected table cell");
         }
 
         tableCell.setHeaderStyles(newStyle, TableCellHeaderStates.ROW);
       });
-
     });
   }, [editor, node, tableCellNode]);
 
   const toggleTableColumnIsHeader = useCallback(() => {
     if (tableCellNode === null) return;
     editor.update(() => {
-      const tableNode = $getTableNodeFromLexicalNodeOrThrow(tableCellNode);
+      const tableNode = $getTableNodeFromLexicalNodeOrThrow(
+        tableCellNode,
+      );
 
-      const tableColumnIndex =
-        $getTableColumnIndexFromTableCellNode(tableCellNode as any);
+      const tableColumnIndex = $getTableColumnIndexFromTableCellNode(
+        tableCellNode as any,
+      );
 
       const tableRows = tableNode.getChildren<TableRowNode>();
       const maxRowsLength = Math.max(
@@ -399,16 +533,18 @@ export default function TableTools({ editor, node }: { editor: LexicalEditor, no
       );
 
       if (tableColumnIndex >= maxRowsLength || tableColumnIndex < 0) {
-        throw new Error('Expected table cell to be inside of table row.');
+        throw new Error(
+          "Expected table cell to be inside of table row.",
+        );
       }
 
-      const newStyle =
-        tableCellNode.getHeaderStyles() ^ TableCellHeaderStates.COLUMN;
+      const newStyle = tableCellNode.getHeaderStyles() ^
+        TableCellHeaderStates.COLUMN;
       for (let r = 0; r < tableRows.length; r++) {
         const tableRow = tableRows[r];
 
         if (!$isTableRowNode(tableRow)) {
-          throw new Error('Expected table row');
+          throw new Error("Expected table row");
         }
 
         const tableCells = tableRow.getChildren();
@@ -420,19 +556,24 @@ export default function TableTools({ editor, node }: { editor: LexicalEditor, no
         const tableCell = tableCells[tableColumnIndex];
 
         if (!$isTableCellNode(tableCell)) {
-          throw new Error('Expected table cell');
+          throw new Error("Expected table cell");
         }
 
-        tableCell.setHeaderStyles(newStyle, TableCellHeaderStates.COLUMN);
+        tableCell.setHeaderStyles(
+          newStyle,
+          TableCellHeaderStates.COLUMN,
+        );
       }
     });
   }, [editor, node, tableCellNode]);
 
   const toggleRowStriping = useCallback(() => {
-    if (tableCellNode === null) return
+    if (tableCellNode === null) return;
     editor.update(() => {
       if (tableCellNode.isAttached()) {
-        const tableNode = $getTableNodeFromLexicalNodeOrThrow(tableCellNode);
+        const tableNode = $getTableNodeFromLexicalNodeOrThrow(
+          tableCellNode,
+        );
         if (tableNode) {
           tableNode.setRowStriping(!tableNode.getRowStriping());
         }
@@ -444,7 +585,9 @@ export default function TableTools({ editor, node }: { editor: LexicalEditor, no
     (styles: Record<string, string>) => {
       editor.update(() => {
         const selection = $getSelection();
-        if ($isRangeSelection(selection) || $isTableSelection(selection)) {
+        if (
+          $isRangeSelection(selection) || $isTableSelection(selection)
+        ) {
           const [cell] = $getNodeTriplet(selection.anchor);
           if ($isTableCellNode(cell)) {
             $patchStyle(cell, styles);
@@ -463,24 +606,23 @@ export default function TableTools({ editor, node }: { editor: LexicalEditor, no
 
   const updateCellColor = useCallback(
     (key: string, value: string) => {
-      const styleKey = key === 'text' ? 'color' : 'background-color';
+      const styleKey = key === "text" ? "color" : "background-color";
       applyCellStyle({ [styleKey]: value });
     },
     [editor],
   );
 
   const getCellWritingMode = useCallback(() => {
-    return tableCellStyle?.['writing-mode'] ?? '';
+    return tableCellStyle?.["writing-mode"] ?? "";
   }, [tableCellStyle]);
 
   const toggleCellWritingMode = useCallback(
     () => {
-      const value = getCellWritingMode() === '' ? 'vertical-rl' : '';
-      applyCellStyle({ 'writing-mode': value });
+      const value = getCellWritingMode() === "" ? "vertical-rl" : "";
+      applyCellStyle({ "writing-mode": value });
     },
     [editor, tableCellStyle],
   );
-
 
   function getNodeFormatType(): ElementFormatType {
     return editor.getEditorState().read(() => {
@@ -519,10 +661,10 @@ export default function TableTools({ editor, node }: { editor: LexicalEditor, no
     setTableCellStyle(cellStyle);
   }, [tableCellNode]);
 
-  function updateFloat(newFloat: 'left' | 'right' | 'none') {
+  function updateFloat(newFloat: "left" | "right" | "none") {
     setFloat(newFloat);
     editor.update(() => {
-      node.setFormat('');
+      node.setFormat("");
       $patchStyle(node, { float: newFloat });
     });
   }
@@ -549,7 +691,12 @@ export default function TableTools({ editor, node }: { editor: LexicalEditor, no
         const selection = $getSelection() || $getPreviousSelection();
         if (!selection) return;
         $setSelection(selection.clone());
-      }, { discrete: true, onUpdate() { editor.focus(undefined, { defaultSelection: "rootStart" }) } });
+      }, {
+        discrete: true,
+        onUpdate() {
+          editor.focus(undefined, { defaultSelection: "rootStart" });
+        },
+      });
     }, 0);
   }, [editor]);
 
@@ -562,144 +709,197 @@ export default function TableTools({ editor, node }: { editor: LexicalEditor, no
     <>
       <Button
         id="table-tools-button"
-        aria-controls={open ? 'table-tools-menu' : undefined}
+        aria-controls={open ? "table-tools-menu" : undefined}
         aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
+        aria-expanded={open ? "true" : undefined}
         variant="outlined"
         onClick={handleClick}
         startIcon={<TableChart fontSize="small" />}
         endIcon={<ArrowDropDown fontSize="small" />}
         sx={{
-          color: 'text.primary',
-          borderColor: 'divider',
-          p: 1, minWidth: 0, height: 36,
-          '& .MuiButton-startIcon': { mr: { xs: 0, sm: 1 }, ml: 0 },
-          '& .MuiButton-endIcon': { mr: 0, ml: 0 },
-          '& .MuiButton-endIcon > svg': { fontSize: 20 },
+          color: "text.primary",
+          borderColor: "divider",
+          p: 1,
+          minWidth: 0,
+          height: 36,
+          "& .MuiButton-startIcon": { mr: { xs: 0, sm: 1 }, ml: 0 },
+          "& .MuiButton-endIcon": { mr: 0, ml: 0 },
+          "& .MuiButton-endIcon > svg": { fontSize: 20 },
         }}
       >
-        <Typography variant="button" sx={{ display: { xs: "none", sm: "block" } }}>Table</Typography>
+        <Typography
+          variant="button"
+          sx={{ display: { xs: "none", sm: "block" } }}
+        >
+          Table
+        </Typography>
       </Button>
-      <Menu id="table-tools-menu" aria-label="Formatting options for table"
+      <Menu
+        id="table-tools-menu"
+        aria-label="Formatting options for table"
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
         anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'center',
+          vertical: "bottom",
+          horizontal: "center",
         }}
         transformOrigin={{
-          vertical: 'top',
-          horizontal: 'center',
+          vertical: "top",
+          horizontal: "center",
         }}
         sx={{
-          '& .MuiMenu-paper': { minWidth: 240 },
-          '& .MuiMenuItem-root': { minHeight: 36 },
-          '& .MuiBackdrop-root': { userSelect: 'none' },
+          "& .MuiMenu-paper": { minWidth: 240 },
+          "& .MuiMenuItem-root": { minHeight: 36 },
+          "& .MuiBackdrop-root": { userSelect: "none" },
         }}
       >
         <MenuItem>
-          <ToggleButtonGroup size="small" sx={{ width: "100%", justifyContent: "center" }}>
-            <ToggleButton value="align-left" key="align-left" selected={formatType === "left"}
+          <ToggleButtonGroup
+            size="small"
+            sx={{ width: "100%", justifyContent: "center" }}
+          >
+            <ToggleButton
+              value="align-left"
+              key="align-left"
+              selected={formatType === "left"}
               onClick={() => {
-                updateFormat('left');
-              }}>
+                updateFormat("left");
+              }}
+            >
               <FormatAlignLeft fontSize="small" />
             </ToggleButton>
-            <ToggleButton value="align-center" key="align-center" selected={formatType === "center"}
+            <ToggleButton
+              value="align-center"
+              key="align-center"
+              selected={formatType === "center"}
               onClick={() => {
-                updateFormat('center');
-              }}>
+                updateFormat("center");
+              }}
+            >
               <FormatAlignCenter fontSize="small" />
             </ToggleButton>,
-            <ToggleButton value="align-right" key="align-right" selected={formatType === "right"}
+            <ToggleButton
+              value="align-right"
+              key="align-right"
+              selected={formatType === "right"}
               onClick={() => {
-                updateFormat('right');
-              }}>
+                updateFormat("right");
+              }}
+            >
               <FormatAlignRight fontSize="small" />
             </ToggleButton>
           </ToggleButtonGroup>
         </MenuItem>
         <MenuItem>
-          <ToggleButtonGroup size="small" sx={{ width: "100%", justifyContent: "center" }}>
-            <ToggleButton value="float-left" key="float-left" selected={float === "left"}
+          <ToggleButtonGroup
+            size="small"
+            sx={{ width: "100%", justifyContent: "center" }}
+          >
+            <ToggleButton
+              value="float-left"
+              key="float-left"
+              selected={float === "left"}
               onClick={() => {
                 updateFloat("left");
-              }}>
+              }}
+            >
               <FormatImageLeft />
             </ToggleButton>
-            <ToggleButton value="align-justify" key="align-justify" selected={formatType === "justify" || (formatType === "" && float === "none")}
+            <ToggleButton
+              value="align-justify"
+              key="align-justify"
+              selected={formatType === "justify" ||
+                (formatType === "" && float === "none")}
               onClick={() => {
-                updateFormat('justify');
-              }}>
+                updateFormat("justify");
+              }}
+            >
               <ViewHeadline fontSize="small" />
             </ToggleButton>,
-            <ToggleButton value="float-right" key="float-right" selected={float === "right"}
+            <ToggleButton
+              value="float-right"
+              key="float-right"
+              selected={float === "right"}
               onClick={() => {
                 updateFloat("right");
-              }}>
+              }}
+            >
               <FormatImageRight />
             </ToggleButton>
           </ToggleButtonGroup>
-
         </MenuItem>
         <Divider />
 
-        <MenuItem onClick={handleCellMerge} disabled={!canMergeCells && !canUnmergeCell}>
+        <MenuItem
+          onClick={handleCellMerge}
+          disabled={!canMergeCells && !canUnmergeCell}
+        >
           <ListItemIcon>
             <CellMerge />
           </ListItemIcon>
           <ListItemText>
-            {canUnmergeCell ? 'Unmerge cell' : 'Merge cells'}
+            {canUnmergeCell ? "Unmerge cell" : "Merge cells"}
           </ListItemText>
         </MenuItem>
         <MenuItem onClick={toggleCellWritingMode}>
           <ListItemIcon>
-            {getCellWritingMode() === '' ? <TextRotationVertical /> : <TextRotationNone />}
+            {getCellWritingMode() === ""
+              ? <TextRotationVertical />
+              : <TextRotationNone />}
           </ListItemIcon>
           <ListItemText>
-            Make {getCellWritingMode() === '' ? 'Vertical' : 'Horizontal'}
+            Make {getCellWritingMode() === "" ? "Vertical" : "Horizontal"}
           </ListItemText>
         </MenuItem>
         <ColorPicker
           onColorChange={updateCellColor}
           toggle="menuitem"
-          label='Cell color'
+          label="Cell color"
           textColor={textColor}
           backgroundColor={backgroundColor}
         />
         <MenuItem onClick={() => toggleTableRowIsHeader()}>
           <ListItemIcon>
-            {(getTableRowHeaderState() & TableCellHeaderStates.ROW) === TableCellHeaderStates.ROW
+            {(getTableRowHeaderState() &
+                TableCellHeaderStates.ROW) ===
+                TableCellHeaderStates.ROW
               ? <RemoveRowHeader />
               : <AddRowHeader />}
           </ListItemIcon>
           <ListItemText>
-            {(getTableRowHeaderState() & TableCellHeaderStates.ROW) === TableCellHeaderStates.ROW
-              ? 'Remove'
-              : 'Add'}{' '}
-            row header
+            {(getTableRowHeaderState() &
+                TableCellHeaderStates.ROW) ===
+                TableCellHeaderStates.ROW
+              ? "Remove"
+              : "Add"} row header
           </ListItemText>
         </MenuItem>
         <MenuItem onClick={() => toggleTableColumnIsHeader()}>
           <ListItemIcon>
-            {(getTableColumnHeaderState() & TableCellHeaderStates.COLUMN) === TableCellHeaderStates.COLUMN
+            {(getTableColumnHeaderState() &
+                TableCellHeaderStates.COLUMN) ===
+                TableCellHeaderStates.COLUMN
               ? <RemoveColumnHeader />
               : <AddColumnHeader />}
           </ListItemIcon>
           <ListItemText>
-            {(getTableColumnHeaderState() & TableCellHeaderStates.COLUMN) === TableCellHeaderStates.COLUMN
-              ? 'Remove'
-              : 'Add'}{' '}
-            column header
+            {(getTableColumnHeaderState() &
+                TableCellHeaderStates.COLUMN) ===
+                TableCellHeaderStates.COLUMN
+              ? "Remove"
+              : "Add"} column header
           </ListItemText>
         </MenuItem>
         <MenuItem onClick={toggleRowStriping}>
           <ListItemIcon>
-            <Texture sx={{ transform: 'rotate(45deg)' }} fontSize="small" />
+            <Texture
+              sx={{ transform: "rotate(45deg)" }}
+              fontSize="small"
+            />
           </ListItemIcon>
           <ListItemText>
-            {getTableRowStriping() ? 'Remove' : 'Add'} row striping
+            {getTableRowStriping() ? "Remove" : "Add"} row striping
           </ListItemText>
         </MenuItem>
         <Divider />
@@ -708,9 +908,10 @@ export default function TableTools({ editor, node }: { editor: LexicalEditor, no
             <AddRowAbove />
           </ListItemIcon>
           <ListItemText>
-            Insert{' '}
-            {selectionCounts.rows === 1 ? 'row' : `${selectionCounts.rows} rows`}{' '}
-            above
+            Insert{" "}
+            {selectionCounts.rows === 1
+              ? "row"
+              : `${selectionCounts.rows} rows`} above
           </ListItemText>
         </MenuItem>
         <MenuItem onClick={() => insertTableRowAtSelection(true)}>
@@ -718,9 +919,10 @@ export default function TableTools({ editor, node }: { editor: LexicalEditor, no
             <AddRowBelow />
           </ListItemIcon>
           <ListItemText>
-            Insert{' '}
-            {selectionCounts.rows === 1 ? 'row' : `${selectionCounts.rows} rows`}{' '}
-            below
+            Insert{" "}
+            {selectionCounts.rows === 1
+              ? "row"
+              : `${selectionCounts.rows} rows`} below
           </ListItemText>
         </MenuItem>
         <MenuItem onClick={() => insertTableColumnAtSelection(false)}>
@@ -728,9 +930,9 @@ export default function TableTools({ editor, node }: { editor: LexicalEditor, no
             <AddColumnLeft />
           </ListItemIcon>
           <ListItemText>
-            Insert{' '}
-            {selectionCounts.columns === 1 ? 'column' : `${selectionCounts.columns} columns`}{' '}
-            left
+            Insert {selectionCounts.columns === 1
+              ? "column"
+              : `${selectionCounts.columns} columns`} left
           </ListItemText>
         </MenuItem>
         <MenuItem onClick={() => insertTableColumnAtSelection(true)}>
@@ -738,9 +940,9 @@ export default function TableTools({ editor, node }: { editor: LexicalEditor, no
             <AddColumnRight />
           </ListItemIcon>
           <ListItemText>
-            Insert{' '}
-            {selectionCounts.columns === 1 ? 'column' : `${selectionCounts.columns} columns`}{' '}
-            right
+            Insert {selectionCounts.columns === 1
+              ? "column"
+              : `${selectionCounts.columns} columns`} right
           </ListItemText>
         </MenuItem>
         <Divider />
@@ -764,6 +966,5 @@ export default function TableTools({ editor, node }: { editor: LexicalEditor, no
         </MenuItem>
       </Menu>
     </>
-
   );
 }

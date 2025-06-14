@@ -3,27 +3,33 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
  */
 
-import { DOMExportOutput, isHTMLElement, LexicalEditor, LexicalNode, NodeKey, Spread, } from 'lexical';
+import {
+  DOMExportOutput,
+  isHTMLElement,
+  LexicalEditor,
+  LexicalNode,
+  NodeKey,
+  Spread,
+} from "lexical";
 
-import { ImageNode, ImagePayload, SerializedImageNode } from '../ImageNode';
+import { ImageNode, ImagePayload, SerializedImageNode } from "../ImageNode";
 
 import { $generateHtmlFromNodes } from "@lexical/html";
 
-import ImageComponent from '../ImageNode/ImageComponent';
-import htmr from 'htmr';
+import ImageComponent from "../ImageNode/ImageComponent";
+import htmr from "htmr";
 import { JSX } from "react";
 
 export type GraphPayload = Spread<{
   value: string;
-}, ImagePayload>
+}, ImagePayload>;
 
 export type SerializedGraphNode = Spread<
   {
     value: string;
-    type: 'graph';
+    type: "graph";
     version: 1;
   },
   SerializedImageNode
@@ -33,7 +39,7 @@ export class GraphNode extends ImageNode {
   __value: string;
 
   static getType(): string {
-    return 'graph';
+    return "graph";
   }
 
   static clone(node: GraphNode): GraphNode {
@@ -52,8 +58,17 @@ export class GraphNode extends ImageNode {
   }
 
   static importJSON(serializedNode: SerializedGraphNode): GraphNode {
-    const { width, height, src, value, style, id, showCaption, caption, altText } =
-      serializedNode;
+    const {
+      width,
+      height,
+      src,
+      value,
+      style,
+      id,
+      showCaption,
+      caption,
+      altText,
+    } = serializedNode;
     const node = $createGraphNode({
       src,
       value,
@@ -62,38 +77,55 @@ export class GraphNode extends ImageNode {
       style,
       id,
       showCaption,
-      altText
+      altText,
     });
     try {
       if (caption) {
         const nestedEditor = node.__caption;
-        const editorState = nestedEditor.parseEditorState(caption.editorState);
+        const editorState = nestedEditor.parseEditorState(
+          caption.editorState,
+        );
         if (!editorState.isEmpty()) {
           nestedEditor.setEditorState(editorState);
         }
       }
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error(e);
+    }
     return node;
   }
 
   exportDOM(editor: LexicalEditor): DOMExportOutput {
-    const isSVG = this.__src.startsWith('data:image/svg+xml');
+    const isSVG = this.__src.startsWith("data:image/svg+xml");
     if (!isSVG) return super.exportDOM(editor);
     const element = this.createDOM(editor._config, editor);
     if (element && isHTMLElement(element)) {
-      const html = decodeURIComponent(this.__src.split(',')[1]);
-      element.innerHTML = html.replace(/<!-- payload-start -->\s*(.+?)\s*<!-- payload-end -->/, "");
+      const html = decodeURIComponent(this.__src.split(",")[1]);
+      element.innerHTML = html.replace(
+        /<!-- payload-start -->\s*(.+?)\s*<!-- payload-end -->/,
+        "",
+      );
       const svg = element.firstElementChild!;
-      const styles = svg.querySelectorAll('style');
-      styles.forEach(style => { style.remove(); });
-      const viewBox = svg.getAttribute('viewBox');
-      const svgWidth = svg.getAttribute('width') || this.__width.toString();
-      const svgHeight = svg.getAttribute('height') || this.__height.toString();
-      if (!viewBox) svg.setAttribute('viewBox', `0 0 ${svgWidth} ${svgHeight}`);
-      if (this.__width) svg.setAttribute('width', this.__width.toString());
-      if (this.__height) svg.setAttribute('height', this.__height.toString());
+      const styles = svg.querySelectorAll("style");
+      styles.forEach((style) => {
+        style.remove();
+      });
+      const viewBox = svg.getAttribute("viewBox");
+      const svgWidth = svg.getAttribute("width") ||
+        this.__width.toString();
+      const svgHeight = svg.getAttribute("height") ||
+        this.__height.toString();
+      if (!viewBox) {
+        svg.setAttribute("viewBox", `0 0 ${svgWidth} ${svgHeight}`);
+      }
+      if (this.__width) {
+        svg.setAttribute("width", this.__width.toString());
+      }
+      if (this.__height) {
+        svg.setAttribute("height", this.__height.toString());
+      }
       if (!this.__showCaption) return { element };
-      const caption = document.createElement('figcaption');
+      const caption = document.createElement("figcaption");
       this.__caption.getEditorState().read(() => {
         caption.innerHTML = $generateHtmlFromNodes(this.__caption);
       });
@@ -114,7 +146,17 @@ export class GraphNode extends ImageNode {
     caption?: LexicalEditor,
     key?: NodeKey,
   ) {
-    super(src, altText, width, height, style, id, showCaption, caption, key);
+    super(
+      src,
+      altText,
+      width,
+      height,
+      style,
+      id,
+      showCaption,
+      caption,
+      key,
+    );
     this.__value = value;
   }
 
@@ -122,10 +164,9 @@ export class GraphNode extends ImageNode {
     return {
       ...super.exportJSON(),
       value: this.__value,
-      type: 'graph',
+      type: "graph",
       version: 1,
     };
-
   }
 
   update(payload: Partial<GraphPayload>): void {
@@ -140,7 +181,9 @@ export class GraphNode extends ImageNode {
 
   decorate(): JSX.Element {
     const self = this.getLatest();
-    const html = self.__caption.getEditorState().read(() => $generateHtmlFromNodes(self.__caption));
+    const html = self.__caption.getEditorState().read(() =>
+      $generateHtmlFromNodes(self.__caption)
+    );
     const children = htmr(html);
 
     return (
@@ -152,13 +195,12 @@ export class GraphNode extends ImageNode {
         nodeKey={self.__key}
         showCaption={self.__showCaption}
         caption={self.__caption}
-        element={self.__src.startsWith('data:image/svg+xml') ? 'svg' : 'img'}
+        element={self.__src.startsWith("data:image/svg+xml") ? "svg" : "img"}
       >
         {children}
       </ImageComponent>
     );
   }
-
 }
 
 export function $createGraphNode({
@@ -171,7 +213,7 @@ export function $createGraphNode({
   id,
   showCaption,
   caption,
-  altText = 'Graph',
+  altText = "Graph",
 }: GraphPayload): GraphNode {
   return new GraphNode(
     src,

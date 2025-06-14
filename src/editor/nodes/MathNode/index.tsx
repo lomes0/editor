@@ -1,10 +1,25 @@
-import { $createNodeSelection, $setSelection, BaseSelection, DOMExportOutput, EditorConfig, LexicalEditor, LexicalNode, NodeKey, SerializedLexicalNode, Spread, isHTMLElement, } from 'lexical';
-import { DecoratorNode, } from 'lexical';
-import { convertLatexToMarkup } from 'mathlive';
-import MathComponent from './MathComponent';
+import {
+  $createNodeSelection,
+  $setSelection,
+  BaseSelection,
+  DOMExportOutput,
+  EditorConfig,
+  isHTMLElement,
+  LexicalEditor,
+  LexicalNode,
+  NodeKey,
+  SerializedLexicalNode,
+  Spread,
+} from "lexical";
+import { DecoratorNode } from "lexical";
+import { convertLatexToMarkup } from "mathlive";
+import MathComponent from "./MathComponent";
 import { JSX } from "react";
 
-export type SerializedMathNode = Spread<{ type: 'math'; value: string; style: string; id: string }, SerializedLexicalNode>;
+export type SerializedMathNode = Spread<
+  { type: "math"; value: string; style: string; id: string },
+  SerializedLexicalNode
+>;
 
 export class MathNode extends DecoratorNode<JSX.Element> {
   __value: string;
@@ -12,7 +27,7 @@ export class MathNode extends DecoratorNode<JSX.Element> {
   __id: string;
 
   static getType(): string {
-    return 'math';
+    return "math";
   }
 
   static clone(node: MathNode): MathNode {
@@ -40,7 +55,7 @@ export class MathNode extends DecoratorNode<JSX.Element> {
       value: this.getValue(),
       style: this.getStyle(),
       id: this.getId(),
-      type: 'math',
+      type: "math",
       version: 1,
     };
   }
@@ -49,14 +64,14 @@ export class MathNode extends DecoratorNode<JSX.Element> {
     const { element } = super.exportDOM(editor);
     if (element && isHTMLElement(element)) {
       element.innerHTML = convertLatexToMarkup(this.getValue(), {
-        registers: { 'arraystretch': 1.5 },
+        registers: { "arraystretch": 1.5 },
       });
     }
     return { element };
   }
 
   createDOM(config: EditorConfig, editor: LexicalEditor): HTMLElement {
-    const element = document.createElement('span');
+    const element = document.createElement("span");
     const className = config.theme.math;
     if (className !== undefined) {
       element.className = className;
@@ -79,7 +94,7 @@ export class MathNode extends DecoratorNode<JSX.Element> {
   }
 
   getText(): string {
-    return `$${this.__value}$`
+    return `$${this.__value}$`;
   }
 
   getTextContentSize(): number {
@@ -136,17 +151,17 @@ export class MathNode extends DecoratorNode<JSX.Element> {
   }
 
   decorate(): JSX.Element {
-    return (
-      <MathComponent initialValue={this.__value} nodeKey={this.__key} />
-    );
+    return <MathComponent initialValue={this.__value} nodeKey={this.__key} />;
   }
 }
 
-export function $createMathNode(value = '', style = '', id = ''): MathNode {
+export function $createMathNode(value = "", style = "", id = ""): MathNode {
   const mathNode = new MathNode(value, style, id);
   return mathNode;
 }
 
-export function $isMathNode(node: LexicalNode | null | undefined): node is MathNode {
+export function $isMathNode(
+  node: LexicalNode | null | undefined,
+): node is MathNode {
   return node instanceof MathNode;
 }

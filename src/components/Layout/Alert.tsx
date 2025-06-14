@@ -1,10 +1,17 @@
-"use client"
-import { useSelector } from '@/store';
-import useFixedBodyScroll from '@/hooks/useFixedBodyScroll';
-import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
+"use client";
+import { useSelector } from "@/store";
+import useFixedBodyScroll from "@/hooks/useFixedBodyScroll";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from "@mui/material";
 
 export default function AlertDialog() {
-  const alert = useSelector(state => state.ui.alerts[0]);
+  const alert = useSelector((state) => state.ui.alerts[0]);
   useFixedBodyScroll(!!alert);
   if (!alert) return null;
 
@@ -15,7 +22,9 @@ export default function AlertDialog() {
         <DialogContentText>{alert.content}</DialogContentText>
       </DialogContent>
       <DialogActions>
-        {alert.actions.map(({ label, id }) => <Button key={id} id={id} autoFocus>{label}</Button>)}
+        {alert.actions.map(({ label, id }) => (
+          <Button key={id} id={id} autoFocus>{label}</Button>
+        ))}
       </DialogActions>
     </Dialog>
   );

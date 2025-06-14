@@ -6,16 +6,19 @@ import { findRevisionThumbnail } from "../api/utils";
 import { ThumbnailProvider } from "@/app/context/ThumbnailContext";
 
 export const metadata: Metadata = {
-  title: 'Editor',
-  description: 'Editor is a free text editor, with support for LaTeX, Geogebra, Excalidraw and markdown shortcuts. Create, share and print math documents with ease.',
-}
+  title: "Editor",
+  description:
+    "Editor is a free text editor, with support for LaTeX, Geogebra, Excalidraw and markdown shortcuts. Create, share and print math documents with ease.",
+};
 
 const page = async () => {
   const publishedDocuments = await findPublishedDocuments(12);
-  const staticDocuments: UserDocument[] = publishedDocuments.map(document => ({
-    id: document.id,
-    cloud: document,
-  }));
+  const staticDocuments: UserDocument[] = publishedDocuments.map(
+    (document) => ({
+      id: document.id,
+      cloud: document,
+    }),
+  );
   const staticThumbnails = publishedDocuments.reduce((acc, document) => {
     acc[document.head] = findRevisionThumbnail(document.head);
     return acc;
@@ -25,6 +28,6 @@ const page = async () => {
       <Home staticDocuments={staticDocuments} />
     </ThumbnailProvider>
   );
-}
+};
 
 export default page;
