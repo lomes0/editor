@@ -355,7 +355,7 @@ const DocumentsGrid: React.FC<
         mb: 2,
       }}
     >
-      <Grid container spacing={2}>
+      <Grid container spacing={4}>
         {showSkeletons &&
           Array.from({ length: 6 }).map((_, i) => (
             <Grid key={i} size={{ xs: 12, sm: 6, md: 4 }}>

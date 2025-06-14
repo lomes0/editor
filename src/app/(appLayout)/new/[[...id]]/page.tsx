@@ -1,3 +1,6 @@
+// Use the "use server" directive to explicitly mark this as a dynamic page
+export const dynamic = 'force-dynamic';
+
 import NewDocument from "@/components/NewDocument";
 import type { OgMetadata } from "@/app/api/og/route";
 import { findUserDocument } from "@/repositories/document";
@@ -16,12 +19,11 @@ const getCachedSession = cache(async () => await getServerSession(authOptions));
 
 export async function generateMetadata(
   props: {
-    params: Promise<{ id: string }>;
-    searchParams: Promise<{ v?: string }>;
+    params: { id: string[] };
+    searchParams: { v?: string };
   },
 ): Promise<Metadata> {
-  const searchParams = await props.searchParams;
-  const params = await props.params;
+  const { searchParams, params } = props;
   if (!(params.id && params.id[0])) {
     return {
       title: "New Document",
@@ -66,12 +68,11 @@ export async function generateMetadata(
 
 export default async function Page(
   props: {
-    params: Promise<{ id?: string }>;
-    searchParams: Promise<{ v?: string }>;
+    params: { id?: string[] };
+    searchParams: { v?: string };
   },
 ) {
-  const params = await props.params;
-  const searchParams = await props.searchParams;
+  const { params, searchParams } = props;
   const documentId = params.id?.[0];
   if (!documentId) return <NewDocument />;
   const document = await getCachedUserDocument(documentId, searchParams.v);

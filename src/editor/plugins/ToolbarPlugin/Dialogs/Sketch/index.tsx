@@ -9,11 +9,11 @@ import { $isSketchNode } from "@/editor/nodes/SketchNode";
 import { SET_DIALOGS_COMMAND } from "../commands";
 import { getImageDimensions } from "@/editor/nodes/utils";
 import { useTheme } from "@mui/material/styles";
+import { debounce } from "@mui/material/utils";
 import {
   Box,
   Button,
   CircularProgress,
-  debounce,
   Dialog,
   DialogActions,
   DialogContent,

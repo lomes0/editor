@@ -115,31 +115,34 @@ const DirectoryCard: React.FC<
       sx={{
         display: "flex",
         flexDirection: "column",
+        justifyContent: "space-between",
         height: "100%",
-        minHeight: "280px", // Increased from 240px
+        minHeight: "280px", // Increased height to make cards taller
         maxWidth: "100%",
-        borderRadius: "12px",
-        overflow: "hidden",
         position: "relative",
+        borderRadius: "12px",
+        borderColor: "divider",
         transition: "all 0.2s ease-in-out",
         boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
         "&:hover": {
           boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
+          borderColor: "primary.light", // Added to match DocumentCard
           transform: "translateY(-4px)",
         },
+        borderWidth: 1, // Added to match DocumentCard
         ...sx,
       }}
     >
-      {/* Top section (70%): Background Image */}
+      {/* Top section (65%): Background Image */}
       <Box
         sx={{
-          height: "70%", // Changed from 50% to 70%
-          minHeight: "196px", // Adjusted for 70% of 280px
+          height: "65%", // Changed from 70% to 65% to match DocumentCard
+          minHeight: "182px", // Adjusted for taller card (65% of 280px)
           position: "relative",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          bgcolor: "grey.100",
+          bgcolor: "background.paper", // Changed from grey.100 to match DocumentCard
           backgroundImage: backgroundImage
             ? `url(${backgroundImage})`
             : undefined,
@@ -175,7 +178,7 @@ const DirectoryCard: React.FC<
           top: 0,
           left: 0,
           right: 0,
-          bottom: "50px", // Updated to match new action bar height
+          bottom: "50px",
           zIndex: 1,
           borderRadius: "12px 12px 0 0",
           "&:hover": {
@@ -184,17 +187,17 @@ const DirectoryCard: React.FC<
         }}
       />
 
-      {/* Bottom section (30%): Directory Info & Actions */}
+      {/* Bottom section (35%): Directory Info & Actions */}
       <Box
         sx={{
-          height: "30%", // Changed from 50% to 30%
+          height: "35%", // Changed from 30% to 35% to match DocumentCard
           display: "flex",
           flexDirection: "column",
           position: "relative",
           zIndex: 2, // Higher than the action area
         }}
       >
-        <CardContent sx={{ pt: 2, pb: 1, flexGrow: 1 }}>
+        <CardContent sx={{ pt: 1.5, pb: 0.5, flexGrow: 1 }}>
           <Typography
             variant="h6"
             component="div"
@@ -204,11 +207,13 @@ const DirectoryCard: React.FC<
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
-              fontSize: "1.25rem", // Increased font size
+              fontSize: "1.1rem", // Changed from 1.25rem to 1.1rem to match DocumentCard
             }}
           >
             {document ? document.name : <Skeleton variant="text" width={190} />}
           </Typography>
+          {/* Added a small space similar to DocumentCard's subheaderContent */}
+          {document ? <div style={{ height: "8px" }}></div> : <Skeleton variant="text" width={150} />}
         </CardContent>
 
         <Box
@@ -222,8 +227,11 @@ const DirectoryCard: React.FC<
             borderColor: "divider",
             backgroundColor: "transparent",
             zIndex: 3, // Higher than the card content and action area
-            height: "50px", // Reduced from 60px to make it narrower
+            height: "50px",
             mt: "auto",
+            "& button:first-of-type": { ml: "auto !important" }, // Added to match DocumentCard
+            "& .MuiChip-root:last-of-type": { mr: 1 }, // Added to match DocumentCard
+            pointerEvents: "auto", // Added to match DocumentCard
           }}
         >
           <Box
@@ -234,8 +242,72 @@ const DirectoryCard: React.FC<
               overflow: "hidden",
             }}
           >
-            {statusChip()}
-            {authorChip()}
+            {/* Update to small chips to match DocumentCard */}
+            {!userDocument
+              ? (
+                <>
+                  <Chip
+                    size="small"
+                    variant="outlined"
+                    label={
+                      <Skeleton
+                        variant="text"
+                        width={50}
+                      />
+                    }
+                  />
+                  <Chip
+                    size="small"
+                    variant="outlined"
+                    label={
+                      <Skeleton
+                        variant="text"
+                        width={70}
+                      />
+                    }
+                  />
+                </>
+              )
+              : (
+                <>
+                  {isLocalOnly && (
+                    <Chip
+                      size="small"
+                      variant="outlined"
+                      icon={<MobileFriendly />}
+                      label="Local"
+                    />
+                  )}
+                  {isUploaded && (
+                    <Chip
+                      size="small"
+                      variant="outlined"
+                      icon={isUpToDate ? <CloudDone /> : <CloudSync />}
+                      label={isUpToDate ? "Synced" : "Out of Sync"}
+                    />
+                  )}
+                  {isCloudOnly && (
+                    <Chip
+                      size="small"
+                      variant="outlined"
+                      icon={<Cloud />}
+                      label="Cloud"
+                    />
+                  )}
+                  <Chip
+                    size="small"
+                    variant="outlined"
+                    sx={{ pointerEvents: "auto" }}
+                    avatar={
+                      <Avatar
+                        alt={author?.name ?? "Local User"}
+                        src={author?.image ?? undefined}
+                      />
+                    }
+                    label={author?.name ?? "Local User"}
+                  />
+                </>
+              )}
           </Box>
 
           <Box sx={{ display: "flex", ml: "auto" }}>

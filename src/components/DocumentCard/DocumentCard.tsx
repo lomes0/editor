@@ -198,7 +198,7 @@ const DocumentCard: React.FC<
         flexDirection: "column",
         justifyContent: "space-between",
         height: "100%",
-        minHeight: "280px",
+        minHeight: "280px", // Increased from 240px to make cards taller
         maxWidth: "100%",
         position: "relative",
         borderRadius: "12px",
@@ -217,8 +217,8 @@ const DocumentCard: React.FC<
       {/* Top section (70%): Document Thumbnail */}
       <Box
         sx={{
-          height: "70%",
-          minHeight: "196px",
+          height: "65%",
+          minHeight: "182px", // Adjusted for taller card (65% of 280px)
           position: "relative",
           display: "flex",
           alignItems: "center",
@@ -257,14 +257,14 @@ const DocumentCard: React.FC<
       {/* Bottom section (30%): Document Info & Actions */}
       <Box
         sx={{
-          height: "30%",
+          height: "35%",
           display: "flex",
           flexDirection: "column",
           position: "relative",
           zIndex: 2,
         }}
       >
-        <CardContent sx={{ pt: 2, pb: 1, flexGrow: 1 }}>
+        <CardContent sx={{ pt: 1.5, pb: 0.5, flexGrow: 1 }}>
           <Typography
             variant="h6"
             component="div"
@@ -274,7 +274,7 @@ const DocumentCard: React.FC<
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
-              fontSize: "1.25rem",
+              fontSize: "1.1rem",
             }}
           >
             {document ? document.name : <Skeleton variant="text" width={190} />}
