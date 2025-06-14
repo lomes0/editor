@@ -139,6 +139,7 @@ const withPWAConfig = {
 };
 
 const nextConfig: NextConfig = {
+  devIndicators: false,
   reactStrictMode: false,
   distDir: process.env.BUILD_DIR || '.next',
   webpack: (config, { isServer }) => {
