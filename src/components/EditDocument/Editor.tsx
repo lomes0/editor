@@ -8,7 +8,7 @@ import type { EditorState, LexicalEditor } from "lexical";
 import { v4 as uuidv4 } from "uuid";
 import dynamic from "next/dynamic";
 import DiffView from "../Diff";
-import { debounce } from "@mui/material";
+import { debounce } from "@mui/material/utils";
 import Editor from "../Editor";
 
 const EditDocumentInfo = dynamic(
