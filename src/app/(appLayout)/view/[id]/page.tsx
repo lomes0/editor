@@ -10,6 +10,9 @@ import { cache } from "react";
 import { findRevisionHtml } from "@/app/api/utils";
 import { DocumentRevision } from "@/types";
 
+// Mark this page as dynamic since it uses searchParams
+export const dynamic = 'force-dynamic';
+
 const getCachedUserDocument = cache(async (id: string, revisions?: string) =>
   await findUserDocument(id, revisions)
 );
@@ -17,12 +20,13 @@ const getCachedSession = cache(async () => await getServerSession(authOptions));
 
 export async function generateMetadata(
   props: {
-    params: Promise<{ id: string }>;
-    searchParams: Promise<{ v?: string }>;
+    params: Promise<{ id: string }> | { id: string };
+    searchParams: Promise<{ v?: string }> | { v?: string };
   },
 ): Promise<Metadata> {
-  const searchParams = await props.searchParams;
   const params = await props.params;
+  const searchParams = await props.searchParams;
+  
   if (!params.id) {
     return {
       title: "View Document",
@@ -96,12 +100,13 @@ export async function generateMetadata(
 
 export default async function Page(
   props: {
-    params: Promise<{ id: string }>;
-    searchParams: Promise<{ v?: string }>;
+    params: Promise<{ id: string }> | { id: string };
+    searchParams: Promise<{ v?: string }> | { v?: string };
   },
 ) {
-  const searchParams = await props.searchParams;
   const params = await props.params;
+  const searchParams = await props.searchParams;
+  
   try {
     const document = await getCachedUserDocument(params.id, "all");
     if (!document) return <SplashScreen title="Document not found" />;
