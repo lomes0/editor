@@ -10,7 +10,7 @@ import {
   Folder,
   Home as HomeIcon,
 } from "@mui/icons-material";
-import DocumentCard from "./DocumentCard";
+import CardSelector from "./DocumentCard";
 import { DocumentType, UserDocument } from "@/types";
 import DocumentSortControl from "./DocumentControls/SortControl";
 import { sortDocuments } from "./DocumentControls/sortDocuments";
@@ -286,7 +286,7 @@ const DirectoryView: React.FC<DirectoryViewProps> = ({ directoryId }) => {
                 key={document.id}
                 size={{ xs: 12, sm: 6, md: 4 }}
               >
-                <DocumentCard
+                <CardSelector
                   userDocument={document}
                   user={user}
                 />

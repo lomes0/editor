@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import RouterLink from "next/link";
 import { actions, useDispatch, useSelector } from "@/store";
-import DocumentCard from "../DocumentCard";
+import CardSelector from "../DocumentCard";
 import { memo, Suspense, useEffect } from "react";
 import { BackupDocument, DocumentType, User, UserDocument } from "@/types";
 import { validate } from "uuid";
@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import {
   CreateNewFolder,
-  Help,
+  Folder, Help,
   Pageview,
   PostAdd,
   Science,
@@ -262,7 +262,7 @@ const Documents: React.FC<{ staticDocuments: UserDocument[] }> = (
           component="h2"
           sx={{ display: { xs: "none", sm: "block" } }}
         >
-          Documents
+          Documents & Directories
         </Typography>
         <Box
           sx={{
@@ -303,6 +303,44 @@ const Documents: React.FC<{ staticDocuments: UserDocument[] }> = (
             >
               Backup
             </Button>
+            <Button
+              variant="outlined"
+              sx={{ px: 1, "& .MuiButton-startIcon": { ml: 0 } }}
+              startIcon={<CreateNewFolder />}
+              onClick={handleCreateDirectory}
+            >
+              Directory
+            </Button>
+            <Button
+              variant="contained"
+              sx={{ px: 1, "& .MuiButton-startIcon": { ml: 0 } }}
+              startIcon={<PostAdd />}
+              onClick={() => {
+                const docId = uuid();
+                dispatch(actions.createLocalDocument({
+                  id: docId,
+                  name: "New Document",
+                  head: uuid(),
+                  data: {
+                    root: {
+                      children: [],
+                      direction: null,
+                      format: "",
+                      indent: 0,
+                      type: "root",
+                      version: 1,
+                    },
+                  },
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString(),
+                  sort_order: 0,
+                  type: DocumentType.DOCUMENT,
+                }));
+                navigate(`/edit/${docId}`);
+              }}
+            >
+              New Document
+            </Button>
           </Box>
           <Suspense key={hydrated ? "local" : "cloud"}>
             <DocumentSortControl value={sort} setValue={setSort} />
@@ -318,7 +356,8 @@ const Documents: React.FC<{ staticDocuments: UserDocument[] }> = (
 
       {/* Add a divider with extra spacing for better separation */}
       <Box sx={{ my: 5, borderBottom: 1, borderColor: "divider" }} />
-
+      
+      {/* Intro text for directories */}
       <DocumentsGrid
         documents={documents.length ? sortedDocuments : staticDocuments}
         initialized={initialized}
@@ -359,7 +398,7 @@ const DocumentsGrid: React.FC<
         {showSkeletons &&
           Array.from({ length: 6 }).map((_, i) => (
             <Grid key={i} size={{ xs: 12, sm: 6, md: 4 }}>
-              <DocumentCard />
+              <CardSelector />
             </Grid>
           ))}
         {showEmpty && (
@@ -373,17 +412,25 @@ const DocumentsGrid: React.FC<
               gap: 2,
             }}
           >
-            <Pageview
-              sx={{ width: 64, height: 64, fontSize: 64 }}
-            />
-            <Typography variant="overline" component="p">
-              No documents found
+            <Box sx={{ display: "flex", gap: 3, justifyContent: "center" }}>
+              <Pageview
+                sx={{ width: 64, height: 64, fontSize: 64 }}
+              />
+              <Folder
+                sx={{ width: 64, height: 64, fontSize: 64, color: "primary.main" }}
+              />
+            </Box>
+            <Typography variant="h6" component="p" gutterBottom>
+              No documents or directories found
+            </Typography>
+            <Typography variant="body2" color="text.secondary" align="center">
+              Get started by creating a new document or directory using the buttons above.
             </Typography>
           </Grid>
         )}
         {pageDocuments.map((document) => (
           <Grid key={document.id} size={{ xs: 12, sm: 6, md: 4 }}>
-            <DocumentCard userDocument={document} user={user} />
+            <CardSelector userDocument={document} user={user} />
           </Grid>
         ))}
       </Grid>
