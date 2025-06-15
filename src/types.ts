@@ -114,6 +114,7 @@ export type DocumentUpdateInput = Partial<EditorDocument> & {
   baseId?: string | null;
   revisions?: EditorDocumentRevision[];
   background_image?: string | null;
+  sort_order?: number | null;
 };
 
 export interface EditorDocumentRevision {

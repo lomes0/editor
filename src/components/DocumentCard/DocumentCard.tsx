@@ -52,6 +52,10 @@ const DocumentCard: React.FC<
   const isCoauthor = isCloud
     ? cloudDocument.coauthors.some((u) => u.id === user?.id)
     : false;
+  
+  // Check if document has a valid sort_order (> 0) to display the sort order chip
+  const sortOrderValue = localDocument?.sort_order ?? cloudDocument?.sort_order ?? 0;
+  const hasSortOrder = sortOrderValue > 0;
 
   const document = isCloudOnly ? cloudDocument : localDocument;
   const handle = cloudDocument?.handle ?? localDocument?.handle ??
@@ -411,6 +415,20 @@ const DocumentCard: React.FC<
                       />
                     )}
                   />
+                  {/* Sort order indicator */}
+                  {hasSortOrder && (
+                    <Chip
+                      size="small"
+                      variant="outlined"
+                      label={`Sort: ${sortOrderValue}`}
+                      sx={{
+                        bgcolor: 'rgba(0,0,0,0.05)',
+                        borderColor: 'gray',
+                        color: 'gray',
+                        fontWeight: 'bold'
+                      }}
+                    />
+                  )}
                 </>
               )}
           </Box>

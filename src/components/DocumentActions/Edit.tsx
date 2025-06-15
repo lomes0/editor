@@ -83,6 +83,7 @@ const EditDocument: React.FC<
     published: isPublished,
     collab: isCollab,
     background_image: document?.background_image || null,
+    sort_order: document?.sort_order || null,
   });
 
   const [validating, setValidating] = useState(false);
@@ -101,6 +102,7 @@ const EditDocument: React.FC<
       published: isPublished,
       collab: isCollab,
       background_image: document?.background_image || null,
+      sort_order: document?.sort_order || null,
     });
     setValidating(false);
     setValidationErrors({});
@@ -207,6 +209,10 @@ const EditDocument: React.FC<
     // Add background_image to the update if it has changed
     if (input.background_image !== document?.background_image) {
       partial.background_image = input.background_image;
+    }
+    // Add sort_order to the update if it has changed
+    if (input.sort_order !== document?.sort_order) {
+      partial.sort_order = input.sort_order;
     }
     if (Object.keys(partial).length === 0) return;
     if (isLocal) {
@@ -325,6 +331,34 @@ const EditDocument: React.FC<
                   onChange={updateBackgroundImage}
                   currentImage={document?.background_image ||
                     null}
+                />
+              </>
+            )}
+            
+            {/* Sort order field for both documents and directories */}
+            {isAuthor && (
+              <>
+                <Divider sx={{ my: 2 }} />
+                <Typography
+                  variant="subtitle2"
+                  color="text.secondary"
+                  gutterBottom
+                >
+                  Sort Options
+                </Typography>
+                <TextField
+                  margin="normal"
+                  size="small"
+                  fullWidth
+                  label="Sort Order"
+                  type="number"
+                  inputProps={{ min: 0, step: 1 }}
+                  value={input.sort_order === null ? '' : input.sort_order}
+                  onChange={(e) => {
+                    const value = e.target.value === '' ? null : Number(e.target.value);
+                    updateInput({ sort_order: value });
+                  }}
+                  helperText="Items with sort order > 0 will appear first, sorted by this value. Leave empty for default sorting."
                 />
               </>
             )}

@@ -41,6 +41,10 @@ const DirectoryCard: React.FC<
   const isUploaded = isLocal && isCloud;
   const isUpToDate = isUploaded && localDocument.head === cloudDocument.head;
 
+  // Check if directory has a valid sort_order (> 0) to display the sort order chip
+  const sortOrderValue = localDocument?.sort_order ?? cloudDocument?.sort_order ?? 0;
+  const hasSortOrder = sortOrderValue > 0;
+
   const document = isCloudOnly ? cloudDocument : localDocument;
   const handle = cloudDocument?.handle ?? localDocument?.handle ??
     document?.id;
@@ -129,7 +133,7 @@ const DirectoryCard: React.FC<
           borderColor: "primary.light", // Added to match DocumentCard
           transform: "translateY(-4px)",
         },
-        borderWidth: 1, // Added to match DocumentCard
+        borderWidth: 1,
         ...sx,
       }}
     >
@@ -306,6 +310,20 @@ const DirectoryCard: React.FC<
                     }
                     label={author?.name ?? "Local User"}
                   />
+                  {/* Sort order indicator */}
+                  {hasSortOrder && (
+                    <Chip
+                      size="small"
+                      variant="outlined"
+                      label={`Sort: ${sortOrderValue}`}
+                      sx={{
+                        bgcolor: 'rgba(0,0,0,0.05)',
+                        borderColor: 'gray',
+                        color: 'gray',
+                        fontWeight: 'bold'
+                      }}
+                    />
+                  )}
                 </>
               )}
           </Box>

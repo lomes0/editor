@@ -2,8 +2,8 @@ import type { UserDocument } from "@/types";
 
 function compareObjectsByKey(key: string, ascending = true) {
   return function innerSort(objectA: any, objectB: any) {
-    const valueA = key.split(".").reduce((o: any, i) => o[i], objectA);
-    const valueB = key.split(".").reduce((o: any, i) => o[i], objectB);
+    const valueA = key.split(".").reduce((o: any, i) => o?.[i], objectA);
+    const valueB = key.split(".").reduce((o: any, i) => o?.[i], objectB);
     const sortValue = valueA > valueB ? 1 : valueA < valueB ? -1 : 0;
     return ascending ? sortValue : -1 * sortValue;
   };
@@ -18,19 +18,13 @@ export const sortDocuments = (
   const data = documents.map((d) => {
     const docData = (d.local ?? d.cloud)!;
 
-    // Check if the document has a sort_order (directly on local/cloud document or via directory property on cloud doc)
-    const hasSortOrder = d.cloud?.sort_order !== undefined ||
-      d.local?.sort_order !== undefined ||
-      d.cloud?.directory?.sort_order !== undefined;
-
-    // Get sort_order with precedence: direct field first, then legacy directory property
-    const sortOrder = d.cloud?.sort_order ??
-      d.local?.sort_order ??
-      d.cloud?.directory?.sort_order ??
-      null;
+    // Check if the document has a sort_order value that is not null or undefined
+    const sortOrder = d.local?.sort_order ?? d.cloud?.sort_order ?? null;
+    const hasSortOrder = sortOrder !== null && sortOrder !== undefined && sortOrder > 0;
 
     return {
       ...docData,
+      id: d.id,
       _hasSortOrder: hasSortOrder,
       _sortOrder: sortOrder,
     };
