@@ -246,13 +246,14 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
               "&.Mui-selected": {
                 bgcolor: "action.selected",
               },
+              "&:hover": {
+                bgcolor: "rgba(0, 0, 0, 0.15) !important", // Much darker gray hover color with !important
+              },
             }}
           >          <ListItemIcon
             sx={{
               minWidth: 30,
-              color: (isCurrentDirectory || isCurrentDocument)
-                ? "primary.main"
-                : "inherit",
+              color: "inherit", // Use default icon color
               ml: 0, // Ensure no margin is applied
             }}
             >
@@ -276,10 +277,7 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
                         isCurrentDocument)
                       ? "medium"
                       : "normal",
-                    color: (isCurrentDirectory ||
-                        isCurrentDocument)
-                      ? "primary.main"
-                      : "text.primary",
+                    color: "text.primary", // Keep default text color for all items
                   }}
                 />
 
@@ -332,16 +330,16 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
             "&.Mui-selected": {
               bgcolor: "action.selected",
             },
+            "&:hover": {
+              bgcolor: "rgba(0, 0, 0, 0.15) !important", // Much darker gray hover color with !important
+            },
           }}
         >
           <ListItemIcon
             sx={{
               minWidth: 30,
               ml: 0, // Ensure no margin is applied
-              color: currentDirectory === null &&
-                  pathname === "/browse"
-                ? "primary.main"
-                : "inherit",
+              color: "inherit", // Use default icon color
             }}
           >
             <HomeIcon fontSize="small" />
@@ -357,10 +355,7 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
                     pathname === "/browse"
                   ? "medium"
                   : "normal",
-                color: currentDirectory === null &&
-                    pathname === "/browse"
-                  ? "primary.main"
-                  : "text.primary",
+                color: "text.primary", // Keep default text color
               }}
             />
           )}
@@ -369,7 +364,7 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
         {/* Directory tree */}
         {treeData.length > 0
           ? (
-            renderTreeItems(treeData)
+            renderTreeItems(treeData, 1) // Start with level 1 to add initial indentation
           )
           : (
             <Box sx={{ p: 1, textAlign: "center" }}>
