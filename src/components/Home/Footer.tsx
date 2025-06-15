@@ -1,8 +1,13 @@
 import { Cached } from "@mui/icons-material";
 import { Box, IconButton, Link, Typography } from "@mui/material";
 import RouterLink from "next/link";
+import { usePathname } from "next/navigation";
 import packageJson from "../../../package.json";
+
 const Footer: React.FC = () => {
+  const pathname = usePathname();
+  const isDashboard = pathname === "/dashboard";
+  
   const version = packageJson.version;
   const commitHash: string | undefined =
     process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA;
@@ -10,7 +15,7 @@ const Footer: React.FC = () => {
     commitHash ? "/commit/" + commitHash.substring(0, 7) : "/"
   }`;
 
-  return (
+  return isDashboard ? (
     <Box
       component="footer"
       sx={{
@@ -64,7 +69,7 @@ const Footer: React.FC = () => {
         </Link>
       </Typography>
     </Box>
-  );
+  ) : null;
 };
 
 export default Footer;

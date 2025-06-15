@@ -202,7 +202,7 @@ const DocumentCard: React.FC<
         flexDirection: "column",
         justifyContent: "space-between",
         height: "100%",
-        minHeight: "320px", // Increased from 280px to make cards taller
+        minHeight: "320px", // Maintain the same minHeight as before
         maxWidth: "100%",
         position: "relative",
         borderRadius: "12px",
@@ -218,16 +218,16 @@ const DocumentCard: React.FC<
         ...sx,
       }}
     >
-      {/* Top section (70%): Document Thumbnail */}
+      {/* Top section (65%): Document Thumbnail */}
       <Box
         sx={{
-          height: "65%",
-          minHeight: "182px", // Adjusted for taller card (65% of 280px)
+          height: "65%", // Adjusted to match DirectoryCard's ratio
+          minHeight: "208px", // Adjusted for card (65% of 320px)
           position: "relative",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          bgcolor: "background.paper", // Changed from grey.100 to white background
+          bgcolor: "background.paper",
           borderBottom: "1px solid",
           borderColor: "divider",
         }}
@@ -258,10 +258,10 @@ const DocumentCard: React.FC<
         }}
       />
 
-      {/* Bottom section (30%): Document Info & Actions */}
+      {/* Bottom section (35%): Document Info & Actions */}
       <Box
         sx={{
-          height: "35%",
+          height: "35%", // Adjusted to match DirectoryCard's ratio
           display: "flex",
           flexDirection: "column",
           position: "relative",
@@ -278,7 +278,7 @@ const DocumentCard: React.FC<
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
-              fontSize: "1.1rem",
+              fontSize: "1.1rem", // Adjusted to match DirectoryCard
             }}
           >
             {document ? document.name : <Skeleton variant="text" width={190} />}

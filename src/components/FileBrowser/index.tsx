@@ -253,7 +253,7 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
           >          <ListItemIcon
             sx={{
               minWidth: 30,
-              color: "inherit", // Use default icon color
+              color: "text.secondary", // Use gray color for icons
               ml: 0, // Ensure no margin is applied
             }}
             >
@@ -282,7 +282,7 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
                 />
 
                 {isDirectory && (
-                  <Box>
+                  <Box sx={{ color: "text.secondary" }}>
                     {isExpanded
                       ? <ExpandMore fontSize="small" />
                       : <ChevronRight fontSize="small" />}
@@ -339,7 +339,7 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
             sx={{
               minWidth: 30,
               ml: 0, // Ensure no margin is applied
-              color: "inherit", // Use default icon color
+              color: "text.secondary", // Use gray color for icons
             }}
           >
             <HomeIcon fontSize="small" />
