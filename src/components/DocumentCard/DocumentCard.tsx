@@ -198,7 +198,7 @@ const DocumentCard: React.FC<
         flexDirection: "column",
         justifyContent: "space-between",
         height: "100%",
-        minHeight: "280px", // Increased from 240px to make cards taller
+        minHeight: "320px", // Increased from 280px to make cards taller
         maxWidth: "100%",
         position: "relative",
         borderRadius: "12px",
