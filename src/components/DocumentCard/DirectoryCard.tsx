@@ -122,8 +122,8 @@ const DirectoryCard: React.FC<
         flexDirection: "column",
         justifyContent: "space-between",
         height: "100%",
-        minHeight: "280px", // Increased height to make cards taller
-        maxWidth: "100%",
+        minHeight: "240px", // Reduced from 280px to make cards smaller
+        width: "100%", // Allow card to fill available width
         position: "relative",
         borderRadius: "12px",
         borderColor: "divider",
@@ -141,8 +141,9 @@ const DirectoryCard: React.FC<
       {/* Top section (65%): Background Image */}
       <Box
         sx={{
-          height: "65%", // Changed from 70% to 65% to match DocumentCard
-          minHeight: "182px", // Adjusted for taller card (65% of 280px)
+          height: "65%", // Proportion stays the same
+          minHeight: "156px", // Adjusted for smaller card (65% of 240px)
+          width: "100%", // Ensure backgrounds fill the full width
           position: "relative",
           display: "flex",
           alignItems: "center",
@@ -161,13 +162,13 @@ const DirectoryCard: React.FC<
           <Badge badgeContent={0} color="secondary">
             <Avatar
               sx={{
-                width: 96,
-                height: 96,
+                width: 80,
+                height: 80,
                 bgcolor: "primary.main",
                 boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
               }}
             >
-              <Folder sx={{ fontSize: 56 }} />
+              <Folder sx={{ fontSize: 48 }} />
             </Avatar>
           </Badge>
         )}
@@ -212,7 +213,7 @@ const DirectoryCard: React.FC<
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
-              fontSize: "1.1rem", // Changed from 1.25rem to 1.1rem to match DocumentCard
+              fontSize: "1rem", // Reduced from 1.1rem for smaller cards
             }}
           >
             {document ? document.name : <Skeleton variant="text" width={190} />}

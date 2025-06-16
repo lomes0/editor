@@ -8,33 +8,33 @@ const ThumbnailSkeleton = () => {
     >
       <Skeleton
         variant="text"
-        width={150}
-        height={40}
+        width="60%"
+        height={32}
         sx={{ alignSelf: "center" }}
       />
       <Skeleton
         variant="text"
-        width={100}
-        height={20}
-        sx={{ alignSelf: "start", my: 1 }}
+        width="45%"
+        height={18}
+        sx={{ alignSelf: "start", my: 0.8 }}
       />
       <Skeleton
         variant="text"
-        width={150}
-        height={20}
-        sx={{ alignSelf: "start", my: 1 }}
+        width="65%"
+        height={18}
+        sx={{ alignSelf: "start", my: 0.8 }}
       />
       <Skeleton
         variant="text"
-        width={120}
-        height={20}
-        sx={{ alignSelf: "start", my: 1 }}
+        width="50%"
+        height={18}
+        sx={{ alignSelf: "start", my: 0.8 }}
       />
       <Skeleton
         variant="rectangular"
         width="100%"
-        height={100}
-        sx={{ alignSelf: "center", my: 2 }}
+        height={80}
+        sx={{ alignSelf: "center", my: 1.5 }}
       />
     </Box>
   );
