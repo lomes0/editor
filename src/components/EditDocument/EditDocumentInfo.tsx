@@ -309,7 +309,47 @@ export default function EditDocumentInfo(
               </IconButton>
               <IconButton
                 aria-label="View"
-                onClick={viewLocalDocument}
+                onClick={async () => {
+                  // If we have unsaved changes, make sure to save to cloud before viewing
+                  if (unsavedChanges) {
+                    const data = getLocalEditorData();
+                    if (data) {
+                      // First create local revision
+                      await createLocalRevision();
+                      
+                      // Then save to cloud
+                      if (isAuthor && localDocument) {
+                        try {
+                          // Create revision in cloud
+                          const revision = {
+                            id: localDocument.head,
+                            documentId: localDocument.id,
+                            createdAt: localDocument.updatedAt,
+                            data,
+                          };
+                          
+                          const revisionResponse = await dispatch(actions.createCloudRevision(revision));
+                          if (revisionResponse.type === actions.createCloudRevision.fulfilled.type) {
+                            // Update document in cloud
+                            await dispatch(actions.updateCloudDocument({
+                              id: localDocument.id,
+                              partial: {
+                                head: localDocument.head,
+                                updatedAt: localDocument.updatedAt,
+                              }
+                            }));
+                            console.log("Document saved to cloud before viewing");
+                          }
+                        } catch (error) {
+                          console.error("Failed to save to cloud before viewing:", error);
+                        }
+                      }
+                    }
+                  }
+                  
+                  // Then view the document
+                  viewLocalDocument();
+                }}
                 sx={isDiffViewOpen
                   ? {
                     color: "primary.contrastText",
@@ -338,7 +378,38 @@ export default function EditDocumentInfo(
             <Typography variant="h6">Revisions</Typography>
             <Button
               sx={{ ml: "auto" }}
-              onClick={toggleDiffView}
+              onClick={async () => {
+                if (isDiffViewOpen) {
+                  // If we're exiting the diff view, save the latest revision to the cloud if there are unsaved changes
+                  if (unsavedChanges && localDocument) {
+                    // Create a cloud revision before toggling the diff view
+                    const revision = {
+                      id: localDocument.head,
+                      documentId: localDocument.id,
+                      createdAt: localDocument.updatedAt,
+                      data: getLocalEditorData(),
+                    };
+                    try {
+                      // First save the revision
+                      const revisionResponse = await dispatch(actions.createCloudRevision(revision));
+                      if (revisionResponse.type === actions.createCloudRevision.fulfilled.type) {
+                        // Then update the document
+                        await dispatch(actions.updateCloudDocument({
+                          id: localDocument.id,
+                          partial: {
+                            head: localDocument.head,
+                            updatedAt: localDocument.updatedAt,
+                          }
+                        }));
+                        console.log("Document saved to cloud when exiting diff view");
+                      }
+                    } catch (error) {
+                      console.error("Failed to save to cloud:", error);
+                    }
+                  }
+                }
+                toggleDiffView();
+              }}
               endIcon={isDiffViewOpen ? <Close /> : <Compare />}
             >
               {isDiffViewOpen ? "Exit" : "Compare"}

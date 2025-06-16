@@ -828,6 +828,7 @@ export const alert = createAsyncThunk(
   },
 );
 
+// Add a special action to handle the auto-save before navigation
 export const appSlice = createSlice({
   name: "app",
   initialState,
@@ -856,6 +857,12 @@ export const appSlice = createSlice({
       action: PayloadAction<Partial<AppState["ui"]["diff"]>>,
     ) => {
       state.ui.diff = { ...state.ui.diff, ...action.payload };
+    },
+    // This is a placeholder action that will be intercepted by the middleware
+    // It doesn't actually modify state but serves as a signal
+    triggerAutosaveBeforeNavigation: (state, action: PayloadAction<{ targetUrl: string }>) => {
+      // This is intentionally empty as we'll handle this action in middleware
+      // The actual save logic is in the component
     },
   },
   extraReducers: (builder) => {

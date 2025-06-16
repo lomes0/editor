@@ -48,6 +48,9 @@ const SideBar: React.FC = () => {
   const initialized = useSelector((state) => state.ui.initialized);
   const user = useSelector((state) => state.user);
 
+  // Determine if we're in edit mode to trigger autosave
+  const isEditMode = pathname.startsWith('/edit/');
+
   const showPrintButton = !!["/edit", "/view", "/playground"].find((path) =>
     pathname.startsWith(path)
   );
@@ -86,6 +89,47 @@ const SideBar: React.FC = () => {
     { text: "Playground", icon: <LibraryBooks />, path: "/playground" },
     { text: "Tutorial", icon: <Help />, path: "/tutorial" },
   ];
+
+  // Custom Link component that handles auto-saving before navigation
+  const SafeNavigationLink = ({ 
+    href, 
+    children, 
+    onClick,
+    ...props 
+  }: { 
+    href: string; 
+    children: React.ReactNode;
+    onClick?: () => void;
+    [key: string]: any;
+  }) => {
+    const handleClick = (e: React.MouseEvent) => {
+      // Only perform autosave if we're in edit mode
+      if (isEditMode) {
+        e.preventDefault();
+        
+        // Dispatch a special action to trigger autosave
+        dispatch({ type: 'TRIGGER_AUTOSAVE_BEFORE_NAVIGATION', payload: { targetUrl: href } });
+        
+        // This will be picked up by the DocumentEditor component
+        // after autosave is complete, it will navigate to the target URL
+        
+        // After a short delay to allow autosave to start, navigate to the target URL
+        setTimeout(() => {
+          router.push(href);
+          if (onClick) onClick();
+        }, 100);
+      } else {
+        // If not in edit mode, just navigate normally
+        if (onClick) onClick();
+      }
+    };
+
+    return (
+      <RouterLink href={href} onClick={handleClick} {...props}>
+        {children}
+      </RouterLink>
+    );
+  };
 
   return (
     <Drawer
@@ -183,7 +227,7 @@ const SideBar: React.FC = () => {
                 placement="right"
               >
                 <ListItemButton
-                  component={RouterLink}
+                  component={SafeNavigationLink}
                   href={item.path}
                   selected={pathname === item.path ||
                     pathname.startsWith(`${item.path}/`)}
@@ -303,7 +347,7 @@ const SideBar: React.FC = () => {
                 placement="right"
               >
                 <ListItemButton
-                  component={RouterLink}
+                  component={SafeNavigationLink}
                   href={user ? "/browse" : "/api/auth/signin"}
                   sx={{
                     minHeight: 48,
