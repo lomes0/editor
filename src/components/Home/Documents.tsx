@@ -20,7 +20,8 @@ import {
 } from "@mui/material";
 import {
   CreateNewFolder,
-  Folder, Help,
+  Folder,
+  Help,
   Pageview,
   PostAdd,
   Science,
@@ -356,7 +357,7 @@ const Documents: React.FC<{ staticDocuments: UserDocument[] }> = (
 
       {/* Add a divider with extra spacing for better separation */}
       <Box sx={{ my: 5, borderBottom: 1, borderColor: "divider" }} />
-      
+
       {/* Intro text for directories */}
       <DocumentsGrid
         documents={documents.length ? sortedDocuments : staticDocuments}
@@ -417,14 +418,20 @@ const DocumentsGrid: React.FC<
                 sx={{ width: 64, height: 64, fontSize: 64 }}
               />
               <Folder
-                sx={{ width: 64, height: 64, fontSize: 64, color: "primary.main" }}
+                sx={{
+                  width: 64,
+                  height: 64,
+                  fontSize: 64,
+                  color: "primary.main",
+                }}
               />
             </Box>
             <Typography variant="h6" component="p" gutterBottom>
               No documents or directories found
             </Typography>
             <Typography variant="body2" color="text.secondary" align="center">
-              Get started by creating a new document or directory using the buttons above.
+              Get started by creating a new document or directory using the
+              buttons above.
             </Typography>
           </Grid>
         )}

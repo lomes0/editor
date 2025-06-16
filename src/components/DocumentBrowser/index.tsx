@@ -149,7 +149,10 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
   // Render loading state for directory browsing
   if (loading) {
     return (
-      <Container maxWidth="xl" sx={{ py: 4, px: { xs: 2, sm: 3, md: 4, lg: 5 } }}>
+      <Container
+        maxWidth="xl"
+        sx={{ py: 4, px: { xs: 2, sm: 3, md: 4, lg: 5 } }}
+      >
         <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
           <Typography>Loading directory contents...</Typography>
         </Box>
@@ -160,7 +163,10 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
   // Render error state if specified directory not found
   if (directoryId && !currentDirectory) {
     return (
-      <Container maxWidth="xl" sx={{ py: 4, px: { xs: 2, sm: 3, md: 4, lg: 5 } }}>
+      <Container
+        maxWidth="xl"
+        sx={{ py: 4, px: { xs: 2, sm: 3, md: 4, lg: 5 } }}
+      >
         <Box
           sx={{
             display: "flex",
@@ -441,7 +447,7 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
                               xs: 12,
                               sm: 6,
                               md: 4,
-                              lg: 3
+                              lg: 3,
                             }}
                           >
                             <DraggableDocumentCard
@@ -491,7 +497,7 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
                             xs: 12,
                             sm: 6,
                             md: 4,
-                            lg: 3
+                            lg: 3,
                           }}
                         >
                           <DraggableDocumentCard

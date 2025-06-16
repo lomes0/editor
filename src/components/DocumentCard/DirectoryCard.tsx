@@ -42,7 +42,8 @@ const DirectoryCard: React.FC<
   const isUpToDate = isUploaded && localDocument.head === cloudDocument.head;
 
   // Check if directory has a valid sort_order (> 0) to display the sort order chip
-  const sortOrderValue = localDocument?.sort_order ?? cloudDocument?.sort_order ?? 0;
+  const sortOrderValue = localDocument?.sort_order ??
+    cloudDocument?.sort_order ?? 0;
   const hasSortOrder = sortOrderValue > 0;
 
   const document = isCloudOnly ? cloudDocument : localDocument;
@@ -217,7 +218,9 @@ const DirectoryCard: React.FC<
             {document ? document.name : <Skeleton variant="text" width={190} />}
           </Typography>
           {/* Added a small space similar to DocumentCard's subheaderContent */}
-          {document ? <div style={{ height: "8px" }}></div> : <Skeleton variant="text" width={150} />}
+          {document
+            ? <div style={{ height: "8px" }}></div>
+            : <Skeleton variant="text" width={150} />}
         </CardContent>
 
         <Box
@@ -317,10 +320,10 @@ const DirectoryCard: React.FC<
                       variant="outlined"
                       label={`Sort: ${sortOrderValue}`}
                       sx={{
-                        bgcolor: 'rgba(0,0,0,0.05)',
-                        borderColor: 'gray',
-                        color: 'gray',
-                        fontWeight: 'bold'
+                        bgcolor: "rgba(0,0,0,0.05)",
+                        borderColor: "gray",
+                        color: "gray",
+                        fontWeight: "bold",
                       }}
                     />
                   )}

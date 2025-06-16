@@ -20,7 +20,8 @@ export const sortDocuments = (
 
     // Check if the document has a sort_order value that is not null or undefined
     const sortOrder = d.local?.sort_order ?? d.cloud?.sort_order ?? null;
-    const hasSortOrder = sortOrder !== null && sortOrder !== undefined && sortOrder > 0;
+    const hasSortOrder = sortOrder !== null && sortOrder !== undefined &&
+      sortOrder > 0;
 
     return {
       ...docData,

@@ -240,7 +240,7 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
             onClick={() => handleItemClick(item)}
             selected={isCurrentDirectory || isCurrentDocument}
             sx={{
-              pl: level * 1.5 + 1,  // Consistent indentation formula
+              pl: level * 1.5 + 1, // Consistent indentation formula
               py: 0.5,
               minHeight: 36,
               "&.Mui-selected": {
@@ -250,12 +250,13 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
                 bgcolor: "rgba(0, 0, 0, 0.15) !important", // Much darker gray hover color with !important
               },
             }}
-          >          <ListItemIcon
-            sx={{
-              minWidth: 30,
-              color: "text.secondary", // Use gray color for icons
-              ml: 0, // Ensure no margin is applied
-            }}
+          >
+            <ListItemIcon
+              sx={{
+                minWidth: 30,
+                color: "text.secondary", // Use gray color for icons
+                ml: 0, // Ensure no margin is applied
+              }}
             >
               {isDirectory
                 ? (
@@ -324,7 +325,7 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
           selected={currentDirectory === null &&
             pathname === "/browse"}
           sx={{
-            pl: 1,  // Match the base padding used in renderTreeItems
+            pl: 1, // Match the base padding used in renderTreeItems
             py: 0.5,
             minHeight: 36,
             "&.Mui-selected": {

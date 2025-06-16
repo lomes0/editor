@@ -1,5 +1,5 @@
 // Use the "use server" directive to explicitly mark this as a dynamic page
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 import NewDocument from "@/components/NewDocument";
 import type { OgMetadata } from "@/app/api/og/route";

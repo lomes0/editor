@@ -7,12 +7,7 @@ import Announcer from "./Announcer";
 import ProgressBar from "./ProgressBar";
 import HydrationManager from "./HydrationManager";
 import Footer from "@/components/Home/Footer";
-import {
-  Box,
-  Container,
-  Toolbar,
-  useMediaQuery,
-} from "@mui/material";
+import { Box, Container, Toolbar, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { Suspense } from "react";
 

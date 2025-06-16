@@ -40,25 +40,25 @@ const DocumentEditor: React.FC<React.PropsWithChildren> = ({ children }) => {
   // Function to save current document to cloud
   const saveToCloud = useCallback(async () => {
     if (!document || !user) return false;
-    
+
     try {
       // Get the current editor state
       const editorState = editorRef.current?.getEditorState();
       if (!editorState) return false;
-      
+
       const data = editorState.toJSON();
       const serializedData = JSON.stringify(data);
-      
+
       // Check if the content has changed since last cloud save
       if (lastSavedCloud.current === serializedData) {
         console.log("No changes to save to cloud");
         return true; // No changes to save
       }
-      
+
       // Create a new revision ID
       const revisionId = uuidv4();
       const now = new Date().toISOString();
-      
+
       // Create a new revision
       const revision: EditorDocumentRevision = {
         id: revisionId,
@@ -66,7 +66,7 @@ const DocumentEditor: React.FC<React.PropsWithChildren> = ({ children }) => {
         createdAt: now,
         data,
       };
-      
+
       // Update the document with the new head
       const documentUpdate = {
         id: document.id,
@@ -75,14 +75,20 @@ const DocumentEditor: React.FC<React.PropsWithChildren> = ({ children }) => {
           updatedAt: now,
         },
       };
-      
+
       // Save to cloud
-      const revisionResponse = await dispatch(actions.createCloudRevision(revision));
-      
-      if (revisionResponse.type === actions.createCloudRevision.fulfilled.type) {
+      const revisionResponse = await dispatch(
+        actions.createCloudRevision(revision),
+      );
+
+      if (
+        revisionResponse.type === actions.createCloudRevision.fulfilled.type
+      ) {
         // Then update the document to point to the new revision
-        const docResponse = await dispatch(actions.updateCloudDocument(documentUpdate));
-        
+        const docResponse = await dispatch(
+          actions.updateCloudDocument(documentUpdate),
+        );
+
         if (docResponse.type === actions.updateCloudDocument.fulfilled.type) {
           console.log("Document auto-saved to cloud successfully");
           lastSavedCloud.current = serializedData;
@@ -90,7 +96,7 @@ const DocumentEditor: React.FC<React.PropsWithChildren> = ({ children }) => {
           return true;
         }
       }
-      
+
       return false;
     } catch (error) {
       console.error("Failed to auto-save document to cloud:", error);
@@ -107,16 +113,16 @@ const DocumentEditor: React.FC<React.PropsWithChildren> = ({ children }) => {
       }
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, [saveToCloud, hasUnsavedChanges]);
 
   // Handle router navigation
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       // Create a custom router event handler for Next.js navigation
       const handleRouteChangeStart = (url: string) => {
         if (hasUnsavedChanges) {
@@ -124,12 +130,12 @@ const DocumentEditor: React.FC<React.PropsWithChildren> = ({ children }) => {
           saveToCloud();
         }
       };
-      
+
       // Create a patched router.push method
       const originalPush = router.push;
       const originalReplace = router.replace;
       const originalBack = router.back;
-      
+
       router.push = (href: string) => {
         if (hasUnsavedChanges) {
           saveToCloud().then(() => {
@@ -139,7 +145,7 @@ const DocumentEditor: React.FC<React.PropsWithChildren> = ({ children }) => {
         }
         return originalPush(href);
       };
-      
+
       router.replace = (href: string) => {
         if (hasUnsavedChanges) {
           saveToCloud().then(() => {
@@ -149,7 +155,7 @@ const DocumentEditor: React.FC<React.PropsWithChildren> = ({ children }) => {
         }
         return originalReplace(href);
       };
-      
+
       router.back = () => {
         if (hasUnsavedChanges) {
           saveToCloud().then(() => {
@@ -159,13 +165,13 @@ const DocumentEditor: React.FC<React.PropsWithChildren> = ({ children }) => {
         }
         return originalBack();
       };
-      
+
       return () => {
         // Restore original methods
         router.push = originalPush;
         router.replace = originalReplace;
         router.back = originalBack;
-        
+
         // Final attempt to save on unmount
         if (hasUnsavedChanges) {
           saveToCloud();

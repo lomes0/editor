@@ -49,7 +49,7 @@ const SideBar: React.FC = () => {
   const user = useSelector((state) => state.user);
 
   // Determine if we're in edit mode to trigger autosave
-  const isEditMode = pathname.startsWith('/edit/');
+  const isEditMode = pathname.startsWith("/edit/");
 
   const showPrintButton = !!["/edit", "/view", "/playground"].find((path) =>
     pathname.startsWith(path)
@@ -91,13 +91,13 @@ const SideBar: React.FC = () => {
   ];
 
   // Custom Link component that handles auto-saving before navigation
-  const SafeNavigationLink = ({ 
-    href, 
-    children, 
+  const SafeNavigationLink = ({
+    href,
+    children,
     onClick,
-    ...props 
-  }: { 
-    href: string; 
+    ...props
+  }: {
+    href: string;
     children: React.ReactNode;
     onClick?: () => void;
     [key: string]: any;
@@ -106,13 +106,16 @@ const SideBar: React.FC = () => {
       // Only perform autosave if we're in edit mode
       if (isEditMode) {
         e.preventDefault();
-        
+
         // Dispatch a special action to trigger autosave
-        dispatch({ type: 'TRIGGER_AUTOSAVE_BEFORE_NAVIGATION', payload: { targetUrl: href } });
-        
+        dispatch({
+          type: "TRIGGER_AUTOSAVE_BEFORE_NAVIGATION",
+          payload: { targetUrl: href },
+        });
+
         // This will be picked up by the DocumentEditor component
         // after autosave is complete, it will navigate to the target URL
-        
+
         // After a short delay to allow autosave to start, navigate to the target URL
         setTimeout(() => {
           router.push(href);
@@ -338,7 +341,6 @@ const SideBar: React.FC = () => {
 
       {/* Bottom section - User */}
       <Box sx={styles.userBox}>
-
         <Box sx={{ mt: "auto" }}>
           <List>
             <ListItem disablePadding sx={{ display: "block" }}>

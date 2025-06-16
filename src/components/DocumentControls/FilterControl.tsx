@@ -48,7 +48,7 @@ export const filterDocuments = (
       !isCollaborator;
     const isDirectory = document?.type === DocumentType.DIRECTORY;
     const isDocument = document?.type !== DocumentType.DIRECTORY;
-    
+
     const showLocal = !!(value & (1 << 0)) && !!localDocument;
     const showCloud = !!(value & (1 << 1)) && !!isCloudOnly;
     const showPublished = !!(value & (1 << 2)) &&

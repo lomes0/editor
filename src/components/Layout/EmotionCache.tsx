@@ -6,16 +6,18 @@ import { CacheProvider as EmotionCacheProvider } from "@emotion/react";
 
 // Create a stable cache configuration with deterministic class names
 const createEmotionCache = () => {
-  return createCache({ 
-    key: "mui-app", 
+  return createCache({
+    key: "mui-app",
     prepend: true,
-    stylisPlugins: [] // Ensure consistent behavior between server and client
+    stylisPlugins: [], // Ensure consistent behavior between server and client
   });
 };
 
 // This component is adapted from the MUI with Next.js example
 // https://github.com/mui/material-ui/blob/master/examples/material-ui-nextjs-ts/src/components/ThemeRegistry/EmotionCache.tsx
-export default function EmotionCache({ children }: { children: React.ReactNode }) {
+export default function EmotionCache(
+  { children }: { children: React.ReactNode },
+) {
   const [{ cache, flush }] = useState(() => {
     const cache = createEmotionCache();
     cache.compat = true;

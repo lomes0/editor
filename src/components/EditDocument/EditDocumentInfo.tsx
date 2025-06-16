@@ -316,7 +316,7 @@ export default function EditDocumentInfo(
                     if (data) {
                       // First create local revision
                       await createLocalRevision();
-                      
+
                       // Then save to cloud
                       if (isAuthor && localDocument) {
                         try {
@@ -327,26 +327,36 @@ export default function EditDocumentInfo(
                             createdAt: localDocument.updatedAt,
                             data,
                           };
-                          
-                          const revisionResponse = await dispatch(actions.createCloudRevision(revision));
-                          if (revisionResponse.type === actions.createCloudRevision.fulfilled.type) {
+
+                          const revisionResponse = await dispatch(
+                            actions.createCloudRevision(revision),
+                          );
+                          if (
+                            revisionResponse.type ===
+                              actions.createCloudRevision.fulfilled.type
+                          ) {
                             // Update document in cloud
                             await dispatch(actions.updateCloudDocument({
                               id: localDocument.id,
                               partial: {
                                 head: localDocument.head,
                                 updatedAt: localDocument.updatedAt,
-                              }
+                              },
                             }));
-                            console.log("Document saved to cloud before viewing");
+                            console.log(
+                              "Document saved to cloud before viewing",
+                            );
                           }
                         } catch (error) {
-                          console.error("Failed to save to cloud before viewing:", error);
+                          console.error(
+                            "Failed to save to cloud before viewing:",
+                            error,
+                          );
                         }
                       }
                     }
                   }
-                  
+
                   // Then view the document
                   viewLocalDocument();
                 }}
@@ -391,17 +401,24 @@ export default function EditDocumentInfo(
                     };
                     try {
                       // First save the revision
-                      const revisionResponse = await dispatch(actions.createCloudRevision(revision));
-                      if (revisionResponse.type === actions.createCloudRevision.fulfilled.type) {
+                      const revisionResponse = await dispatch(
+                        actions.createCloudRevision(revision),
+                      );
+                      if (
+                        revisionResponse.type ===
+                          actions.createCloudRevision.fulfilled.type
+                      ) {
                         // Then update the document
                         await dispatch(actions.updateCloudDocument({
                           id: localDocument.id,
                           partial: {
                             head: localDocument.head,
                             updatedAt: localDocument.updatedAt,
-                          }
+                          },
                         }));
-                        console.log("Document saved to cloud when exiting diff view");
+                        console.log(
+                          "Document saved to cloud when exiting diff view",
+                        );
                       }
                     } catch (error) {
                       console.error("Failed to save to cloud:", error);

@@ -29,8 +29,8 @@ const theme = createTheme({
 // Options for the emotion cache
 const cacheOptions = {
   key: "mui-app",
-  prepend: true, 
-  stylisPlugins: [] // Ensure consistent behavior between server and client
+  prepend: true,
+  stylisPlugins: [], // Ensure consistent behavior between server and client
 };
 
 export default function ThemeProvider(

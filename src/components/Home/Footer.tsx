@@ -7,7 +7,7 @@ import packageJson from "../../../package.json";
 const Footer: React.FC = () => {
   const pathname = usePathname();
   const isDashboard = pathname === "/dashboard";
-  
+
   const version = packageJson.version;
   const commitHash: string | undefined =
     process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA;
@@ -15,61 +15,63 @@ const Footer: React.FC = () => {
     commitHash ? "/commit/" + commitHash.substring(0, 7) : "/"
   }`;
 
-  return isDashboard ? (
-    <Box
-      component="footer"
-      sx={{
-        display: "flex",
-        displayPrint: "none",
-        position: "fixed",
-        bottom: 8,
-        right: 16,
-        gap: 1,
-        zIndex: 1000,
-      }}
-    >
-      <Typography
-        variant="button"
-        component={Link}
-        href={href}
-        target="_blank"
+  return isDashboard
+    ? (
+      <Box
+        component="footer"
         sx={{
-          textDecoration: "none",
           display: "flex",
-          alignItems: "center",
+          displayPrint: "none",
+          position: "fixed",
+          bottom: 8,
+          right: 16,
+          gap: 1,
+          zIndex: 1000,
         }}
       >
-        v{version} {commitHash?.substring(0, 7)}
-      </Typography>
-      <IconButton
-        size="small"
-        sx={{ width: 24, height: 24 }}
-        aria-label="Check for updates"
-      >
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `document.currentScript.parentElement.onclick  = () => {
+        <Typography
+          variant="button"
+          component={Link}
+          href={href}
+          target="_blank"
+          sx={{
+            textDecoration: "none",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          v{version} {commitHash?.substring(0, 7)}
+        </Typography>
+        <IconButton
+          size="small"
+          sx={{ width: 24, height: 24 }}
+          aria-label="Check for updates"
+        >
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `document.currentScript.parentElement.onclick  = () => {
               if (!navigator.onLine) return;
               navigator.serviceWorker.getRegistrations().then(registrations => {
                 return Promise.all(registrations.map(registration => registration.unregister()))
               }).then(() => window.location.reload())
             }`,
-          }}
-        />
-        <Cached />
-      </IconButton>
-      <Typography variant="button">
-        <Link
-          component={RouterLink}
-          prefetch={false}
-          href="/privacy"
-          sx={{ textDecoration: "none" }}
-        >
-          Privacy Policy
-        </Link>
-      </Typography>
-    </Box>
-  ) : null;
+            }}
+          />
+          <Cached />
+        </IconButton>
+        <Typography variant="button">
+          <Link
+            component={RouterLink}
+            prefetch={false}
+            href="/privacy"
+            sx={{ textDecoration: "none" }}
+          >
+            Privacy Policy
+          </Link>
+        </Typography>
+      </Box>
+    )
+    : null;
 };
 
 export default Footer;

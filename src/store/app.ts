@@ -860,7 +860,10 @@ export const appSlice = createSlice({
     },
     // This is a placeholder action that will be intercepted by the middleware
     // It doesn't actually modify state but serves as a signal
-    triggerAutosaveBeforeNavigation: (state, action: PayloadAction<{ targetUrl: string }>) => {
+    triggerAutosaveBeforeNavigation: (
+      state,
+      action: PayloadAction<{ targetUrl: string }>,
+    ) => {
       // This is intentionally empty as we'll handle this action in middleware
       // The actual save logic is in the component
     },

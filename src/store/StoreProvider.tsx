@@ -7,10 +7,8 @@ const StoreProvider: FC<PropsWithChildren> = ({ children }) => {
   // Using useRef to ensure the store instance remains the same across re-renders
   // This helps prevent hydration mismatches that can occur with Redux
   const storeRef = useRef(store);
-  
-  return (
-    <Provider store={storeRef.current}>{children}</Provider>
-  );
+
+  return <Provider store={storeRef.current}>{children}</Provider>;
 };
 
 export default StoreProvider;

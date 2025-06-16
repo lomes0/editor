@@ -334,7 +334,7 @@ const EditDocument: React.FC<
                 />
               </>
             )}
-            
+
             {/* Sort order field for both documents and directories */}
             {isAuthor && (
               <>
@@ -353,9 +353,11 @@ const EditDocument: React.FC<
                   label="Sort Order"
                   type="number"
                   inputProps={{ min: 0, step: 1 }}
-                  value={input.sort_order === null ? '' : input.sort_order}
+                  value={input.sort_order === null ? "" : input.sort_order}
                   onChange={(e) => {
-                    const value = e.target.value === '' ? null : Number(e.target.value);
+                    const value = e.target.value === ""
+                      ? null
+                      : Number(e.target.value);
                     updateInput({ sort_order: value });
                   }}
                   helperText="Items with sort order > 0 will appear first, sorted by this value. Leave empty for default sorting."

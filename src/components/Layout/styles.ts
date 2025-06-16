@@ -28,5 +28,5 @@ export const styles = {
     flexDirection: "column",
     pt: 1,
     pb: 1,
-  }
+  },
 };
