@@ -392,36 +392,42 @@ export default function EditDocumentInfo(
                 if (isDiffViewOpen) {
                   // If we're exiting the diff view, save the latest revision to the cloud if there are unsaved changes
                   if (unsavedChanges && localDocument) {
-                    // Create a cloud revision before toggling the diff view
-                    const revision = {
-                      id: localDocument.head,
-                      documentId: localDocument.id,
-                      createdAt: localDocument.updatedAt,
-                      data: getLocalEditorData(),
-                    };
-                    try {
-                      // First save the revision
-                      const revisionResponse = await dispatch(
-                        actions.createCloudRevision(revision),
-                      );
-                      if (
-                        revisionResponse.type ===
-                          actions.createCloudRevision.fulfilled.type
-                      ) {
-                        // Then update the document
-                        await dispatch(actions.updateCloudDocument({
-                          id: localDocument.id,
-                          partial: {
-                            head: localDocument.head,
-                            updatedAt: localDocument.updatedAt,
-                          },
-                        }));
-                        console.log(
-                          "Document saved to cloud when exiting diff view",
+                    // Get the editor data
+                    const editorData = getLocalEditorData();
+
+                    // Only proceed if we have valid editor data
+                    if (editorData) {
+                      // Create a cloud revision before toggling the diff view
+                      const revision = {
+                        id: localDocument.head,
+                        documentId: localDocument.id,
+                        createdAt: localDocument.updatedAt,
+                        data: editorData,
+                      };
+                      try {
+                        // First save the revision
+                        const revisionResponse = await dispatch(
+                          actions.createCloudRevision(revision),
                         );
+                        if (
+                          revisionResponse.type ===
+                            actions.createCloudRevision.fulfilled.type
+                        ) {
+                          // Then update the document
+                          await dispatch(actions.updateCloudDocument({
+                            id: localDocument.id,
+                            partial: {
+                              head: localDocument.head,
+                              updatedAt: localDocument.updatedAt,
+                            },
+                          }));
+                          console.log(
+                            "Document saved to cloud when exiting diff view",
+                          );
+                        }
+                      } catch (error) {
+                        console.error("Failed to save to cloud:", error);
                       }
-                    } catch (error) {
-                      console.error("Failed to save to cloud:", error);
                     }
                   }
                 }
