@@ -240,7 +240,7 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
             onClick={() => handleItemClick(item)}
             selected={isCurrentDirectory || isCurrentDocument}
             sx={{
-              pl: level * 1.5 + 1, // Consistent indentation formula
+              pl: level * 1.5 + 2.5, // Adjusted indentation formula - starts with pl: 2.5 at level 0, then adds 1.5 per level
               py: 0.5,
               minHeight: 36,
               "&.Mui-selected": {
@@ -259,11 +259,7 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
               }}
             >
               {isDirectory
-                ? (
-                  isExpanded
-                    ? <FolderOpen fontSize="small" />
-                    : <Folder fontSize="small" />
-                )
+                ? <Folder fontSize="small" />
                 : <Article fontSize="small" />}
             </ListItemIcon>
 
@@ -325,7 +321,7 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
           selected={currentDirectory === null &&
             pathname === "/browse"}
           sx={{
-            pl: 1, // Match the base padding used in renderTreeItems
+            pl: 2.5, // Match the padding from the navigation section above (px value)
             py: 0.5,
             minHeight: 36,
             "&.Mui-selected": {
@@ -365,7 +361,7 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
         {/* Directory tree */}
         {treeData.length > 0
           ? (
-            renderTreeItems(treeData, 1) // Start with level 1 to add initial indentation
+            renderTreeItems(treeData, 0) // Start with level 0 because the base indentation is now included in the formula
           )
           : (
             <Box sx={{ p: 1, textAlign: "center" }}>

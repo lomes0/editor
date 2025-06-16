@@ -130,7 +130,7 @@ const Home: React.FC<{ staticDocuments: UserDocument[] }> = (
       >
         <Box sx={{ mb: { xs: 2, md: 0 } }}>
           <Typography variant="h4" component="h1" gutterBottom>
-            Welcome to Math Editor
+            Welcome
           </Typography>
           <Typography
             variant="body1"

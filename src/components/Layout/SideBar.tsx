@@ -57,9 +57,8 @@ const SideBar: React.FC = () => {
   const showInfoButton = !!["/edit", "/view"].find((path) =>
     pathname.startsWith(path)
   );
-  const showFileBrowser = !!["/browse", "/view", "/edit"].find((path) =>
-    pathname.startsWith(path)
-  );
+  // Always show file browser for all routes
+  const showFileBrowser = true;
 
   const handlePrint = () => {
     window.print();
@@ -233,11 +232,18 @@ const SideBar: React.FC = () => {
                   component={SafeNavigationLink}
                   href={item.path}
                   selected={pathname === item.path ||
-                    pathname.startsWith(`${item.path}/`)}
+                    pathname.startsWith(`${item.path}/`) ||
+                    (item.text === "Browse" && pathname.startsWith("/view"))}
                   sx={{
-                    minHeight: 48,
+                    minHeight: 42, // Reduced from 48
                     justifyContent: open ? "initial" : "center",
                     px: 2.5,
+                    "&.Mui-selected": {
+                      bgcolor: "action.selected",
+                      "&:hover": {
+                        bgcolor: "rgba(0, 0, 0, 0.15)",
+                      }
+                    },
                   }}
                 >
                   <ListItemIcon
@@ -245,11 +251,19 @@ const SideBar: React.FC = () => {
                       minWidth: 0,
                       mr: open ? 2 : "auto",
                       justifyContent: "center",
+                      "& .MuiSvgIcon-root": {
+                        fontSize: "1.2rem", // Smaller icon size
+                      },
                     }}
                   >
                     {item.icon}
                   </ListItemIcon>
-                  {open && <ListItemText primary={item.text} />}
+                  {open && <ListItemText 
+                    primary={item.text} 
+                    primaryTypographyProps={{ 
+                      fontSize: "0.9rem" // Smaller text size
+                    }} 
+                  />}
                 </ListItemButton>
               </Tooltip>
             </ListItem>
@@ -260,8 +274,13 @@ const SideBar: React.FC = () => {
       <Divider sx={styles.divider} />
 
       {/* Middle section - File browser */}
-      <Box sx={styles.sectionBox}>
-        {showFileBrowser && <FileBrowser open={open} />}
+      <Box sx={{
+        ...styles.sectionBox,
+        flex: 1,
+        flexGrow: 1,
+        overflow: 'auto'
+      }}>
+        <FileBrowser open={open} />
       </Box>
 
       {(showPrintButton || showInfoButton) && <Divider sx={styles.divider} />}
@@ -282,6 +301,12 @@ const SideBar: React.FC = () => {
                       minHeight: 48,
                       justifyContent: open ? "initial" : "center",
                       px: 2.5,
+                      "&.Mui-selected": {
+                        bgcolor: "action.selected",
+                        "&:hover": {
+                          bgcolor: "rgba(0, 0, 0, 0.15)",
+                        }
+                      },
                     }}
                   >
                     <ListItemIcon
@@ -316,6 +341,12 @@ const SideBar: React.FC = () => {
                         height: "1em",
                         userSelect: "none",
                         zIndex: -1,
+                      },
+                      "&.Mui-selected": {
+                        bgcolor: "action.selected",
+                        "&:hover": {
+                          bgcolor: "rgba(0, 0, 0, 0.15)",
+                        }
                       },
                     }}
                   >
