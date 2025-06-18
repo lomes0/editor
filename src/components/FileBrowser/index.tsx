@@ -18,7 +18,6 @@ import {
   ExpandMore,
   Folder,
   FolderOpen,
-  Home as HomeIcon,
 } from "@mui/icons-material";
 import { DocumentType, UserDocument } from "@/types";
 
@@ -218,10 +217,6 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
     }
   };
 
-  const handleRootClick = () => {
-    router.push("/browse");
-  };
-
   // Recursive component to render tree items
   const renderTreeItems = (items: TreeItem[], level: number = 0) => {
     return items.map((item) => {
@@ -315,49 +310,6 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
         disablePadding
         sx={{ overflow: "auto", maxHeight: "40vh" }}
       >
-        {/* Root node */}
-        <ListItemButton
-          onClick={handleRootClick}
-          selected={currentDirectory === null &&
-            pathname === "/browse"}
-          sx={{
-            pl: 2.5, // Match the padding from the navigation section above (px value)
-            py: 0.5,
-            minHeight: 36,
-            "&.Mui-selected": {
-              bgcolor: "action.selected",
-            },
-            "&:hover": {
-              bgcolor: "rgba(0, 0, 0, 0.15) !important", // Much darker gray hover color with !important
-            },
-          }}
-        >
-          <ListItemIcon
-            sx={{
-              minWidth: 30,
-              ml: 0, // Ensure no margin is applied
-              color: "text.secondary", // Use gray color for icons
-            }}
-          >
-            <HomeIcon fontSize="small" />
-          </ListItemIcon>
-
-          {open && (
-            <ListItemText
-              primary="Root"
-              primaryTypographyProps={{
-                noWrap: true,
-                fontSize: 14,
-                fontWeight: currentDirectory === null &&
-                    pathname === "/browse"
-                  ? "medium"
-                  : "normal",
-                color: "text.primary", // Keep default text color
-              }}
-            />
-          )}
-        </ListItemButton>
-
         {/* Directory tree */}
         {treeData.length > 0
           ? (
