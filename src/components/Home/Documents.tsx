@@ -61,12 +61,67 @@ const Documents: React.FC<{ staticDocuments: UserDocument[] }> = (
     }
   }, []);
 
-  const handleFilesChange = async (files: FileList | File[] | null) => {
+  const handleFilesChange = async (files: FileList | File[] | null, createNewDirectory: boolean = false) => {
     if (!files?.length) return;
-    for (const file of files) await loadFromFile(file, files.length === 1);
+    
+    let directoryId: string | null = null;
+    let dirName = "New_Files";
+    
+    // Create a new directory to hold imported files if requested
+    if (createNewDirectory) {
+      directoryId = uuid();
+      const now = new Date();
+      const formattedDate = now.toLocaleDateString().replace(/\//g, '-');
+      const formattedTime = now.toLocaleTimeString().replace(/:/g, '-').replace(/ /g, '');
+      dirName = `New_Files_${formattedDate}_${formattedTime}`;
+      
+      dispatch(actions.createLocalDocument({
+        id: directoryId,
+        name: dirName,
+        type: DocumentType.DIRECTORY,
+        parentId: null, // Root level directory
+        head: uuid(), // Provide a UUID for head even though it's not used for directories
+        data: {
+          root: {
+            children: [],
+            direction: null,
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        }, // Empty editor state
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        sort_order: 0, // Default sort order
+      }));
+      
+      dispatch(
+        actions.announce({
+          message: {
+            title: `Creating '${dirName}' directory`,
+            subtitle: "All imported files will be placed in this directory",
+          },
+        })
+      );
+    }
+    
+    for (const file of files) await loadFromFile(file, files.length === 1, directoryId);
+    
+    // Show success notification after all files are imported
+    if (createNewDirectory && files.length > 0) {
+      dispatch(
+        actions.announce({
+          message: {
+            title: "Import completed",
+            subtitle: `${files.length} file(s) imported into '${dirName}' directory`,
+          },
+        })
+      );
+    }
   };
 
-  async function loadFromFile(file: File, shouldNavigate?: boolean) {
+  async function loadFromFile(file: File, shouldNavigate?: boolean, directoryId?: string | null) {
     const reader = new FileReader();
     reader.readAsText(file);
     await new Promise<void>((resolve) => {
@@ -77,11 +132,11 @@ const Documents: React.FC<{ staticDocuments: UserDocument[] }> = (
           );
           if (!Array.isArray(data)) {
             validate(data.id) &&
-              await addDocument(data, shouldNavigate);
+              await addDocument(data, shouldNavigate, directoryId);
           } else {
             for (const document of data) {
               validate(document.id) &&
-                await addDocument(document);
+                await addDocument(document, false, directoryId);
             }
           }
         } catch (error) {
@@ -103,6 +158,7 @@ const Documents: React.FC<{ staticDocuments: UserDocument[] }> = (
   async function addDocument(
     document: BackupDocument,
     shouldNavigate?: boolean,
+    directoryId?: string | null,
   ) {
     const revisions = document.revisions || [];
     if (!document.head) document.head = uuid();
@@ -120,6 +176,12 @@ const Documents: React.FC<{ staticDocuments: UserDocument[] }> = (
         ...revisions,
       ];
     }
+
+    // Set the parentId if a directory was created
+    if (directoryId) {
+      document.parentId = directoryId;
+    }
+    
     if (documents.find((d) => d.id === document.id && d.local)) {
       const alert = {
         title: `Document already exists`,
@@ -293,7 +355,7 @@ const Documents: React.FC<{ staticDocuments: UserDocument[] }> = (
                 hidden
                 accept=".me"
                 multiple
-                onChange={(e) => handleFilesChange(e.target.files)}
+                onChange={(e) => handleFilesChange(e.target.files, true)}
               />
             </Button>
             <Button

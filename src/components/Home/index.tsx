@@ -22,14 +22,17 @@ import {
   Functions,
   Share,
 } from "@mui/icons-material";
-import { DocumentType, UserDocument } from "@/types";
+import { BackupDocument, DocumentType, UserDocument } from "@/types";
 import { actions, useDispatch, useSelector } from "@/store";
 import DocumentCard from "../DocumentCard/DocumentCard";
 import FilterControl from "../DocumentControls/FilterControl";
 import DocumentSortControl from "../DocumentControls/SortControl";
+import ImportExportControl from "../DocumentControls/ImportExportControl";
 import { sortDocuments } from "../DocumentControls/sortDocuments";
 import { filterDocuments } from "../DocumentControls/FilterControl";
 import { v4 as uuid } from "uuid";
+import documentDB, { revisionDB } from "@/indexeddb";
+import NProgress from "nprogress"; // For progress indication
 
 const Home: React.FC<{ staticDocuments: UserDocument[] }> = (
   { staticDocuments },
@@ -49,6 +52,246 @@ const Home: React.FC<{ staticDocuments: UserDocument[] }> = (
 
   // Use documents from state if available, otherwise use static documents
   const allDocuments = documents.length > 0 ? documents : staticDocuments;
+
+  // File import handling
+  const handleFilesChange = async (files: FileList | File[] | null, createNewDirectory: boolean = false) => {
+    if (!files?.length) return;
+    
+    let directoryId: string | null = null;
+    let dirName = "New_Files";
+    
+    // Create a new directory to hold imported files if requested
+    if (createNewDirectory) {
+      directoryId = uuid();
+      const now = new Date();
+      const formattedDate = now.toLocaleDateString().replace(/\//g, '-');
+      const formattedTime = now.toLocaleTimeString().replace(/:/g, '-').replace(/ /g, '');
+      dirName = `New_Files_${formattedDate}_${formattedTime}`;
+      
+      dispatch(actions.createLocalDocument({
+        id: directoryId,
+        name: dirName,
+        type: DocumentType.DIRECTORY,
+        parentId: null, // Root level directory
+        head: uuid(),
+        data: {
+          root: {
+            children: [],
+            direction: null,
+            format: "left",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        sort_order: 0,
+      }));
+      
+      dispatch(
+        actions.announce({
+          message: {
+            title: `Creating '${dirName}' directory`,
+            subtitle: "All imported files will be placed in this directory",
+          },
+        })
+      );
+    }
+    
+    for (const file of files) await loadFromFile(file, files.length === 1, directoryId);
+    
+    // Show success notification after all files are imported
+    if (createNewDirectory && files.length > 0) {
+      dispatch(
+        actions.announce({
+          message: {
+            title: "Import completed",
+            subtitle: `${files.length} file(s) imported into '${dirName}' directory`,
+          },
+        })
+      );
+      
+      // If user is logged in, save all imported files to cloud
+      if (user) {
+        // Start progress indicator
+        NProgress.start();
+        
+        dispatch(
+          actions.announce({
+            message: {
+              title: "Saving to cloud",
+              subtitle: "Uploading imported files to cloud storage...",
+            },
+          })
+        );
+        
+        try {
+          // Save the directory to cloud first
+          let successCount = 0;
+          if (directoryId) {
+            const success = await saveDocumentToCloud(directoryId);
+            if (success) successCount++;
+            
+            // Get all documents with this directory as parent and save them to cloud
+            const allDocs = await documentDB.getAll();
+            const childDocs = allDocs.filter(doc => doc.parentId === directoryId);
+            
+            for (const doc of childDocs) {
+              const success = await saveDocumentToCloud(doc.id);
+              if (success) successCount++;
+              // Add a small delay between uploads to prevent overwhelming the server
+              await new Promise(resolve => setTimeout(resolve, 300));
+            }
+            
+            // Complete progress indicator
+            NProgress.done();
+            
+            dispatch(
+              actions.announce({
+                message: {
+                  title: "Cloud save completed",
+                  subtitle: `Uploaded '${dirName}' directory and ${successCount - 1} file(s) to cloud storage`,
+                },
+              })
+            );
+          }
+        } catch (error) {
+          console.error("Error during cloud save:", error);
+          // Stop progress indicator on error
+          NProgress.done();
+          
+          dispatch(
+            actions.announce({
+              message: {
+                title: "Cloud save incomplete",
+                subtitle: "Some items may not have been saved to the cloud. Please try again later.",
+              },
+            })
+          );
+        }
+      }
+    }
+  };
+
+  async function loadFromFile(file: File, shouldNavigate?: boolean, directoryId?: string | null) {
+    const reader = new FileReader();
+    reader.readAsText(file);
+    await new Promise<void>((resolve) => {
+      reader.onload = async () => {
+        try {
+          const data: BackupDocument | BackupDocument[] = JSON.parse(
+            reader.result as string,
+          );
+          if (!Array.isArray(data)) {
+            await addDocument(data, shouldNavigate, directoryId);
+          } else {
+            for (const document of data) {
+              await addDocument(document, false, directoryId);
+            }
+          }
+        } catch (error) {
+          dispatch(
+            actions.announce({
+              message: {
+                title: "Invalid file",
+                subtitle: "Please select a valid .me file",
+              },
+            }),
+          );
+        } finally {
+          resolve();
+        }
+      };
+    });
+  }
+
+  async function addDocument(
+    document: BackupDocument,
+    shouldNavigate?: boolean,
+    directoryId?: string | null,
+  ) {
+    const revisions = document.revisions || [];
+    if (!document.head) document.head = uuid();
+    const isHeadLocalRevision = !!revisions.find((revision) =>
+      revision.id === document.head
+    );
+    if (!isHeadLocalRevision) {
+      document.revisions = [
+        {
+          id: document.head,
+          documentId: document.id,
+          data: document.data,
+          createdAt: document.updatedAt,
+        },
+        ...revisions,
+      ];
+    }
+    
+    // Set the parentId if a directory was created
+    if (directoryId) {
+      document.parentId = directoryId;
+    }
+    
+    if (documents.find((d) => d.id === document.id && d.local)) {
+      const alert = {
+        title: `Document already exists`,
+        content: `Do you want to overwrite ${document.name}?`,
+        actions: [
+          { label: "Cancel", id: uuid() },
+          { label: "Overwrite", id: uuid() },
+        ],
+      };
+      const response = await dispatch(actions.alert(alert));
+      if (response.payload === alert.actions[1].id) {
+        dispatch(
+          actions.updateLocalDocument({
+            id: document.id,
+            partial: document,
+          }),
+        );
+      }
+    } else {
+      dispatch(actions.createLocalDocument(document));
+    }
+  }
+
+  // Function to save a document to the cloud
+  async function saveDocumentToCloud(documentId: string) {
+    if (!user) return false;
+    
+    try {
+      const document = await documentDB.getByID(documentId);
+      if (!document) return false;
+      
+      // Get all revisions for the document
+      const revisions = await revisionDB.getManyByKey("documentId", documentId);
+      
+      // If the head revision is not in the revisions, create it
+      const isHeadLocalRevision = revisions.some(
+        (revision) => revision.id === document.head
+      );
+      
+      if (!isHeadLocalRevision) {
+        const headRevision = {
+          id: document.head,
+          documentId: document.id,
+          data: document.data,
+          createdAt: document.updatedAt,
+        };
+        await dispatch(actions.createLocalRevision(headRevision));
+      }
+      
+      // Create the document in the cloud
+      const result = await dispatch(actions.createCloudDocument(document));
+      
+      // Verify the cloud upload was successful
+      return result.type === actions.createCloudDocument.fulfilled.type;
+    } catch (error) {
+      console.error(`Error saving document ${documentId} to cloud:`, error);
+      return false;
+    }
+  }
 
   useEffect(() => {
     // Apply filtering and sorting
@@ -104,6 +347,50 @@ const Home: React.FC<{ staticDocuments: UserDocument[] }> = (
       }),
     );
   };
+
+  // Backup function
+  async function backup() {
+    try {
+      const documents = await documentDB.getAll();
+      const revisions = await revisionDB.getAll();
+      const data: BackupDocument[] = documents.map((document) => ({
+        ...document,
+        revisions: revisions.filter((revision) =>
+          revision.documentId === document.id &&
+          revision.id !== document.head
+        ),
+      }));
+
+      const blob = new Blob([JSON.stringify(data)], {
+        type: "text/json",
+      });
+      const link = window.document.createElement("a");
+
+      const now = new Date();
+      link.download = now.toISOString() + ".me";
+      link.href = window.URL.createObjectURL(blob);
+      link.dataset.downloadurl = ["text/json", link.download, link.href]
+        .join(":");
+
+      const evt = new MouseEvent("click", {
+        view: window,
+        bubbles: true,
+        cancelable: true,
+      });
+
+      link.dispatchEvent(evt);
+      link.remove();
+    } catch (error) {
+      dispatch(
+        actions.announce({
+          message: {
+            title: "Backup failed",
+            subtitle: "Please try again",
+          },
+        }),
+      );
+    }
+  }
 
   const recentDocuments = filteredDocuments
     .filter((doc) => {
@@ -185,7 +472,16 @@ const Home: React.FC<{ staticDocuments: UserDocument[] }> = (
             sx={{ maxWidth: "100%" }}
           />
         </Box>
-        <Box sx={{ minWidth: { xs: "100%", sm: "auto" } }}>
+        <Box sx={{ 
+          display: "flex", 
+          flexDirection: { xs: "column", sm: "row" },
+          gap: 2,
+          minWidth: { xs: "100%", sm: "auto" } 
+        }}>
+          <ImportExportControl 
+            handleFilesChange={handleFilesChange}
+            backupFunction={backup} 
+          />
           <DocumentSortControl value={sortValue} setValue={setSortValue} />
         </Box>
       </Box>
