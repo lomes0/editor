@@ -21,6 +21,7 @@ import {
   PatchUserResponse,
   PostRevisionResponse,
   User,
+  UserDocument,
 } from "../types";
 import {
   DeleteDocumentResponse,
@@ -30,6 +31,7 @@ import {
   PostDocumentsResponse,
 } from "@/types";
 import { validate } from "uuid";
+import { duplicateDocument } from "./app/duplicateDocument";
 
 const initialState: AppState = {
   documents: [],
@@ -1102,6 +1104,22 @@ export const appSlice = createSlice({
         };
         state.ui.announcements.push({ message });
       })
+      .addCase(duplicateDocument.fulfilled, (state, action) => {
+        // Add the duplicated document to the state
+        const duplicatedDoc = action.payload;
+        const newUserDocument: UserDocument = {
+          id: duplicatedDoc.id,
+          local: duplicatedDoc,
+        };
+        state.documents.push(newUserDocument);
+      })
+      .addCase(duplicateDocument.rejected, (state, action) => {
+        const message = action.payload as {
+          title: string;
+          subtitle: string;
+        };
+        state.ui.announcements.push({ message });
+      })
       .addCase(alert.pending, (state, action) => {
         const alert = action.meta.arg;
         state.ui.alerts.push(alert);
@@ -1119,5 +1137,8 @@ export const appSlice = createSlice({
       });
   },
 });
+
+// Re-export the duplicateDocument action
+export { duplicateDocument };
 
 export default appSlice.reducer;
