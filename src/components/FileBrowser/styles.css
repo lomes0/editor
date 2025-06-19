@@ -1,0 +1,12 @@
+/* Allow scrolling specifically for FileBrowser but hide scrollbar */
+.file-browser-scroll {
+  scrollbar-width: none;
+  overflow-y: auto;
+}
+
+/* Completely hide scrollbar for FileBrowser */
+.file-browser-scroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
