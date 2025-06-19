@@ -131,18 +131,17 @@ const DirectoryCard: React.FC<
         boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
         "&:hover": {
           boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
-          borderColor: "primary.light", // Added to match DocumentCard
           transform: "translateY(-4px)",
         },
         borderWidth: 1,
         ...sx,
       }}
     >
-      {/* Top section (65%): Background Image */}
+      {/* Top section (60%): Background Image */}
       <Box
         sx={{
-          height: "65%", // Proportion stays the same
-          minHeight: "156px", // Adjusted for smaller card (65% of 240px)
+          height: "60%", // Reduced from 65% to give more space to bottom section
+          minHeight: "144px", // Adjusted for smaller card (60% of 240px)
           width: "100%", // Ensure backgrounds fill the full width
           position: "relative",
           display: "flex",
@@ -184,7 +183,7 @@ const DirectoryCard: React.FC<
           top: 0,
           left: 0,
           right: 0,
-          bottom: "50px",
+          bottom: "60px", // Updated to match the new height of the bottom section
           zIndex: 1,
           borderRadius: "12px 12px 0 0",
           "&:hover": {
@@ -193,23 +192,24 @@ const DirectoryCard: React.FC<
         }}
       />
 
-      {/* Bottom section (35%): Directory Info & Actions */}
+      {/* Bottom section (40%): Directory Info & Actions */}
       <Box
         sx={{
-          height: "35%", // Changed from 30% to 35% to match DocumentCard
+          height: "40%", // Increased from 35% to give more space to bottom section
           display: "flex",
           flexDirection: "column",
           position: "relative",
           zIndex: 2, // Higher than the action area
         }}
       >
-        <CardContent sx={{ pt: 1.5, pb: 0.5, flexGrow: 1 }}>
+        <CardContent sx={{ pt: 1, pb: 0, flexGrow: 1 }}>
           <Typography
             variant="h6"
             component="div"
             sx={{
               fontWeight: 600,
-              mb: 0.5,
+              mb: 0.1,
+              mt: 0.1, // Add top margin to push the title down
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -235,7 +235,7 @@ const DirectoryCard: React.FC<
             borderColor: "divider",
             backgroundColor: "transparent",
             zIndex: 3, // Higher than the card content and action area
-            height: "50px",
+            height: "60px", // Increased from 50px to give more room for chips
             mt: "auto",
             "& button:first-of-type": { ml: "auto !important" }, // Added to match DocumentCard
             "& .MuiChip-root:last-of-type": { mr: 1 }, // Added to match DocumentCard
@@ -248,6 +248,7 @@ const DirectoryCard: React.FC<
               gap: 0.5,
               flexWrap: "nowrap",
               overflow: "hidden",
+              py: 0.0, // Add vertical padding to lift chips away from bottom
             }}
           >
             {/* Update to small chips to match DocumentCard */}

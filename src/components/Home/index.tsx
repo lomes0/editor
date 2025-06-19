@@ -496,9 +496,17 @@ const Home: React.FC<{ staticDocuments: UserDocument[] }> = (
             {recentDocuments.map((document) => (
               <Grid
                 key={document.id}
-                size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 3 }}
+                size={{
+                  xs: 12,
+                  sm: 6,
+                  md: 4,
+                  lg: 3,
+                }}
               >
-                <DocumentCard userDocument={document} user={user} />
+                <DocumentCard
+                  userDocument={document}
+                  user={user}
+                />
               </Grid>
             ))}
           </Grid>
