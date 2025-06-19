@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useContext } from "react";
+import React, { useContext, useState } from "react";
 import { Box, Fade, Paper, Tooltip } from "@mui/material";
 import { DeleteForever } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
@@ -33,35 +33,39 @@ const TrashBin: React.FC = () => {
       if (!data) return;
 
       const draggedItem = JSON.parse(data);
-      
+
       // Show confirmation dialog before deleting
       const alert = {
-        title: `Delete ${draggedItem.type === 'DIRECTORY' ? 'Directory' : 'Document'}`,
+        title: `Delete ${
+          draggedItem.type === "DIRECTORY" ? "Directory" : "Document"
+        }`,
         content: `Are you sure you want to delete "${draggedItem.name}"?`,
         actions: [
           { label: "Cancel", id: uuid() },
-          { label: "Delete", id: uuid() }
-        ]
+          { label: "Delete", id: uuid() },
+        ],
       };
-      
+
       const response = await dispatch(actions.alert(alert));
-      
+
       if (response.payload === alert.actions[1].id) {
         // Get the document to delete
-        const docResponse = await dispatch(actions.getDocumentById(draggedItem.id));
+        const docResponse = await dispatch(
+          actions.getDocumentById(draggedItem.id),
+        );
         const document = docResponse.payload as UserDocument;
-        
+
         if (!document) return;
-        
+
         // Delete local and/or cloud document
         if (document.local) {
           await dispatch(actions.deleteLocalDocument(draggedItem.id));
         }
-        
+
         if (document.cloud) {
           await dispatch(actions.deleteCloudDocument(draggedItem.id));
         }
-        
+
         // Show success message
         dispatch(actions.announce({
           message: {
@@ -109,8 +113,16 @@ const TrashBin: React.FC = () => {
               backgroundColor: isDropTarget
                 ? theme.palette.error.main
                 : theme.palette.background.paper,
-              border: `2px solid ${isDropTarget ? theme.palette.error.dark : theme.palette.grey[300]}`,
-              transition: theme.transitions.create(["background-color", "transform", "border"], {
+              border: `2px solid ${
+                isDropTarget
+                  ? theme.palette.error.dark
+                  : theme.palette.grey[300]
+              }`,
+              transition: theme.transitions.create([
+                "background-color",
+                "transform",
+                "border",
+              ], {
                 duration: 200,
               }),
               transform: isDropTarget ? "scale(1.1)" : "scale(1)",
@@ -120,7 +132,9 @@ const TrashBin: React.FC = () => {
             <DeleteForever
               sx={{
                 fontSize: 40,
-                color: isDropTarget ? theme.palette.common.white : theme.palette.error.main,
+                color: isDropTarget
+                  ? theme.palette.common.white
+                  : theme.palette.error.main,
                 transition: theme.transitions.create("color", {
                   duration: 200,
                 }),

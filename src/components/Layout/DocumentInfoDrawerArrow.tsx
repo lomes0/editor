@@ -1,16 +1,16 @@
 "use client";
 import { actions, useDispatch, useSelector } from "@/store";
-import { Box, Tooltip, Paper } from "@mui/material";
+import { Box, Paper, Tooltip } from "@mui/material";
 import { ChevronLeft } from "@mui/icons-material";
 import { usePathname } from "next/navigation";
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { alpha } from "@mui/material/styles";
 
 const DocumentInfoDrawerArrow: React.FC = () => {
   const dispatch = useDispatch();
   const pathname = usePathname();
   const drawerOpen = useSelector((state) => state.ui.drawer);
-  
+
   // Only show the arrow in edit or view modes
   const showArrow = !!["/edit", "/view"].find((path) =>
     pathname.startsWith(path)
@@ -92,55 +92,58 @@ const DocumentInfoDrawerArrow: React.FC = () => {
       onTouchStart={handleTouchStart}
       onClick={toggleDrawer}
       elevation={3}
-        sx={{
-          position: "fixed",
-          top: "50%",
-          right: 0,
-          transform: "translateY(-50%)",
-          zIndex: 1200,
-          cursor: "pointer",
-          height: 40,  // Reduced height from 80 to 40
-          width: 12,   // Reduced width from 24 to 12
-          borderTopLeftRadius: 4,  // Reduced radius from 8 to 4
-          borderBottomLeftRadius: 4,
-          borderTopRightRadius: 0,
-          borderBottomRightRadius: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: (theme) => 
-            drawerOpen 
-              ? alpha(theme.palette.primary.main, 0.7)  // Reduced opacity from 0.9 to 0.7
-              : alpha(theme.palette.background.paper, 0.5),  // Reduced opacity from 0.9 to 0.5
-          transition: (theme) => theme.transitions.create(
-            ["background-color", "width"], 
-            { duration: theme.transitions.duration.shorter }
+      sx={{
+        position: "fixed",
+        top: "50%",
+        right: 0,
+        transform: "translateY(-50%)",
+        zIndex: 1200,
+        cursor: "pointer",
+        height: 40, // Reduced height from 80 to 40
+        width: 12, // Reduced width from 24 to 12
+        borderTopLeftRadius: 4, // Reduced radius from 8 to 4
+        borderBottomLeftRadius: 4,
+        borderTopRightRadius: 0,
+        borderBottomRightRadius: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: (theme) =>
+          drawerOpen
+            ? alpha(theme.palette.primary.main, 0.7) // Reduced opacity from 0.9 to 0.7
+            : alpha(theme.palette.background.paper, 0.5), // Reduced opacity from 0.9 to 0.5
+        transition: (theme) =>
+          theme.transitions.create(
+            ["background-color", "width"],
+            { duration: theme.transitions.duration.shorter },
           ),
-          "&:hover": {
-            width: 16, // Slightly wider on hover for better visibility
-            backgroundColor: (theme) => 
-              drawerOpen
-                ? alpha(theme.palette.primary.dark, 0.9)
-                : alpha(theme.palette.action.hover, 0.7),
-          },
-          displayPrint: "none",
-        }}
-        aria-label="document info"
-      >
-        <ChevronLeft 
-          fontSize="small"  // Added small size
-          sx={{ 
-            color: (theme) => drawerOpen 
-              ? theme.palette.primary.contrastText 
-              : alpha(theme.palette.text.primary, 0.6),  // Reduced opacity for text
-            transform: drawerOpen ? "rotate(180deg)" : "none",
-            transition: (theme) => theme.transitions.create(
-              ["transform"], 
-              { duration: theme.transitions.duration.standard }
+        "&:hover": {
+          width: 16, // Slightly wider on hover for better visibility
+          backgroundColor: (theme) =>
+            drawerOpen
+              ? alpha(theme.palette.primary.dark, 0.9)
+              : alpha(theme.palette.action.hover, 0.7),
+        },
+        displayPrint: "none",
+      }}
+      aria-label="document info"
+    >
+      <ChevronLeft
+        fontSize="small" // Added small size
+        sx={{
+          color: (theme) =>
+            drawerOpen
+              ? theme.palette.primary.contrastText
+              : alpha(theme.palette.text.primary, 0.6), // Reduced opacity for text
+          transform: drawerOpen ? "rotate(180deg)" : "none",
+          transition: (theme) =>
+            theme.transitions.create(
+              ["transform"],
+              { duration: theme.transitions.duration.standard },
             ),
-          }} 
-        />
-      </Paper>
+        }}
+      />
+    </Paper>
   );
 };
 

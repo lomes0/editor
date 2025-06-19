@@ -209,7 +209,10 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
 
   return (
     <DragProvider>
-      <Container maxWidth="xl" sx={{ py: 4, px: { xs: 2, sm: 3, md: 4, lg: 5 } }}>
+      <Container
+        maxWidth="xl"
+        sx={{ py: 4, px: { xs: 2, sm: 3, md: 4, lg: 5 } }}
+      >
         <Fade in={true} timeout={600}>
           <Box
             className="document-browser-container"
@@ -474,7 +477,9 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
                         gap: 2,
                       }}
                     >
-                      {sortedDirectories.length > 0 && <Divider sx={{ my: 1 }} />}
+                      {sortedDirectories.length > 0 && (
+                        <Divider sx={{ my: 1 }} />
+                      )}
                       <Box
                         sx={{
                           display: "flex",

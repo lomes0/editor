@@ -445,8 +445,8 @@ const Home: React.FC<{ staticDocuments: UserDocument[] }> = (
               color="text.secondary"
               sx={{ maxWidth: 600 }}
             >
-              Create, edit, and share mathematical documents with ease. Our editor
-              supports LaTeX, diagrams, and collaborative editing.
+              Create, edit, and share mathematical documents with ease. Our
+              editor supports LaTeX, diagrams, and collaborative editing.
             </Typography>
           </Box>
           <Box sx={{ display: "flex", gap: 2 }}>
