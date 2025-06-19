@@ -1,6 +1,6 @@
 "use client";
-import React, { useContext, useState } from "react";
-import { Box, Fade, Paper, Tooltip } from "@mui/material";
+import React, { useContext, useEffect, useState } from "react";
+import { Box, Fade, Paper, Tooltip, useScrollTrigger } from "@mui/material";
 import { DeleteForever } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import { actions, useDispatch } from "@/store";
@@ -13,6 +13,12 @@ const TrashBin: React.FC = () => {
   const dispatch = useDispatch();
   const [isDropTarget, setIsDropTarget] = useState(false);
   const { isDragging } = useContext(DragContext);
+
+  // Check if page is scrolled enough to show the scroll-to-top button
+  const scrollTrigger = useScrollTrigger({
+    disableHysteresis: true,
+    threshold: 100,
+  });
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -91,56 +97,53 @@ const TrashBin: React.FC = () => {
       <Box
         sx={{
           position: "fixed",
-          bottom: 40,
-          right: 40,
-          zIndex: 1000,
+          bottom: scrollTrigger ? 70 : 20, // Higher when scroll button is visible, lower when at top
+          right: 12.5, // Directly at the right edge
+          zIndex: 9999, // Extremely high z-index to ensure it's above everything
           pointerEvents: isDragging ? "auto" : "none",
         }}
       >
         <Tooltip title="Drop here to delete" arrow placement="top">
-          <Paper
-            elevation={3}
+          <Box
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             sx={{
-              width: 80,
-              height: 80,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              width: 48,
+              height: 48,
               borderRadius: "50%",
-              backgroundColor: isDropTarget
-                ? theme.palette.error.main
-                : theme.palette.background.paper,
-              border: `2px solid ${
-                isDropTarget
-                  ? theme.palette.error.dark
-                  : theme.palette.grey[300]
-              }`,
-              transition: theme.transitions.create([
-                "background-color",
-                "transform",
-                "border",
-              ], {
-                duration: 200,
-              }),
+              backgroundColor: "white",
+              transition: theme.transitions.create(
+                ["transform", "box-shadow"],
+                {
+                  duration: 200,
+                },
+              ),
               transform: isDropTarget ? "scale(1.1)" : "scale(1)",
+              boxShadow: isDropTarget
+                ? "0 4px 12px rgba(0,0,0,0.2)"
+                : "0 2px 10px rgba(0,0,0,0.1)",
               cursor: "default",
             }}
           >
             <DeleteForever
               sx={{
-                fontSize: 40,
+                fontSize: 32, // Smaller icon size
                 color: isDropTarget
-                  ? theme.palette.common.white
+                  ? theme.palette.error.dark
                   : theme.palette.error.main,
                 transition: theme.transitions.create("color", {
                   duration: 200,
                 }),
+                filter: isDropTarget
+                  ? "drop-shadow(0 0 4px rgba(0,0,0,0.3))"
+                  : "none",
               }}
             />
-          </Paper>
+          </Box>
         </Tooltip>
       </Box>
     </Fade>
