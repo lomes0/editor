@@ -4,9 +4,21 @@
   --sidebar-width-expanded: 240px;
 }
 
+/* Hide scrollbars while keeping scrolling functionality */
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  background: transparent;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: none;
+}
+
 body {
   overflow-x: hidden !important;
-  overflow-y: scroll !important;
+  overflow-y: auto !important; /* Keep scroll functionality */
   margin-left: 0 !important;
   margin-right: 0 !important;
   padding-left: 0 !important;

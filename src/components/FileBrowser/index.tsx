@@ -23,6 +23,7 @@ import {
 import { DocumentType, UserDocument } from "@/types";
 import ContextMenu from "./ContextMenu";
 import documentDB, { revisionDB } from "@/indexeddb";
+import "./styles.css";
 
 interface FileBrowserProps {
   open: boolean; // Whether sidebar is expanded

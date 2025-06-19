@@ -32,6 +32,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
               flexGrow: 1,
               width: { sm: `calc(100% - ${sidebarWidth}px)` },
               ml: { sm: `${sidebarWidth}px` },
+              overflow: "auto", /* Allow scrolling but scrollbar is hidden by CSS */
               transition: theme.transitions.create([
                 "margin",
                 "width",
@@ -59,6 +60,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
                   my: 2,
                   flex: 1,
                   position: "relative",
+                  overflow: "auto", /* Allow scrolling but scrollbar is hidden by CSS */
                   maxWidth: {
                     xs: "100% !important",
                     sm: "100% !important",

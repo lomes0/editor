@@ -266,8 +266,9 @@ const SideBar: React.FC = () => {
           ...styles.sectionBox,
           flex: 1,
           flexGrow: 1,
-          overflow: "auto",
+          overflow: "auto", /* Allow scrolling but scrollbar is hidden by CSS */
         }}
+        className="file-browser-scroll"
       >
         <FileBrowser open={open} />
       </Box>

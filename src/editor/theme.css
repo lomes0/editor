@@ -155,8 +155,8 @@
 .LexicalTheme__table {
   border-collapse: collapse;
   border-spacing: 0;
-  overflow-y: scroll;
-  overflow-x: scroll;
+  overflow-y: auto; /* Allow scrolling but scrollbar is hidden by CSS */
+  overflow-x: auto; /* Allow scrolling but scrollbar is hidden by CSS */
   width: 100%;
   position: relative;
   z-index: 1;
