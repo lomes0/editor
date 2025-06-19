@@ -86,13 +86,12 @@ const DocumentInfoDrawerArrow: React.FC = () => {
   }
 
   return (
-    <Tooltip title="Drag to open Document Info" placement="left">
-      <Paper
-        ref={arrowRef}
-        onMouseDown={handleMouseDown}
-        onTouchStart={handleTouchStart}
-        onClick={toggleDrawer}
-        elevation={3}
+    <Paper
+      ref={arrowRef}
+      onMouseDown={handleMouseDown}
+      onTouchStart={handleTouchStart}
+      onClick={toggleDrawer}
+      elevation={3}
         sx={{
           position: "fixed",
           top: "50%",
@@ -142,7 +141,6 @@ const DocumentInfoDrawerArrow: React.FC = () => {
           }} 
         />
       </Paper>
-    </Tooltip>
   );
 };
 
