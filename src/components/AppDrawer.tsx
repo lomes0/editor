@@ -1,17 +1,79 @@
 "use client";
-import { Box, IconButton, SwipeableDrawer, Typography } from "@mui/material";
-import { Article, Close } from "@mui/icons-material";
+import { Box, IconButton, SwipeableDrawer, Typography, Paper } from "@mui/material";
+import { Article, Close, ChevronRight } from "@mui/icons-material";
 import { actions, useDispatch, useSelector } from "@/store";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+import { alpha } from "@mui/material/styles";
 
 const AppDrawer: React.FC<React.PropsWithChildren<{ title: string }>> = (
   { title, children },
 ) => {
   const open = useSelector((state) => state.ui.drawer);
   const dispatch = useDispatch();
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const dragHandleRef = useRef<HTMLDivElement>(null);
+
   const toggleDrawer = () => {
     dispatch(actions.toggleDrawer());
   };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+    setStartX(e.clientX);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setIsDragging(true);
+    setStartX(e.touches[0].clientX);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging && open) {
+        const dragDistance = e.clientX - startX;
+        // If dragged more than 50px to the right, close the drawer
+        if (dragDistance > 50) {
+          toggleDrawer();
+          setIsDragging(false);
+        }
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (isDragging && open) {
+        const dragDistance = e.touches[0].clientX - startX;
+        // If dragged more than 50px to the right, close the drawer
+        if (dragDistance > 50) {
+          toggleDrawer();
+          setIsDragging(false);
+        }
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    const handleTouchEnd = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+      document.addEventListener("touchmove", handleTouchMove);
+      document.addEventListener("touchend", handleTouchEnd);
+    }
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [isDragging, open, startX]);
 
   useEffect(() => {
     return () => {
@@ -28,7 +90,7 @@ const AppDrawer: React.FC<React.PropsWithChildren<{ title: string }>> = (
         onClose={toggleDrawer}
         sx={{ displayPrint: "none" }}
       >
-        <Box sx={{ p: 2, width: 300 }}>
+        <Box sx={{ p: 2, width: 300, position: "relative" }}>
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Article sx={{ mr: 1 }} />
             <Typography variant="h6">{title}</Typography>
@@ -37,6 +99,41 @@ const AppDrawer: React.FC<React.PropsWithChildren<{ title: string }>> = (
             </IconButton>
           </Box>
           {children}
+          
+          {/* Drag handle */}
+          <Paper
+            ref={dragHandleRef}
+            onMouseDown={handleMouseDown}
+            onTouchStart={handleTouchStart}
+            elevation={0}
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: 0,
+              transform: "translate(-50%, -50%)",
+              zIndex: 1300,
+              cursor: "grab",
+              height: 80,
+              width: 24,
+              borderTopRightRadius: 0,
+              borderBottomRightRadius: 0,
+              borderTopLeftRadius: 8,
+              borderBottomLeftRadius: 8,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.9),
+              "&:active": {
+                cursor: "grabbing"
+              },
+              "&:hover": {
+                backgroundColor: (theme) => alpha(theme.palette.primary.dark, 0.9),
+              },
+            }}
+            aria-label="drag to close document info"
+          >
+            <ChevronRight sx={{ color: (theme) => theme.palette.primary.contrastText }} />
+          </Paper>
         </Box>
       </SwipeableDrawer>
     </>

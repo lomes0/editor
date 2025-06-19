@@ -12,7 +12,7 @@ import {
   Portal,
   Typography,
 } from "@mui/material";
-import { Close, Compare, History, Preview, Print } from "@mui/icons-material";
+import { Close, Compare, History, Preview } from "@mui/icons-material";
 import type { LexicalEditor } from "lexical";
 import { RefObject } from "react";
 import RouterLink from "next/link";
@@ -299,14 +299,6 @@ export default function EditDocumentInfo(
                 alignSelf: "flex-end",
               }}
             >
-              <IconButton
-                aria-label="Print"
-                onClick={() => {
-                  window.print();
-                }}
-              >
-                <Print />
-              </IconButton>
               <IconButton
                 aria-label="View"
                 onClick={async () => {

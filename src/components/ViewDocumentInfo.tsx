@@ -12,7 +12,7 @@ import {
   Typography,
   useScrollTrigger,
 } from "@mui/material";
-import { Edit, FileCopy, History, Print } from "@mui/icons-material";
+import { Edit, FileCopy, History } from "@mui/icons-material";
 import RouterLink from "next/link";
 import ShareDocument from "./DocumentActions/Share";
 import DownloadDocument from "./DocumentActions/Download";
@@ -181,15 +181,6 @@ export default function ViewDocumentInfo(
               alignSelf: "flex-end",
             }}
           >
-            <IconButton
-              aria-label="Print"
-              color="inherit"
-              onClick={() => {
-                window.print();
-              }}
-            >
-              <Print />
-            </IconButton>
             <ShareDocument userDocument={userDocument} />
             {showFork && <ForkDocument userDocument={userDocument} />}
             {isEditable && <DownloadDocument userDocument={userDocument} />}

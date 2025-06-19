@@ -16,7 +16,7 @@ import {
   useScrollTrigger,
   Zoom,
 } from "@mui/material";
-import { Info, KeyboardArrowUp, Print } from "@mui/icons-material";
+import { Info, KeyboardArrowUp } from "@mui/icons-material";
 
 function ScrollTop() {
   const trigger = useScrollTrigger({ disableHysteresis: true });
@@ -60,18 +60,12 @@ function ScrollTop() {
 const TopAppBar: React.FC = () => {
   const dispatch = useDispatch();
   const pathname = usePathname();
-  const showPrintButton = !!["/edit", "/view", "/playground"].find((path) =>
-    pathname.startsWith(path)
-  );
   const showDrawerButton = !!["/edit", "/view"].find((path) =>
     pathname.startsWith(path)
   );
   const initialized = useSelector((state) => state.ui.initialized);
   const user = useSelector((state) => state.user);
 
-  const handlePrint = () => {
-    window.print();
-  };
   const toggleDrawer = () => {
     dispatch(actions.toggleDrawer());
   };
@@ -133,15 +127,6 @@ const TopAppBar: React.FC = () => {
               sx={{ width: 30, height: 30 }}
             />
           </IconButton>
-          {showPrintButton && (
-            <IconButton
-              aria-label="Print"
-              color="inherit"
-              onClick={handlePrint}
-            >
-              <Print />
-            </IconButton>
-          )}
           {showDrawerButton && (
             <IconButton
               id="document-info"
