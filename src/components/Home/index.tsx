@@ -33,6 +33,8 @@ import { filterDocuments } from "../DocumentControls/FilterControl";
 import { v4 as uuid } from "uuid";
 import documentDB, { revisionDB } from "@/indexeddb";
 import NProgress from "nprogress"; // For progress indication
+import { DragProvider } from "../DragContext";
+import TrashBin from "../TrashBin";
 
 const Home: React.FC<{ staticDocuments: UserDocument[] }> = (
   { staticDocuments },
@@ -418,122 +420,125 @@ const Home: React.FC<{ staticDocuments: UserDocument[] }> = (
     .slice(0, 4);
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      {/* Welcome section */}
-      <Paper
-        elevation={0}
-        sx={{
-          p: 4,
-          mb: 4,
-          borderRadius: 2,
-          background: "linear-gradient(to right, #f5f7fa, #e4e7eb)",
-          display: "flex",
-          flexDirection: { xs: "column", md: "row" },
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Box sx={{ mb: { xs: 2, md: 0 } }}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            Welcome
-          </Typography>
-          <Typography
-            variant="body1"
-            color="text.secondary"
-            sx={{ maxWidth: 600 }}
-          >
-            Create, edit, and share mathematical documents with ease. Our editor
-            supports LaTeX, diagrams, and collaborative editing.
-          </Typography>
-        </Box>
-        <Box sx={{ display: "flex", gap: 2 }}>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<Add />}
-            onClick={handleCreateDocument}
-          >
-            New Document
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<Add />}
-            onClick={handleCreateDirectory}
-          >
-            New Directory
-          </Button>
-        </Box>
-      </Paper>
-
-      {/* Filter and sort controls */}
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: { xs: "column", sm: "row" },
-          justifyContent: "space-between",
-          alignItems: { xs: "stretch", sm: "center" },
-          flexWrap: "wrap",
-          mb: 4,
-          gap: 2,
-        }}
-      >
-        <Box
+    <DragProvider>
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        {/* Welcome section */}
+        <Paper
+          elevation={0}
           sx={{
-            width: "100%",
-            maxWidth: { xs: "100%", sm: "85%", md: "90%", lg: "92%" },
-            overflow: "hidden",
+            p: 4,
+            mb: 4,
+            borderRadius: 2,
+            background: "linear-gradient(to right, #f5f7fa, #e4e7eb)",
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            alignItems: "center",
+            justifyContent: "space-between",
           }}
         >
-          <FilterControl
-            value={filterValue}
-            setValue={setFilterValue}
-            sx={{ maxWidth: "100%" }}
-          />
-        </Box>
+          <Box sx={{ mb: { xs: 2, md: 0 } }}>
+            <Typography variant="h4" component="h1" gutterBottom>
+              Welcome
+            </Typography>
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              sx={{ maxWidth: 600 }}
+            >
+              Create, edit, and share mathematical documents with ease. Our editor
+              supports LaTeX, diagrams, and collaborative editing.
+            </Typography>
+          </Box>
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<Add />}
+              onClick={handleCreateDocument}
+            >
+              New Document
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<Add />}
+              onClick={handleCreateDirectory}
+            >
+              New Directory
+            </Button>
+          </Box>
+        </Paper>
+
+        {/* Filter and sort controls */}
         <Box
           sx={{
             display: "flex",
             flexDirection: { xs: "column", sm: "row" },
+            justifyContent: "space-between",
+            alignItems: { xs: "stretch", sm: "center" },
+            flexWrap: "wrap",
+            mb: 4,
             gap: 2,
-            minWidth: { xs: "100%", sm: "auto" },
           }}
         >
-          <DocumentSortControl value={sortValue} setValue={setSortValue} />
-          <ImportExportControl
-            handleFilesChange={handleFilesChange}
-            backupFunction={backup}
-          />
+          <Box
+            sx={{
+              width: "100%",
+              maxWidth: { xs: "100%", sm: "85%", md: "90%", lg: "92%" },
+              overflow: "hidden",
+            }}
+          >
+            <FilterControl
+              value={filterValue}
+              setValue={setFilterValue}
+              sx={{ maxWidth: "100%" }}
+            />
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
+              gap: 2,
+              minWidth: { xs: "100%", sm: "auto" },
+            }}
+          >
+            <DocumentSortControl value={sortValue} setValue={setSortValue} />
+            <ImportExportControl
+              handleFilesChange={handleFilesChange}
+              backupFunction={backup}
+            />
+          </Box>
         </Box>
-      </Box>
 
-      {/* Recent Documents section */}
-      {recentDocuments.length > 0 && (
-        <>
-          <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-            Recent Documents
-          </Typography>
-          <Grid container spacing={3} sx={{ mb: 4 }}>
-            {recentDocuments.map((document) => (
-              <Grid
-                key={document.id}
-                size={{
-                  xs: 12,
-                  sm: 6,
-                  md: 4,
-                  lg: 3,
-                }}
-              >
-                <DraggableDocumentCard
-                  userDocument={document}
-                  user={user}
-                  currentDirectoryId=""
-                />
-              </Grid>
-            ))}
-          </Grid>
-        </>
-      )}
-    </Container>
+        {/* Recent Documents section */}
+        {recentDocuments.length > 0 && (
+          <>
+            <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
+              Recent Documents
+            </Typography>
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+              {recentDocuments.map((document) => (
+                <Grid
+                  key={document.id}
+                  size={{
+                    xs: 12,
+                    sm: 6,
+                    md: 4,
+                    lg: 3,
+                  }}
+                >
+                  <DraggableDocumentCard
+                    userDocument={document}
+                    user={user}
+                    currentDirectoryId=""
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          </>
+        )}
+      </Container>
+      <TrashBin />
+    </DragProvider>
   );
 };
 

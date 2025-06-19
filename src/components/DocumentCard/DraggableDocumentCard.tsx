@@ -1,10 +1,11 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useContext } from "react";
 import { DocumentType, User, UserDocument } from "@/types";
 import { Box, SxProps } from "@mui/material";
 import { Theme, useTheme } from "@mui/material/styles";
 import DocumentCard from "./index";
 import { actions, useDispatch, useSelector } from "@/store";
+import { DragContext } from "../DragContext";
 
 interface DraggableDocumentCardProps {
   userDocument: UserDocument;
@@ -25,6 +26,7 @@ const DraggableDocumentCard: React.FC<DraggableDocumentCardProps> = ({
   const [isDropTarget, setIsDropTarget] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const documents = useSelector((state) => state.documents);
+  const { setIsDragging: setGlobalDragging } = useContext(DragContext);
 
   const document = userDocument?.local || userDocument?.cloud;
   const isDirectory = document?.type === DocumentType.DIRECTORY;
@@ -57,10 +59,12 @@ const DraggableDocumentCard: React.FC<DraggableDocumentCardProps> = ({
 
     e.dataTransfer.effectAllowed = "move";
     setIsDragging(true);
+    setGlobalDragging(true);
   };
 
   const handleDragEnd = () => {
     setIsDragging(false);
+    setGlobalDragging(false);
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
