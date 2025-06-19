@@ -53,11 +53,11 @@ interface StatusChipProps {
   isPrivate?: boolean;
   hasSortOrder?: boolean;
   sortOrderValue?: number;
-  
+
   /** Author information */
   author?: User | null;
   showAuthor?: boolean;
-  
+
   /** Chip customization */
   chipSize?: "small" | "medium";
   chipVariant?: "filled" | "outlined";
@@ -81,7 +81,7 @@ export const createChip = ({
   fontWeight,
   size = "small",
   variant = "outlined",
-  onClick
+  onClick,
 }: ChipProps) => (
   <Chip
     size={size}
@@ -96,7 +96,7 @@ export const createChip = ({
       ...(bgColor && { bgcolor: bgColor }),
       ...(textColor && { color: textColor }),
       ...(fontWeight && { fontWeight }),
-      ...sx
+      ...sx,
     }}
   />
 );
@@ -120,11 +120,11 @@ export const renderStatusChips = ({
   chipVariant = "outlined",
   sortChipStyles = {},
   defaultChipStyles = {},
-  statusChipCount
+  statusChipCount,
 }: StatusChipProps) => {
   // Array to hold all status chips
   const statusChips = [];
-  
+
   // Add status chips based on state
   if (isLocalOnly) {
     statusChips.push(
@@ -133,11 +133,11 @@ export const renderStatusChips = ({
         label: "Local",
         size: chipSize,
         variant: chipVariant,
-        ...defaultChipStyles
-      })
+        ...defaultChipStyles,
+      }),
     );
   }
-  
+
   if (isUploaded) {
     statusChips.push(
       createChip({
@@ -145,11 +145,11 @@ export const renderStatusChips = ({
         label: isUpToDate ? "Synced" : "Out of Sync",
         size: chipSize,
         variant: chipVariant,
-        ...defaultChipStyles
-      })
+        ...defaultChipStyles,
+      }),
     );
   }
-  
+
   if (isCloudOnly) {
     statusChips.push(
       createChip({
@@ -157,11 +157,11 @@ export const renderStatusChips = ({
         label: "Cloud",
         size: chipSize,
         variant: chipVariant,
-        ...defaultChipStyles
-      })
+        ...defaultChipStyles,
+      }),
     );
   }
-  
+
   if (isPublished) {
     statusChips.push(
       createChip({
@@ -169,11 +169,11 @@ export const renderStatusChips = ({
         label: "Published",
         size: chipSize,
         variant: chipVariant,
-        ...defaultChipStyles
-      })
+        ...defaultChipStyles,
+      }),
     );
   }
-  
+
   if (isCollab) {
     statusChips.push(
       createChip({
@@ -181,11 +181,11 @@ export const renderStatusChips = ({
         label: "Collab",
         size: chipSize,
         variant: chipVariant,
-        ...defaultChipStyles
-      })
+        ...defaultChipStyles,
+      }),
     );
   }
-  
+
   if (isPrivate) {
     statusChips.push(
       createChip({
@@ -193,16 +193,16 @@ export const renderStatusChips = ({
         label: "Private",
         size: chipSize,
         variant: chipVariant,
-        ...defaultChipStyles
-      })
+        ...defaultChipStyles,
+      }),
     );
   }
-  
+
   // Limit the number of status chips if specified
-  const displayedStatusChips = statusChipCount 
-    ? statusChips.slice(0, statusChipCount) 
+  const displayedStatusChips = statusChipCount
+    ? statusChips.slice(0, statusChipCount)
     : statusChips;
-  
+
   return (
     <>
       {displayedStatusChips.map((chip, index) => (
@@ -210,7 +210,7 @@ export const renderStatusChips = ({
           {chip}
         </React.Fragment>
       ))}
-      
+
       {/* Author chip */}
       {showAuthor && author && (
         <Chip
@@ -226,7 +226,7 @@ export const renderStatusChips = ({
           label={author.name ?? "Local User"}
         />
       )}
-      
+
       {/* Sort order chip */}
       {hasSortOrder && (
         createChip({
@@ -237,7 +237,7 @@ export const renderStatusChips = ({
           borderColor: "gray",
           textColor: "gray",
           fontWeight: "bold",
-          ...sortChipStyles
+          ...sortChipStyles,
         })
       )}
     </>
@@ -247,7 +247,11 @@ export const renderStatusChips = ({
 /**
  * Render loading skeleton chips for cards in loading state
  */
-export const renderSkeletonChips = (count = 2, sizes = [50, 70], chipProps = {}) => {
+export const renderSkeletonChips = (
+  count = 2,
+  sizes = [50, 70],
+  chipProps = {},
+) => {
   return (
     <>
       {Array.from({ length: count }).map((_, index) => (
@@ -255,7 +259,9 @@ export const renderSkeletonChips = (count = 2, sizes = [50, 70], chipProps = {})
           key={`skeleton-chip-${index}`}
           size="small"
           variant="outlined"
-          label={<Skeleton variant="text" width={sizes[index % sizes.length]} />}
+          label={
+            <Skeleton variant="text" width={sizes[index % sizes.length]} />
+          }
           {...chipProps}
         />
       ))}

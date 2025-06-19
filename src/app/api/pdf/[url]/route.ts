@@ -13,8 +13,8 @@ export async function GET(request: Request) {
     const browser = browserWSEndpoint
       ? await puppeteer.connect({ browserWSEndpoint })
       : await puppeteer.launch({
-          args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        });
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      });
     const page = await browser.newPage();
     await page.goto(url.toString(), { waitUntil: "networkidle0" });
     await page.waitForFunction("document.fonts.ready");
@@ -32,7 +32,7 @@ export async function GET(request: Request) {
     };
     const pdf = await page.pdf(options);
     await browser.close();
-    
+
     // Convert the PDF buffer to a format that Response can handle
     return new Response(pdf, {
       headers: {

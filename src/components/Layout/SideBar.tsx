@@ -242,7 +242,7 @@ const SideBar: React.FC = () => {
                       bgcolor: "action.selected",
                       "&:hover": {
                         bgcolor: "rgba(0, 0, 0, 0.15)",
-                      }
+                      },
                     },
                   }}
                 >
@@ -258,12 +258,14 @@ const SideBar: React.FC = () => {
                   >
                     {item.icon}
                   </ListItemIcon>
-                  {open && <ListItemText 
-                    primary={item.text} 
-                    primaryTypographyProps={{ 
-                      fontSize: "0.9rem" // Smaller text size
-                    }} 
-                  />}
+                  {open && (
+                    <ListItemText
+                      primary={item.text}
+                      primaryTypographyProps={{
+                        fontSize: "0.9rem", // Smaller text size
+                      }}
+                    />
+                  )}
                 </ListItemButton>
               </Tooltip>
             </ListItem>
@@ -274,12 +276,14 @@ const SideBar: React.FC = () => {
       <Divider sx={styles.divider} />
 
       {/* Middle section - File browser */}
-      <Box sx={{
-        ...styles.sectionBox,
-        flex: 1,
-        flexGrow: 1,
-        overflow: 'auto'
-      }}>
+      <Box
+        sx={{
+          ...styles.sectionBox,
+          flex: 1,
+          flexGrow: 1,
+          overflow: "auto",
+        }}
+      >
         <FileBrowser open={open} />
       </Box>
 
@@ -305,7 +309,7 @@ const SideBar: React.FC = () => {
                         bgcolor: "action.selected",
                         "&:hover": {
                           bgcolor: "rgba(0, 0, 0, 0.15)",
-                        }
+                        },
                       },
                     }}
                   >
@@ -346,7 +350,7 @@ const SideBar: React.FC = () => {
                         bgcolor: "action.selected",
                         "&:hover": {
                           bgcolor: "rgba(0, 0, 0, 0.15)",
-                        }
+                        },
                       },
                     }}
                   >

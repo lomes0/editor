@@ -1,26 +1,34 @@
 "use client";
 import { FC, useCallback } from "react";
-import { Button, Box, Tooltip } from "@mui/material";
-import { UploadFile, Storage } from "@mui/icons-material";
-import { useDispatch, actions, useSelector } from "@/store";
+import { Box, Button, Tooltip } from "@mui/material";
+import { Storage, UploadFile } from "@mui/icons-material";
+import { actions, useDispatch, useSelector } from "@/store";
 import { BackupDocument } from "@/types";
 import { v4 as uuid } from "uuid";
 import documentDB, { revisionDB } from "@/indexeddb";
 
 type ImportExportControlProps = {
-  handleFilesChange?: (files: FileList | File[] | null, createNewDirectory?: boolean) => Promise<void>;
+  handleFilesChange?: (
+    files: FileList | File[] | null,
+    createNewDirectory?: boolean,
+  ) => Promise<void>;
   backupFunction?: () => Promise<void>;
 };
 
-const ImportExportControl: FC<ImportExportControlProps> = ({ handleFilesChange, backupFunction }) => {
+const ImportExportControl: FC<ImportExportControlProps> = (
+  { handleFilesChange, backupFunction },
+) => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
 
-  const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (handleFilesChange) {
-      await handleFilesChange(e.target.files, true); // Pass true to indicate we want to import into a new directory
-    }
-  }, [handleFilesChange]);
+  const handleFileUpload = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (handleFilesChange) {
+        await handleFilesChange(e.target.files, true); // Pass true to indicate we want to import into a new directory
+      }
+    },
+    [handleFilesChange],
+  );
 
   const handleBackup = useCallback(async () => {
     if (backupFunction) {

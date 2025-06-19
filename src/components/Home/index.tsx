@@ -54,20 +54,26 @@ const Home: React.FC<{ staticDocuments: UserDocument[] }> = (
   const allDocuments = documents.length > 0 ? documents : staticDocuments;
 
   // File import handling
-  const handleFilesChange = async (files: FileList | File[] | null, createNewDirectory: boolean = false) => {
+  const handleFilesChange = async (
+    files: FileList | File[] | null,
+    createNewDirectory: boolean = false,
+  ) => {
     if (!files?.length) return;
-    
+
     let directoryId: string | null = null;
     let dirName = "New_Files";
-    
+
     // Create a new directory to hold imported files if requested
     if (createNewDirectory) {
       directoryId = uuid();
       const now = new Date();
-      const formattedDate = now.toLocaleDateString().replace(/\//g, '-');
-      const formattedTime = now.toLocaleTimeString().replace(/:/g, '-').replace(/ /g, '');
+      const formattedDate = now.toLocaleDateString().replace(/\//g, "-");
+      const formattedTime = now.toLocaleTimeString().replace(/:/g, "-").replace(
+        / /g,
+        "",
+      );
       dirName = `New_Files_${formattedDate}_${formattedTime}`;
-      
+
       dispatch(actions.createLocalDocument({
         id: directoryId,
         name: dirName,
@@ -88,93 +94,105 @@ const Home: React.FC<{ staticDocuments: UserDocument[] }> = (
         updatedAt: new Date().toISOString(),
         sort_order: 0,
       }));
-      
+
       dispatch(
         actions.announce({
           message: {
             title: `Creating '${dirName}' directory`,
             subtitle: "All imported files will be placed in this directory",
           },
-        })
+        }),
       );
     }
-    
-    for (const file of files) await loadFromFile(file, files.length === 1, directoryId);
-    
+
+    for (const file of files) {
+      await loadFromFile(file, files.length === 1, directoryId);
+    }
+
     // Show success notification after all files are imported
     if (createNewDirectory && files.length > 0) {
       dispatch(
         actions.announce({
           message: {
             title: "Import completed",
-            subtitle: `${files.length} file(s) imported into '${dirName}' directory`,
+            subtitle:
+              `${files.length} file(s) imported into '${dirName}' directory`,
           },
-        })
+        }),
       );
-      
+
       // If user is logged in, save all imported files to cloud
       if (user) {
         // Start progress indicator
         NProgress.start();
-        
+
         dispatch(
           actions.announce({
             message: {
               title: "Saving to cloud",
               subtitle: "Uploading imported files to cloud storage...",
             },
-          })
+          }),
         );
-        
+
         try {
           // Save the directory to cloud first
           let successCount = 0;
           if (directoryId) {
             const success = await saveDocumentToCloud(directoryId);
             if (success) successCount++;
-            
+
             // Get all documents with this directory as parent and save them to cloud
             const allDocs = await documentDB.getAll();
-            const childDocs = allDocs.filter(doc => doc.parentId === directoryId);
-            
+            const childDocs = allDocs.filter((doc) =>
+              doc.parentId === directoryId
+            );
+
             for (const doc of childDocs) {
               const success = await saveDocumentToCloud(doc.id);
               if (success) successCount++;
               // Add a small delay between uploads to prevent overwhelming the server
-              await new Promise(resolve => setTimeout(resolve, 300));
+              await new Promise((resolve) => setTimeout(resolve, 300));
             }
-            
+
             // Complete progress indicator
             NProgress.done();
-            
+
             dispatch(
               actions.announce({
                 message: {
                   title: "Cloud save completed",
-                  subtitle: `Uploaded '${dirName}' directory and ${successCount - 1} file(s) to cloud storage`,
+                  subtitle: `Uploaded '${dirName}' directory and ${
+                    successCount - 1
+                  } file(s) to cloud storage`,
                 },
-              })
+              }),
             );
           }
         } catch (error) {
           console.error("Error during cloud save:", error);
           // Stop progress indicator on error
           NProgress.done();
-          
+
           dispatch(
             actions.announce({
               message: {
                 title: "Cloud save incomplete",
-                subtitle: "Some items may not have been saved to the cloud. Please try again later.",
+                subtitle:
+                  "Some items may not have been saved to the cloud. Please try again later.",
               },
-            })
+            }),
           );
         }
       }
     }
   };
 
-  async function loadFromFile(file: File, shouldNavigate?: boolean, directoryId?: string | null) {
+  async function loadFromFile(
+    file: File,
+    shouldNavigate?: boolean,
+    directoryId?: string | null,
+  ) {
     const reader = new FileReader();
     reader.readAsText(file);
     await new Promise<void>((resolve) => {
@@ -227,12 +245,12 @@ const Home: React.FC<{ staticDocuments: UserDocument[] }> = (
         ...revisions,
       ];
     }
-    
+
     // Set the parentId if a directory was created
     if (directoryId) {
       document.parentId = directoryId;
     }
-    
+
     if (documents.find((d) => d.id === document.id && d.local)) {
       const alert = {
         title: `Document already exists`,
@@ -259,19 +277,19 @@ const Home: React.FC<{ staticDocuments: UserDocument[] }> = (
   // Function to save a document to the cloud
   async function saveDocumentToCloud(documentId: string) {
     if (!user) return false;
-    
+
     try {
       const document = await documentDB.getByID(documentId);
       if (!document) return false;
-      
+
       // Get all revisions for the document
       const revisions = await revisionDB.getManyByKey("documentId", documentId);
-      
+
       // If the head revision is not in the revisions, create it
       const isHeadLocalRevision = revisions.some(
-        (revision) => revision.id === document.head
+        (revision) => revision.id === document.head,
       );
-      
+
       if (!isHeadLocalRevision) {
         const headRevision = {
           id: document.head,
@@ -281,10 +299,10 @@ const Home: React.FC<{ staticDocuments: UserDocument[] }> = (
         };
         await dispatch(actions.createLocalRevision(headRevision));
       }
-      
+
       // Create the document in the cloud
       const result = await dispatch(actions.createCloudDocument(document));
-      
+
       // Verify the cloud upload was successful
       return result.type === actions.createCloudDocument.fulfilled.type;
     } catch (error) {
@@ -472,16 +490,18 @@ const Home: React.FC<{ staticDocuments: UserDocument[] }> = (
             sx={{ maxWidth: "100%" }}
           />
         </Box>
-        <Box sx={{ 
-          display: "flex", 
-          flexDirection: { xs: "column", sm: "row" },
-          gap: 2,
-          minWidth: { xs: "100%", sm: "auto" } 
-        }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            gap: 2,
+            minWidth: { xs: "100%", sm: "auto" },
+          }}
+        >
           <DocumentSortControl value={sortValue} setValue={setSortValue} />
-          <ImportExportControl 
+          <ImportExportControl
             handleFilesChange={handleFilesChange}
-            backupFunction={backup} 
+            backupFunction={backup}
           />
         </Box>
       </Box>

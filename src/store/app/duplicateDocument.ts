@@ -1,20 +1,20 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { v4 as uuid } from "uuid";
 import documentDB, { revisionDB } from "@/indexeddb";
-import { UserDocument, BackupDocument } from "@/types";
+import { BackupDocument, UserDocument } from "@/types";
 
 /**
  * Duplicates an existing document or directory
  */
 export const duplicateDocument = createAsyncThunk(
   "app/duplicateDocument",
-  async ({ 
-    id, 
-    newId, 
-    newName 
-  }: { 
-    id: string; 
-    newId: string; 
+  async ({
+    id,
+    newId,
+    newName,
+  }: {
+    id: string;
+    newId: string;
     newName: string;
   }, { rejectWithValue }) => {
     try {
@@ -54,5 +54,5 @@ export const duplicateDocument = createAsyncThunk(
     } catch (error) {
       return rejectWithValue("Failed to duplicate document");
     }
-  }
+  },
 );

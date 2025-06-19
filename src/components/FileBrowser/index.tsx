@@ -22,7 +22,7 @@ import {
 } from "@mui/icons-material";
 import { DocumentType, UserDocument } from "@/types";
 import ContextMenu from "./ContextMenu";
-import documentDB, { revisionDB } from '@/indexeddb';
+import documentDB, { revisionDB } from "@/indexeddb";
 
 interface FileBrowserProps {
   open: boolean; // Whether sidebar is expanded
@@ -46,14 +46,16 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
   const [currentDirectory, setCurrentDirectory] = useState<string | null>(
     null,
   );
-  
+
   // Context menu state
-  const [contextMenu, setContextMenu] = useState<{
-    mouseX: number;
-    mouseY: number;
-    item: TreeItem | null;
-  } | null>(null);
-  
+  const [contextMenu, setContextMenu] = useState<
+    {
+      mouseX: number;
+      mouseY: number;
+      item: TreeItem | null;
+    } | null
+  >(null);
+
   // In-place editing state
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState<string>("");
@@ -231,87 +233,97 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
       router.push(`/view/${item.id}`);
     }
   };
-  
+
   // Context menu handlers
   const handleContextMenu = (event: React.MouseEvent, item: TreeItem) => {
     event.preventDefault();
     event.stopPropagation();
-    
+
     console.log("Opening context menu for item:", item);
-    
+
     setContextMenu({
       mouseX: event.clientX,
       mouseY: event.clientY,
-      item: item
+      item: item,
     });
   };
-  
+
   const handleCloseContextMenu = () => {
     setContextMenu(null);
   };
-  
+
   // Handle starting in-place editing for an item
-  const startEditing = (item: { id: string; name: string; type: DocumentType }, event: React.MouseEvent) => {
+  const startEditing = (
+    item: { id: string; name: string; type: DocumentType },
+    event: React.MouseEvent,
+  ) => {
     event.stopPropagation();
     setEditingItemId(item.id);
     setEditingText(item.name);
     handleCloseContextMenu();
   };
-  
+
   // Handle the edit input change
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEditingText(e.target.value);
   };
-  
+
   // Handle canceling the edit
   const cancelEditing = () => {
     setEditingItemId(null);
     setEditingText("");
   };
-  
+
   // Track if we've already submitted the edit to prevent double submission
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  
+
   // Handle submitting the edit
   const submitEditing = async () => {
     // Prevent double submission
     if (isSubmitting) return;
-    
+
     if (editingItemId && editingText.trim() !== "") {
       // Check if the name has actually changed
-      const editingItem = treeData.flat(Infinity).find((item: any) => item.id === editingItemId);
+      const editingItem = treeData.flat(Infinity).find((item: any) =>
+        item.id === editingItemId
+      );
       const originalName = editingItem?.name || "";
-      
+
       // If name hasn't changed, just cancel editing without reload
       if (editingText.trim() === originalName) {
         cancelEditing();
         return;
       }
-      
+
       setIsSubmitting(true);
-      
+
       try {
         // Find the item being edited
-        const itemToEdit = documents.find(doc => doc.id === editingItemId);
+        const itemToEdit = documents.find((doc) => doc.id === editingItemId);
         if (!itemToEdit) {
           setIsSubmitting(false);
           cancelEditing();
           return;
         }
-        
-        console.log("Renaming document/folder:", editingItemId, "to:", editingText.trim());
-        
+
+        console.log(
+          "Renaming document/folder:",
+          editingItemId,
+          "to:",
+          editingText.trim(),
+        );
+
         // 1. Redux approach
         console.log("Attempting to rename document with ID:", editingItemId);
         await dispatch(
           actions.updateLocalDocument({
             id: editingItemId,
             partial: {
-              name: editingText.trim()
-            }
-          })
+              name: editingText.trim(),
+            },
+          }),
         );
-        
+
         // 2. Direct IndexedDB approach as fallback
         try {
           const originalDoc = await documentDB.getByID(editingItemId);
@@ -321,14 +333,14 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
               name: editingText.trim(),
               updatedAt: new Date().toISOString(),
             };
-            
+
             await documentDB.update(updatedDoc);
             console.log("Document renamed in IndexedDB:", updatedDoc);
           }
         } catch (dbError) {
           console.error("Direct IndexedDB update failed:", dbError);
         }
-        
+
         // Show confirmation notification
         dispatch(
           actions.announce({
@@ -336,12 +348,12 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
               title: `Renamed successfully`,
               subtitle: `Item renamed to "${editingText.trim()}"`,
             },
-          })
+          }),
         );
-        
+
         // Cancel the editing state before reload
         cancelEditing();
-        
+
         // Use setTimeout to ensure state updates happen before reload
         setTimeout(() => {
           // Reload the current page to refresh the file list
@@ -355,7 +367,7 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
               title: `Failed to rename`,
               subtitle: `Error occurred when trying to rename item`,
             },
-          })
+          }),
         );
         setIsSubmitting(false);
         cancelEditing();
@@ -388,7 +400,7 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
               startEditing({
                 id: item.id,
                 name: item.name,
-                type: item.type
+                type: item.type,
               }, e);
             }}
             onContextMenu={(e) => handleContextMenu(e, item)}
@@ -419,64 +431,66 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
 
             {open && (
               <>
-                {editingItemId === item.id ? (
-                  <TextField
-                    value={editingText}
-                    onChange={handleEditChange}
-                    autoFocus
-                    size="small"
-                    variant="standard"
-                    margin="dense"
-                    fullWidth
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                    }}
-                    onKeyDown={(e) => {
-                      e.stopPropagation();
-                      if (e.key === 'Enter') {
+                {editingItemId === item.id
+                  ? (
+                    <TextField
+                      value={editingText}
+                      onChange={handleEditChange}
+                      autoFocus
+                      size="small"
+                      variant="standard"
+                      margin="dense"
+                      fullWidth
+                      onClick={(e) => {
+                        e.stopPropagation();
                         e.preventDefault();
-                        submitEditing();
-                      } else if (e.key === 'Escape') {
-                        e.preventDefault();
-                        cancelEditing();
-                      }
-                    }}
-                    // Use onBlur with a small delay to prevent conflicts with button clicks
-                    onBlur={(e) => {
-                      // Small timeout to allow clicking other elements
-                      setTimeout(() => {
-                        if (editingItemId === item.id) {
+                      }}
+                      onKeyDown={(e) => {
+                        e.stopPropagation();
+                        if (e.key === "Enter") {
+                          e.preventDefault();
                           submitEditing();
+                        } else if (e.key === "Escape") {
+                          e.preventDefault();
+                          cancelEditing();
                         }
-                      }, 100);
-                    }}
-                    sx={{
-                      '& .MuiInputBase-input': {
+                      }}
+                      // Use onBlur with a small delay to prevent conflicts with button clicks
+                      onBlur={(e) => {
+                        // Small timeout to allow clicking other elements
+                        setTimeout(() => {
+                          if (editingItemId === item.id) {
+                            submitEditing();
+                          }
+                        }, 100);
+                      }}
+                      sx={{
+                        "& .MuiInputBase-input": {
+                          fontSize: 14,
+                          py: 0.5,
+                        },
+                        width: "90%",
+                        mr: 1,
+                      }}
+                      InputProps={{
+                        disableUnderline: false,
+                      }}
+                    />
+                  )
+                  : (
+                    <ListItemText
+                      primary={item.name}
+                      primaryTypographyProps={{
+                        noWrap: true,
                         fontSize: 14,
-                        py: 0.5,
-                      },
-                      width: '90%',
-                      mr: 1,
-                    }}
-                    InputProps={{
-                      disableUnderline: false,
-                    }}
-                  />
-                ) : (
-                  <ListItemText
-                    primary={item.name}
-                    primaryTypographyProps={{
-                      noWrap: true,
-                      fontSize: 14,
-                      fontWeight: (isCurrentDirectory ||
-                          isCurrentDocument)
-                        ? "medium"
-                        : "normal",
-                      color: "text.primary", // Keep default text color for all items
-                    }}
-                  />
-                )}
+                        fontWeight: (isCurrentDirectory ||
+                            isCurrentDocument)
+                          ? "medium"
+                          : "normal",
+                        color: "text.primary", // Keep default text color for all items
+                      }}
+                    />
+                  )}
 
                 {isDirectory && (
                   <Box sx={{ color: "text.secondary" }}>
@@ -533,19 +547,21 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
             </Box>
           )}
       </List>
-      
+
       {/* Context Menu */}
       <ContextMenu
         open={Boolean(contextMenu)}
-        anchorPosition={
-          contextMenu ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : null
-        }
+        anchorPosition={contextMenu
+          ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
+          : null}
         handleClose={handleCloseContextMenu}
-        item={contextMenu?.item ? {
-          id: contextMenu.item.id,
-          name: contextMenu.item.name,
-          type: contextMenu.item.type
-        } : null}
+        item={contextMenu?.item
+          ? {
+            id: contextMenu.item.id,
+            name: contextMenu.item.name,
+            type: contextMenu.item.type,
+          }
+          : null}
         onStartEditing={startEditing}
       />
     </>

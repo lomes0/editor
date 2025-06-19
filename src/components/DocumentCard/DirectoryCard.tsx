@@ -2,18 +2,8 @@
 import * as React from "react";
 import { memo } from "react";
 import { SxProps, Theme } from "@mui/material/styles";
-import {
-  Avatar,
-  Badge,
-  Box,
-  IconButton,
-  Skeleton,
-} from "@mui/material";
-import {
-  Folder,
-  MoreVert,
-  Share,
-} from "@mui/icons-material";
+import { Avatar, Badge, Box, IconButton, Skeleton } from "@mui/material";
+import { Folder, MoreVert, Share } from "@mui/icons-material";
 import { User, UserDocument } from "@/types";
 import DocumentActionMenu from "./DocumentActionMenu";
 import CardBase from "./CardBase";
@@ -46,11 +36,11 @@ interface DirectoryCardProps {
 /**
  * Directory card component representing a folder of documents
  */
-const DirectoryCard: React.FC<DirectoryCardProps> = memo(({ 
-  userDocument, 
-  user, 
+const DirectoryCard: React.FC<DirectoryCardProps> = memo(({
+  userDocument,
+  user,
   sx,
-  cardConfig = {}
+  cardConfig = {},
 }) => {
   // Apply default configuration with overrides
   const config = {
@@ -58,7 +48,7 @@ const DirectoryCard: React.FC<DirectoryCardProps> = memo(({
     showAuthor: cardConfig.showAuthor !== false,
     maxStatusChips: cardConfig.maxStatusChips,
     showSortOrder: cardConfig.showSortOrder !== false,
-    showPermissionChips: cardConfig.showPermissionChips !== false
+    showPermissionChips: cardConfig.showPermissionChips !== false,
   };
 
   // Document state calculations
@@ -72,9 +62,12 @@ const DirectoryCard: React.FC<DirectoryCardProps> = memo(({
   const isUpToDate = isUploaded && localDocument?.head === cloudDocument?.head;
 
   // Document permissions and status
-  const isPublished = isCloud && cloudDocument?.published && config.showPermissionChips;
-  const isCollab = isCloud && cloudDocument?.collab && config.showPermissionChips;
-  const isPrivate = isCloud && cloudDocument?.private && config.showPermissionChips;
+  const isPublished = isCloud && cloudDocument?.published &&
+    config.showPermissionChips;
+  const isCollab = isCloud && cloudDocument?.collab &&
+    config.showPermissionChips;
+  const isPrivate = isCloud && cloudDocument?.private &&
+    config.showPermissionChips;
   const isAuthor = isCloud ? cloudDocument?.author?.id === user?.id : true;
   const isCoauthor = isCloud
     ? cloudDocument?.coauthors?.some((u) => u.id === user?.id)
@@ -82,15 +75,16 @@ const DirectoryCard: React.FC<DirectoryCardProps> = memo(({
 
   // Get the document to display (prefer local if available)
   const document = isCloudOnly ? cloudDocument : localDocument;
-  
+
   // Navigation and metadata
   const handle = cloudDocument?.handle ?? localDocument?.handle ?? document?.id;
   const href = document ? `/browse/${handle}` : "/";
   const author = cloudDocument?.author ?? user;
   const backgroundImage = document?.background_image;
-  
+
   // Sort order for display
-  const sortOrderValue = localDocument?.sort_order ?? cloudDocument?.sort_order ?? 0;
+  const sortOrderValue = localDocument?.sort_order ??
+    cloudDocument?.sort_order ?? 0;
   const hasSortOrder = sortOrderValue > 0 && config.showSortOrder;
 
   // Rendering helpers
@@ -100,26 +94,26 @@ const DirectoryCard: React.FC<DirectoryCardProps> = memo(({
   const topContent = (
     <Box
       sx={{
-      width: "100%",
-      height: "100%", // This ensures the box takes up all available height
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      background: backgroundImage ? `url(${backgroundImage})` : undefined,
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-      backgroundRepeat: "no-repeat",
-      position: "absolute", // Position absolute to fill the entire container
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      overflow: "hidden",
-      // Remove the fixed minHeight - let it fill the parent container
+        width: "100%",
+        height: "100%", // This ensures the box takes up all available height
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: backgroundImage ? `url(${backgroundImage})` : undefined,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        position: "absolute", // Position absolute to fill the entire container
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        overflow: "hidden",
+        // Remove the fixed minHeight - let it fill the parent container
       }}
     >
       {!backgroundImage && (
-        <Box 
+        <Box
           sx={{
             width: "100%",
             height: "100%",
@@ -127,7 +121,7 @@ const DirectoryCard: React.FC<DirectoryCardProps> = memo(({
             alignItems: "center",
             justifyContent: "center",
             position: "relative",
-            zIndex: 1
+            zIndex: 1,
           }}
         >
           <Badge badgeContent={0} color="secondary">
@@ -149,50 +143,52 @@ const DirectoryCard: React.FC<DirectoryCardProps> = memo(({
   );
 
   // Chip content based on document status
-  const chipContent = isLoading
-    ? renderSkeletonChips()
-    : renderStatusChips({
-        isLocalOnly,
-        isUploaded,
-        isUpToDate,
-        isCloudOnly: isCloudOnly && (isAuthor || isCoauthor),
-        isPublished,
-        isCollab,
-        isPrivate,
-        hasSortOrder,
-        sortOrderValue,
-        author,
-        showAuthor: config.showAuthor,
-        statusChipCount: config.maxStatusChips
-      });
+  const chipContent = isLoading ? renderSkeletonChips() : renderStatusChips({
+    isLocalOnly,
+    isUploaded,
+    isUpToDate,
+    isCloudOnly: isCloudOnly && (isAuthor || isCoauthor),
+    isPublished,
+    isCollab,
+    isPrivate,
+    hasSortOrder,
+    sortOrderValue,
+    author,
+    showAuthor: config.showAuthor,
+    statusChipCount: config.maxStatusChips,
+  });
 
   // Action buttons
-  const actionContent = isLoading ? (
-    <>
-      <IconButton
-        aria-label="Share Directory"
-        size="small"
-        disabled
-      >
-        <Share />
-      </IconButton>
-      <IconButton
-        aria-label="Directory Actions"
-        size="small"
-        disabled
-      >
-        <MoreVert />
-      </IconButton>
-    </>
-  ) : (
-    <DocumentActionMenu
-      userDocument={userDocument}
-      user={user}
-    />
-  );
+  const actionContent = isLoading
+    ? (
+      <>
+        <IconButton
+          aria-label="Share Directory"
+          size="small"
+          disabled
+        >
+          <Share />
+        </IconButton>
+        <IconButton
+          aria-label="Directory Actions"
+          size="small"
+          disabled
+        >
+          <MoreVert />
+        </IconButton>
+      </>
+    )
+    : (
+      <DocumentActionMenu
+        userDocument={userDocument}
+        user={user}
+      />
+    );
 
   // Title content
-  const titleContent = document ? document.name : <Skeleton variant="text" width={190} />;
+  const titleContent = document
+    ? document.name
+    : <Skeleton variant="text" width={190} />;
 
   return (
     <CardBase
@@ -204,20 +200,22 @@ const DirectoryCard: React.FC<DirectoryCardProps> = memo(({
       actionContent={actionContent}
       minHeight={config.minHeight}
       className="directory-card"
-      ariaLabel={document ? `Open ${document.name} directory` : "Loading directory"}
+      ariaLabel={document
+        ? `Open ${document.name} directory`
+        : "Loading directory"}
       sx={sx}
       contentProps={{
         titlePadding: {
           top: cardTheme.spacing.titleMargin,
-          bottom: cardTheme.spacing.titleMargin
+          bottom: cardTheme.spacing.titleMargin,
         },
-        showSubheaderSpace: true
+        showSubheaderSpace: true,
       }}
     />
   );
 });
 
 // Set display name for debugging purposes
-DirectoryCard.displayName = 'DirectoryCard';
+DirectoryCard.displayName = "DirectoryCard";
 
 export default DirectoryCard;

@@ -7,8 +7,8 @@ import {
   Card,
   CardActionArea,
   CardContent,
-  Typography,
   Skeleton,
+  Typography,
 } from "@mui/material";
 import Link from "next/link";
 import { cardTheme } from "./theme";
@@ -112,7 +112,9 @@ const CardBase: React.FC<CardBaseProps> = ({
     topSectionHeight = cardTheme.contentRatio.top,
     bottomSectionHeight = cardTheme.contentRatio.bottom,
     // Calculate the min-height of the top section based on the card's minHeight
-    topSectionMinHeight = `calc(${minHeight} * ${parseFloat(topSectionHeight) / 100})`;
+    topSectionMinHeight = `calc(${minHeight} * ${
+      parseFloat(topSectionHeight) / 100
+    })`;
 
   return (
     <Card
@@ -169,7 +171,8 @@ const CardBase: React.FC<CardBaseProps> = ({
           right: 0,
           bottom: height,
           zIndex: 1,
-          borderRadius: `${cardTheme.borderRadius}px ${cardTheme.borderRadius}px 0 0`,
+          borderRadius:
+            `${cardTheme.borderRadius}px ${cardTheme.borderRadius}px 0 0`,
           "&:hover": {
             backgroundColor: "transparent",
           },
@@ -221,11 +224,9 @@ const CardBase: React.FC<CardBaseProps> = ({
               {title}
             </Typography>
             {showSubheaderSpace &&
-              (isLoading ? (
-                <Skeleton variant="text" width={150} />
-              ) : (
-                <Box sx={{ height: subheaderSpaceHeight }} />
-              ))}
+              (isLoading
+                ? <Skeleton variant="text" width={150} />
+                : <Box sx={{ height: subheaderSpaceHeight }} />)}
           </Box>
         </CardContent>
 

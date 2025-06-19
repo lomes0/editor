@@ -2,15 +2,8 @@
 import * as React from "react";
 import { memo, Suspense } from "react";
 import { SxProps, Theme } from "@mui/material/styles";
-import {
-  Badge,
-  IconButton,
-  Skeleton,
-} from "@mui/material";
-import {
-  MoreVert,
-  Share,
-} from "@mui/icons-material";
+import { Badge, IconButton, Skeleton } from "@mui/material";
+import { MoreVert, Share } from "@mui/icons-material";
 import { User, UserDocument } from "@/types";
 import DocumentActionMenu from "./DocumentActionMenu";
 import DocumentThumbnail from "./DocumentThumbnail";
@@ -45,11 +38,11 @@ interface DocumentCardProps {
 /**
  * Document card component representing a document in the system
  */
-const DocumentCard: React.FC<DocumentCardProps> = memo(({ 
-  userDocument, 
-  user, 
+const DocumentCard: React.FC<DocumentCardProps> = memo(({
+  userDocument,
+  user,
   sx,
-  cardConfig = {}
+  cardConfig = {},
 }) => {
   // Apply default configuration with overrides
   const config = {
@@ -57,7 +50,7 @@ const DocumentCard: React.FC<DocumentCardProps> = memo(({
     showAuthor: cardConfig.showAuthor !== false,
     maxStatusChips: cardConfig.maxStatusChips,
     showSortOrder: cardConfig.showSortOrder !== false,
-    showPermissionChips: cardConfig.showPermissionChips !== false
+    showPermissionChips: cardConfig.showPermissionChips !== false,
   };
 
   // Document state calculations
@@ -69,11 +62,14 @@ const DocumentCard: React.FC<DocumentCardProps> = memo(({
   const isCloudOnly = !isLocal && isCloud;
   const isUploaded = isLocal && isCloud;
   const isUpToDate = isUploaded && localDocument?.head === cloudDocument?.head;
-  
+
   // Document permissions and status
-  const isPublished = isCloud && cloudDocument?.published && config.showPermissionChips;
-  const isCollab = isCloud && cloudDocument?.collab && config.showPermissionChips;
-  const isPrivate = isCloud && cloudDocument?.private && config.showPermissionChips;
+  const isPublished = isCloud && cloudDocument?.published &&
+    config.showPermissionChips;
+  const isCollab = isCloud && cloudDocument?.collab &&
+    config.showPermissionChips;
+  const isPrivate = isCloud && cloudDocument?.private &&
+    config.showPermissionChips;
   const isAuthor = isCloud ? cloudDocument?.author?.id === user?.id : true;
   const isCoauthor = isCloud
     ? cloudDocument?.coauthors?.some((u) => u.id === user?.id)
@@ -81,14 +77,15 @@ const DocumentCard: React.FC<DocumentCardProps> = memo(({
 
   // Get the document to display (prefer local if available)
   const document = isCloudOnly ? cloudDocument : localDocument;
-  
+
   // Navigation and metadata
   const handle = cloudDocument?.handle ?? localDocument?.handle ?? document?.id;
   const href = document ? `/view/${handle}` : "/";
   const author = cloudDocument?.author ?? user;
-  
+
   // Sort order for display
-  const sortOrderValue = localDocument?.sort_order ?? cloudDocument?.sort_order ?? 0;
+  const sortOrderValue = localDocument?.sort_order ??
+    cloudDocument?.sort_order ?? 0;
   const hasSortOrder = sortOrderValue > 0 && config.showSortOrder;
 
   // Determine the badge content (if any)
@@ -107,50 +104,52 @@ const DocumentCard: React.FC<DocumentCardProps> = memo(({
   );
 
   // Chip content based on document status
-  const chipContent = isLoading
-    ? renderSkeletonChips()
-    : renderStatusChips({
-        isLocalOnly,
-        isUploaded,
-        isUpToDate,
-        isCloudOnly: isCloudOnly && (isAuthor || isCoauthor),
-        isPublished,
-        isCollab,
-        isPrivate,
-        hasSortOrder,
-        sortOrderValue,
-        author,
-        showAuthor: config.showAuthor,
-        statusChipCount: config.maxStatusChips
-      });
+  const chipContent = isLoading ? renderSkeletonChips() : renderStatusChips({
+    isLocalOnly,
+    isUploaded,
+    isUpToDate,
+    isCloudOnly: isCloudOnly && (isAuthor || isCoauthor),
+    isPublished,
+    isCollab,
+    isPrivate,
+    hasSortOrder,
+    sortOrderValue,
+    author,
+    showAuthor: config.showAuthor,
+    statusChipCount: config.maxStatusChips,
+  });
 
   // Action buttons
-  const actionContent = isLoading ? (
-    <>
-      <IconButton
-        aria-label="Share Document"
-        size="small"
-        disabled
-      >
-        <Share />
-      </IconButton>
-      <IconButton
-        aria-label="Document Actions"
-        size="small"
-        disabled
-      >
-        <MoreVert />
-      </IconButton>
-    </>
-  ) : (
-    <DocumentActionMenu
-      userDocument={userDocument}
-      user={user}
-    />
-  );
+  const actionContent = isLoading
+    ? (
+      <>
+        <IconButton
+          aria-label="Share Document"
+          size="small"
+          disabled
+        >
+          <Share />
+        </IconButton>
+        <IconButton
+          aria-label="Document Actions"
+          size="small"
+          disabled
+        >
+          <MoreVert />
+        </IconButton>
+      </>
+    )
+    : (
+      <DocumentActionMenu
+        userDocument={userDocument}
+        user={user}
+      />
+    );
 
   // Title content
-  const titleContent = document ? document.name : <Skeleton variant="text" width={190} />;
+  const titleContent = document
+    ? document.name
+    : <Skeleton variant="text" width={190} />;
 
   return (
     <CardBase
@@ -162,20 +161,22 @@ const DocumentCard: React.FC<DocumentCardProps> = memo(({
       actionContent={actionContent}
       minHeight={config.minHeight}
       className="document-card"
-      ariaLabel={document ? `Open ${document.name} document` : "Loading document"}
+      ariaLabel={document
+        ? `Open ${document.name} document`
+        : "Loading document"}
       sx={sx}
       contentProps={{
         titlePadding: {
           top: cardTheme.spacing.titleMargin,
-          bottom: cardTheme.spacing.titleMargin
+          bottom: cardTheme.spacing.titleMargin,
         },
-        showSubheaderSpace: true
+        showSubheaderSpace: true,
       }}
     />
   );
 });
 
 // Set display name for debugging purposes
-DocumentCard.displayName = 'DocumentCard';
+DocumentCard.displayName = "DocumentCard";
 
 export default DocumentCard;

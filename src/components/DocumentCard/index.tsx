@@ -11,9 +11,9 @@ const CardSelector: React.FC<
   { userDocument?: UserDocument; user?: User; sx?: SxProps<Theme> }
 > = memo(({ userDocument, user, sx = {} }) => {
   // Apply default size to all cards
-  const defaultSx = { 
+  const defaultSx = {
     width: "400px", // Make cards wider (increased from 360px)
-    ...sx 
+    ...sx,
   };
 
   // Early return for loading state
@@ -25,9 +25,13 @@ const CardSelector: React.FC<
   const isDirectory = document?.type === DocumentType.DIRECTORY;
 
   if (isDirectory) {
-    return <DirectoryCard userDocument={userDocument} user={user} sx={defaultSx} />;
+    return (
+      <DirectoryCard userDocument={userDocument} user={user} sx={defaultSx} />
+    );
   } else {
-    return <DocumentCard userDocument={userDocument} user={user} sx={defaultSx} />;
+    return (
+      <DocumentCard userDocument={userDocument} user={user} sx={defaultSx} />
+    );
   }
 });
 
