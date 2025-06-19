@@ -24,7 +24,7 @@ import {
 } from "@mui/icons-material";
 import { BackupDocument, DocumentType, UserDocument } from "@/types";
 import { actions, useDispatch, useSelector } from "@/store";
-import DocumentCard from "../DocumentCard/DocumentCard";
+import DraggableDocumentCard from "../DocumentCard/DraggableDocumentCard";
 import FilterControl from "../DocumentControls/FilterControl";
 import DocumentSortControl from "../DocumentControls/SortControl";
 import ImportExportControl from "../DocumentControls/ImportExportControl";
@@ -478,11 +478,11 @@ const Home: React.FC<{ staticDocuments: UserDocument[] }> = (
           gap: 2,
           minWidth: { xs: "100%", sm: "auto" } 
         }}>
+          <DocumentSortControl value={sortValue} setValue={setSortValue} />
           <ImportExportControl 
             handleFilesChange={handleFilesChange}
             backupFunction={backup} 
           />
-          <DocumentSortControl value={sortValue} setValue={setSortValue} />
         </Box>
       </Box>
 
@@ -503,9 +503,10 @@ const Home: React.FC<{ staticDocuments: UserDocument[] }> = (
                   lg: 3,
                 }}
               >
-                <DocumentCard
+                <DraggableDocumentCard
                   userDocument={document}
                   user={user}
+                  currentDirectoryId=""
                 />
               </Grid>
             ))}
