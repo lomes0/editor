@@ -3,93 +3,102 @@ import * as React from "react";
 import { memo, Suspense } from "react";
 import { SxProps, Theme } from "@mui/material/styles";
 import {
-  Avatar,
   Badge,
-  Box,
-  Card,
-  CardActionArea,
-  CardActions,
-  CardContent,
-  CardHeader,
-  Chip,
   IconButton,
   Skeleton,
-  Typography,
 } from "@mui/material";
 import {
-  Cloud,
-  CloudDone,
-  CloudSync,
-  MobileFriendly,
   MoreVert,
-  Public,
-  Security,
   Share,
-  Workspaces,
 } from "@mui/icons-material";
 import { User, UserDocument } from "@/types";
 import DocumentActionMenu from "./DocumentActionMenu";
 import DocumentThumbnail from "./DocumentThumbnail";
 import ThumbnailSkeleton from "./ThumbnailSkeleton";
-import { useHydration } from "@/hooks/useHydration";
-import RouterLink from "next/link";
+import CardBase from "./CardBase";
+import { renderSkeletonChips, renderStatusChips } from "./CardChips";
+import { cardTheme } from "./theme";
 
-const DocumentCard: React.FC<
-  { userDocument?: UserDocument; user?: User; sx?: SxProps<Theme> }
-> = memo(({ userDocument, user, sx }) => {
+// Define proper interface for component props
+interface DocumentCardProps {
+  /** The document data */
+  userDocument?: UserDocument;
+  /** The current user */
+  user?: User;
+  /** Additional styles to apply */
+  sx?: SxProps<Theme>;
+  /** Card configuration */
+  cardConfig?: {
+    /** Min height of the card */
+    minHeight?: string;
+    /** Whether to show the author chip */
+    showAuthor?: boolean;
+    /** Max number of status chips to display */
+    maxStatusChips?: number;
+    /** Whether to show the sort order chip */
+    showSortOrder?: boolean;
+    /** Whether to show permission chips (published, collab, private) */
+    showPermissionChips?: boolean;
+  };
+}
+
+/**
+ * Document card component representing a document in the system
+ */
+const DocumentCard: React.FC<DocumentCardProps> = memo(({ 
+  userDocument, 
+  user, 
+  sx,
+  cardConfig = {}
+}) => {
+  // Apply default configuration with overrides
+  const config = {
+    minHeight: cardConfig.minHeight || cardTheme.minHeight.document,
+    showAuthor: cardConfig.showAuthor !== false,
+    maxStatusChips: cardConfig.maxStatusChips,
+    showSortOrder: cardConfig.showSortOrder !== false,
+    showPermissionChips: cardConfig.showPermissionChips !== false
+  };
+
+  // Document state calculations
   const localDocument = userDocument?.local;
   const cloudDocument = userDocument?.cloud;
-  const isLocal = !!localDocument;
-  const isCloud = !!cloudDocument;
+  const isLocal = Boolean(localDocument);
+  const isCloud = Boolean(cloudDocument);
   const isLocalOnly = isLocal && !isCloud;
   const isCloudOnly = !isLocal && isCloud;
   const isUploaded = isLocal && isCloud;
-  const isUpToDate = isUploaded && localDocument.head === cloudDocument.head;
-  const isPublished = isCloud && cloudDocument.published;
-  const isCollab = isCloud && cloudDocument.collab;
-  const isPrivate = isCloud && cloudDocument.private;
-  const isAuthor = isCloud ? cloudDocument.author.id === user?.id : true;
+  const isUpToDate = isUploaded && localDocument?.head === cloudDocument?.head;
+  
+  // Document permissions and status
+  const isPublished = isCloud && cloudDocument?.published && config.showPermissionChips;
+  const isCollab = isCloud && cloudDocument?.collab && config.showPermissionChips;
+  const isPrivate = isCloud && cloudDocument?.private && config.showPermissionChips;
+  const isAuthor = isCloud ? cloudDocument?.author?.id === user?.id : true;
   const isCoauthor = isCloud
-    ? cloudDocument.coauthors.some((u) => u.id === user?.id)
+    ? cloudDocument?.coauthors?.some((u) => u.id === user?.id)
     : false;
 
-  // Check if document has a valid sort_order (> 0) to display the sort order chip
-  const sortOrderValue = localDocument?.sort_order ??
-    cloudDocument?.sort_order ?? 0;
-  const hasSortOrder = sortOrderValue > 0;
-
+  // Get the document to display (prefer local if available)
   const document = isCloudOnly ? cloudDocument : localDocument;
-  const handle = cloudDocument?.handle ?? localDocument?.handle ??
-    document?.id;
-  const isEditable = isAuthor || isCoauthor || isCollab;
+  
+  // Navigation and metadata
+  const handle = cloudDocument?.handle ?? localDocument?.handle ?? document?.id;
   const href = document ? `/view/${handle}` : "/";
-
   const author = cloudDocument?.author ?? user;
-  const hydrated = useHydration();
+  
+  // Sort order for display
+  const sortOrderValue = localDocument?.sort_order ?? cloudDocument?.sort_order ?? 0;
+  const hasSortOrder = sortOrderValue > 0 && config.showSortOrder;
 
-  const subheaderContent = document
-    ? <div style={{ height: "8px" }}></div>
-    : <Skeleton variant="text" width={150} />;
+  // Determine the badge content (if any)
+  const revisionsBadgeContent = 0; // This appears to be unused currently
 
-  const localDocumentRevisions = localDocument?.revisions ?? [];
-  const cloudDocumentRevisions = cloudDocument?.revisions ?? [];
-  const isHeadLocalRevision = localDocumentRevisions.some((r) =>
-    r.id === localDocument?.head
-  );
-  const isHeadCloudRevision = cloudDocumentRevisions.some((r) =>
-    r.id === localDocument?.head
-  );
-  const localOnlyRevisions = isUploaded
-    ? localDocumentRevisions.filter((r) =>
-      !cloudDocumentRevisions.some((cr) => cr.id === r.id)
-    )
-    : [];
-  const unsavedChanges = isUploaded && !isHeadLocalRevision &&
-    !isHeadCloudRevision;
+  // Rendering helpers
+  const isLoading = !userDocument;
 
-  let revisionsBadgeContent = 0;
-
-  const avatarContent = (
+  // Top content with document thumbnail
+  const topContent = (
     <Badge badgeContent={revisionsBadgeContent} color="secondary">
       <Suspense fallback={<ThumbnailSkeleton />}>
         <DocumentThumbnail userDocument={userDocument} />
@@ -97,376 +106,76 @@ const DocumentCard: React.FC<
     </Badge>
   );
 
-  const actionsContent = !userDocument
-    ? (
-      <>
-        <Chip
-          sx={{ width: 0, flex: 1, maxWidth: "fit-content" }}
-          label={<Skeleton variant="text" width={50} />}
-        />
-        <Chip
-          sx={{ width: 0, flex: 1, maxWidth: "fit-content" }}
-          label={<Skeleton variant="text" width={70} />}
-        />
-        <IconButton aria-label="Share Document" size="small" disabled>
-          <Share />
-        </IconButton>
-        <IconButton aria-label="Document Actions" size="small" disabled>
-          <MoreVert />
-        </IconButton>
-      </>
-    )
-    : (
-      <>
-        {isLocalOnly && (
-          <Chip
-            sx={{ width: 0, flex: 1, maxWidth: "fit-content" }}
-            icon={<MobileFriendly />}
-            label="Local"
-          />
-        )}
-        {isUploaded && (
-          <Chip
-            sx={{ width: 0, flex: 1, maxWidth: "fit-content" }}
-            icon={isUpToDate ? <CloudDone /> : <CloudSync />}
-            label={isUpToDate ? "Synced" : "Out of Sync"}
-          />
-        )}
-        {isCloudOnly && (isAuthor || isCoauthor) && (
-          <Chip
-            sx={{ width: 0, flex: 1, maxWidth: "fit-content" }}
-            icon={<Cloud />}
-            label="Cloud"
-          />
-        )}
-        {isPublished && (
-          <Chip
-            sx={{ width: 0, flex: 1, maxWidth: "fit-content" }}
-            icon={<Public />}
-            label="Published"
-          />
-        )}
-        {isCollab && (
-          <Chip
-            sx={{ width: 0, flex: 1, maxWidth: "fit-content" }}
-            icon={<Workspaces />}
-            label="Collab"
-          />
-        )}
-        {isPrivate && (
-          <Chip
-            sx={{ width: 0, flex: 1, maxWidth: "fit-content" }}
-            icon={<Security />}
-            label="Private"
-          />
-        )}
-        <Chip
-          sx={{
-            width: 0,
-            flex: 1,
-            maxWidth: "fit-content",
-            pointerEvents: "auto",
-          }}
-          avatar={document
-            ? (
-              <Avatar
-                alt={author?.name ?? "Local User"}
-                src={author?.image ?? undefined}
-              />
-            )
-            : (
-              <Skeleton
-                variant="circular"
-                width={24}
-                height={24}
-              />
-            )}
-          label={document
-            ? author?.name ?? "Local User"
-            : <Skeleton variant="text" width={100} />}
-        />
-        {userDocument && (
-          <DocumentActionMenu
-            userDocument={userDocument}
-            user={user}
-          />
-        )}
-      </>
-    );
+  // Chip content based on document status
+  const chipContent = isLoading
+    ? renderSkeletonChips()
+    : renderStatusChips({
+        isLocalOnly,
+        isUploaded,
+        isUpToDate,
+        isCloudOnly: isCloudOnly && (isAuthor || isCoauthor),
+        isPublished,
+        isCollab,
+        isPrivate,
+        hasSortOrder,
+        sortOrderValue,
+        author,
+        showAuthor: config.showAuthor,
+        statusChipCount: config.maxStatusChips
+      });
+
+  // Action buttons
+  const actionContent = isLoading ? (
+    <>
+      <IconButton
+        aria-label="Share Document"
+        size="small"
+        disabled
+      >
+        <Share />
+      </IconButton>
+      <IconButton
+        aria-label="Document Actions"
+        size="small"
+        disabled
+      >
+        <MoreVert />
+      </IconButton>
+    </>
+  ) : (
+    <DocumentActionMenu
+      userDocument={userDocument}
+      user={user}
+    />
+  );
+
+  // Title content
+  const titleContent = document ? document.name : <Skeleton variant="text" width={190} />;
 
   return (
-    <Card
-      variant="outlined"
+    <CardBase
+      title={titleContent}
+      href={href}
+      isLoading={isLoading}
+      topContent={topContent}
+      chipContent={chipContent}
+      actionContent={actionContent}
+      minHeight={config.minHeight}
       className="document-card"
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        height: "100%",
-        minHeight: "260px", // Reduced from 320px to make cards smaller
-        width: "100%", // Allow card to fill available width
-        position: "relative",
-        borderRadius: "12px",
-        borderColor: "divider",
-        transition: "all 0.2s ease-in-out",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-        "&:hover": {
-          boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
-          transform: "translateY(-4px)",
+      ariaLabel={document ? `Open ${document.name} document` : "Loading document"}
+      sx={sx}
+      contentProps={{
+        titlePadding: {
+          top: cardTheme.spacing.titleMargin,
+          bottom: cardTheme.spacing.titleMargin
         },
-        borderWidth: 1,
-        ...sx,
+        showSubheaderSpace: true
       }}
-    >
-      {/* Top section (60%): Document Thumbnail */}
-      <Box
-        sx={{
-          height: "60%", // Reduced from 65% to give more space to bottom section
-          minHeight: "156px", // Adjusted for smaller card (60% of 260px)
-          width: "100%", // Ensure thumbnails fill the full width
-          position: "relative",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          bgcolor: "background.paper",
-          borderBottom: "1px solid",
-          borderColor: "divider",
-        }}
-      >
-        <Badge badgeContent={revisionsBadgeContent} color="secondary">
-          <Suspense fallback={<ThumbnailSkeleton />}>
-            <DocumentThumbnail userDocument={userDocument} />
-          </Suspense>
-        </Badge>
-      </Box>
-
-      {/* Clickable area for the entire card except the action buttons */}
-      <CardActionArea
-        component={RouterLink}
-        prefetch={false}
-        href={href}
-        sx={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: "60px", // Updated to match the new height of the bottom section
-          zIndex: 1,
-          borderRadius: "12px 12px 0 0",
-          "&:hover": {
-            backgroundColor: "transparent", // Remove default hover background
-          },
-        }}
-      />
-
-      {/* Bottom section (40%): Document Info & Actions */}
-      <Box
-        sx={{
-          height: "40%", // Increased from 35% to give more space to bottom section
-          display: "flex",
-          flexDirection: "column",
-          position: "relative",
-          zIndex: 2,
-        }}
-      >
-        <CardContent sx={{ pt: 1, pb: 0, flexGrow: 1 }}>
-          <Typography
-            variant="h6"
-            component="div"
-            sx={{
-              fontWeight: 600,
-              mb: 0.1,
-              mt: 0.1, // Add top margin to push the title down
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              fontSize: "1rem", // Reduced to match DirectoryCard
-            }}
-          >
-            {document ? document.name : <Skeleton variant="text" width={190} />}
-          </Typography>
-          {subheaderContent}
-        </CardContent>
-
-        <Box
-          sx={{
-            px: 2,
-            py: 1,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            borderTop: "1px solid",
-            borderColor: "divider",
-            backgroundColor: "transparent",
-            zIndex: 3,
-            height: "60px", // Increased from 50px to give more room for chips
-            mt: "auto",
-            "& button:first-of-type": { ml: "auto !important" },
-            "& .MuiChip-root:last-of-type": { mr: 1 },
-            pointerEvents: "auto",
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              gap: 0.5,
-              flexWrap: "nowrap",
-              overflow: "hidden",
-              py: 0.0, // Add vertical padding to lift chips away from bottom
-            }}
-          >
-            {!userDocument
-              ? (
-                <>
-                  <Chip
-                    size="small"
-                    variant="outlined"
-                    label={
-                      <Skeleton
-                        variant="text"
-                        width={50}
-                      />
-                    }
-                  />
-                  <Chip
-                    size="small"
-                    variant="outlined"
-                    label={
-                      <Skeleton
-                        variant="text"
-                        width={70}
-                      />
-                    }
-                  />
-                </>
-              )
-              : (
-                <>
-                  {isLocalOnly && (
-                    <Chip
-                      size="small"
-                      variant="outlined"
-                      icon={<MobileFriendly />}
-                      label="Local"
-                    />
-                  )}
-                  {isUploaded && (
-                    <Chip
-                      size="small"
-                      variant="outlined"
-                      icon={isUpToDate ? <CloudDone /> : <CloudSync />}
-                      label={isUpToDate ? "Synced" : "Out of Sync"}
-                    />
-                  )}
-                  {isCloudOnly && (isAuthor || isCoauthor) &&
-                    (
-                      <Chip
-                        size="small"
-                        variant="outlined"
-                        icon={<Cloud />}
-                        label="Cloud"
-                      />
-                    )}
-                  {isPublished && (
-                    <Chip
-                      size="small"
-                      variant="outlined"
-                      icon={<Public />}
-                      label="Published"
-                    />
-                  )}
-                  {isCollab && (
-                    <Chip
-                      size="small"
-                      variant="outlined"
-                      icon={<Workspaces />}
-                      label="Collab"
-                    />
-                  )}
-                  {isPrivate && (
-                    <Chip
-                      size="small"
-                      variant="outlined"
-                      icon={<Security />}
-                      label="Private"
-                    />
-                  )}
-                  <Chip
-                    size="small"
-                    variant="outlined"
-                    sx={{ pointerEvents: "auto" }}
-                    avatar={document
-                      ? (
-                        <Avatar
-                          alt={author?.name ??
-                            "Local User"}
-                          src={author?.image ??
-                            undefined}
-                        />
-                      )
-                      : (
-                        <Skeleton
-                          variant="circular"
-                          width={24}
-                          height={24}
-                        />
-                      )}
-                    label={document ? author?.name ?? "Local User" : (
-                      <Skeleton
-                        variant="text"
-                        width={100}
-                      />
-                    )}
-                  />
-                  {/* Sort order indicator */}
-                  {hasSortOrder && (
-                    <Chip
-                      size="small"
-                      variant="outlined"
-                      label={`Sort: ${sortOrderValue}`}
-                      sx={{
-                        bgcolor: "rgba(0,0,0,0.05)",
-                        borderColor: "gray",
-                        color: "gray",
-                        fontWeight: "bold",
-                      }}
-                    />
-                  )}
-                </>
-              )}
-          </Box>
-
-          <Box sx={{ display: "flex", ml: "auto" }}>
-            {!userDocument
-              ? (
-                <>
-                  <IconButton
-                    aria-label="Share Document"
-                    size="small"
-                    disabled
-                  >
-                    <Share />
-                  </IconButton>
-                  <IconButton
-                    aria-label="Document Actions"
-                    size="small"
-                    disabled
-                  >
-                    <MoreVert />
-                  </IconButton>
-                </>
-              )
-              : (
-                <DocumentActionMenu
-                  userDocument={userDocument}
-                  user={user}
-                />
-              )}
-          </Box>
-        </Box>
-      </Box>
-    </Card>
+    />
   );
 });
+
+// Set display name for debugging purposes
+DocumentCard.displayName = 'DocumentCard';
 
 export default DocumentCard;
