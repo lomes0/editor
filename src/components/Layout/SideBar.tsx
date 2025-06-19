@@ -27,10 +27,7 @@ import {
   Folder,
   Help,
   Home,
-  Info,
   LibraryBooks,
-  Print,
-  Settings,
 } from "@mui/icons-material";
 import FileBrowser from "@/components/FileBrowser";
 import { styles } from "./styles";
@@ -51,21 +48,9 @@ const SideBar: React.FC = () => {
   // Determine if we're in edit mode to trigger autosave
   const isEditMode = pathname.startsWith("/edit/");
 
-  const showPrintButton = !!["/edit", "/view", "/playground"].find((path) =>
-    pathname.startsWith(path)
-  );
-  const showInfoButton = !!["/edit", "/view"].find((path) =>
-    pathname.startsWith(path)
-  );
   // Always show file browser for all routes
   const showFileBrowser = true;
 
-  const handlePrint = () => {
-    window.print();
-  };
-  const toggleDrawer = () => {
-    dispatch(actions.toggleDrawer());
-  };
   const toggleSidebar = () => {
     setOpen(!open);
   };
@@ -287,90 +272,7 @@ const SideBar: React.FC = () => {
         <FileBrowser open={open} />
       </Box>
 
-      {(showPrintButton || showInfoButton) && <Divider sx={styles.divider} />}
-
-      {/* Document actions section */}
-      {(showPrintButton || showInfoButton) && (
-        <Box sx={styles.sectionBox}>
-          <List>
-            {showPrintButton && (
-              <ListItem disablePadding sx={{ display: "block" }}>
-                <Tooltip
-                  title={open ? "" : "Print"}
-                  placement="right"
-                >
-                  <ListItemButton
-                    onClick={handlePrint}
-                    sx={{
-                      minHeight: 48,
-                      justifyContent: open ? "initial" : "center",
-                      px: 2.5,
-                      "&.Mui-selected": {
-                        bgcolor: "action.selected",
-                        "&:hover": {
-                          bgcolor: "rgba(0, 0, 0, 0.15)",
-                        },
-                      },
-                    }}
-                  >
-                    <ListItemIcon
-                      sx={{
-                        minWidth: 0,
-                        mr: open ? 2 : "auto",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Print />
-                    </ListItemIcon>
-                    {open && <ListItemText primary="Print" />}
-                  </ListItemButton>
-                </Tooltip>
-              </ListItem>
-            )}
-
-            {showInfoButton && (
-              <ListItem disablePadding sx={{ display: "block" }}>
-                <Tooltip
-                  title={open ? "" : "Document Info"}
-                  placement="right"
-                >
-                  <ListItemButton
-                    id="document-info"
-                    onClick={toggleDrawer}
-                    sx={{
-                      minHeight: 48,
-                      justifyContent: open ? "initial" : "center",
-                      px: 2.5,
-                      "& >.MuiBadge-root": {
-                        height: "1em",
-                        userSelect: "none",
-                        zIndex: -1,
-                      },
-                      "&.Mui-selected": {
-                        bgcolor: "action.selected",
-                        "&:hover": {
-                          bgcolor: "rgba(0, 0, 0, 0.15)",
-                        },
-                      },
-                    }}
-                  >
-                    <ListItemIcon
-                      sx={{
-                        minWidth: 0,
-                        mr: open ? 2 : "auto",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Info />
-                    </ListItemIcon>
-                    {open && <ListItemText primary="Document Info" />}
-                  </ListItemButton>
-                </Tooltip>
-              </ListItem>
-            )}
-          </List>
-        </Box>
-      )}
+      {/* Document actions section - Removed */}
 
       <Divider sx={styles.dividerBottom} />
 

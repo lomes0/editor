@@ -1,6 +1,8 @@
 "use client";
 import StoreProvider from "@/store/StoreProvider";
 import SideBar from "./SideBar";
+import InfoButton from "./InfoButton";
+import PrintButton from "./PrintButton";
 import ScrollTop from "./ScrollTop";
 import AlertDialog from "./Alert";
 import Announcer from "./Announcer";
@@ -77,6 +79,8 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
         <Footer />
         <AlertDialog />
         <Announcer />
+        <InfoButton />
+        <PrintButton />
       </StoreProvider>
     </>
   );
