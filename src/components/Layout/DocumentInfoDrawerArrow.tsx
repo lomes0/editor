@@ -100,10 +100,10 @@ const DocumentInfoDrawerArrow: React.FC = () => {
           transform: "translateY(-50%)",
           zIndex: 1200,
           cursor: "pointer",
-          height: 80,
-          width: 24,
-          borderTopLeftRadius: 8,
-          borderBottomLeftRadius: 8,
+          height: 40,  // Reduced height from 80 to 40
+          width: 12,   // Reduced width from 24 to 12
+          borderTopLeftRadius: 4,  // Reduced radius from 8 to 4
+          borderBottomLeftRadius: 4,
           borderTopRightRadius: 0,
           borderBottomRightRadius: 0,
           display: "flex",
@@ -111,25 +111,29 @@ const DocumentInfoDrawerArrow: React.FC = () => {
           justifyContent: "center",
           backgroundColor: (theme) => 
             drawerOpen 
-              ? alpha(theme.palette.primary.main, 0.9)
-              : alpha(theme.palette.background.paper, 0.9),
+              ? alpha(theme.palette.primary.main, 0.7)  // Reduced opacity from 0.9 to 0.7
+              : alpha(theme.palette.background.paper, 0.5),  // Reduced opacity from 0.9 to 0.5
           transition: (theme) => theme.transitions.create(
-            ["background-color"], 
+            ["background-color", "width"], 
             { duration: theme.transitions.duration.shorter }
           ),
           "&:hover": {
+            width: 16, // Slightly wider on hover for better visibility
             backgroundColor: (theme) => 
               drawerOpen
                 ? alpha(theme.palette.primary.dark, 0.9)
-                : alpha(theme.palette.action.hover, 0.9),
+                : alpha(theme.palette.action.hover, 0.7),
           },
           displayPrint: "none",
         }}
         aria-label="document info"
       >
         <ChevronLeft 
+          fontSize="small"  // Added small size
           sx={{ 
-            color: (theme) => drawerOpen ? theme.palette.primary.contrastText : theme.palette.text.primary,
+            color: (theme) => drawerOpen 
+              ? theme.palette.primary.contrastText 
+              : alpha(theme.palette.text.primary, 0.6),  // Reduced opacity for text
             transform: drawerOpen ? "rotate(180deg)" : "none",
             transition: (theme) => theme.transitions.create(
               ["transform"], 

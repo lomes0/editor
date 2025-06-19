@@ -113,26 +113,34 @@ const AppDrawer: React.FC<React.PropsWithChildren<{ title: string }>> = (
               transform: "translate(-50%, -50%)",
               zIndex: 1300,
               cursor: "grab",
-              height: 80,
-              width: 24,
+              height: 40,  // Reduced height from 80 to 40
+              width: 12,   // Reduced width from 24 to 12
               borderTopRightRadius: 0,
               borderBottomRightRadius: 0,
-              borderTopLeftRadius: 8,
-              borderBottomLeftRadius: 8,
+              borderTopLeftRadius: 4,  // Reduced radius from 8 to 4
+              borderBottomLeftRadius: 4,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.9),
+              backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.7),  // Reduced opacity from 0.9 to 0.7
+              transition: (theme) => theme.transitions.create(
+                ["background-color", "width"], 
+                { duration: theme.transitions.duration.shorter }
+              ),
               "&:active": {
                 cursor: "grabbing"
               },
               "&:hover": {
+                width: 16, // Slightly wider on hover for better visibility
                 backgroundColor: (theme) => alpha(theme.palette.primary.dark, 0.9),
               },
             }}
             aria-label="drag to close document info"
           >
-            <ChevronRight sx={{ color: (theme) => theme.palette.primary.contrastText }} />
+            <ChevronRight 
+              fontSize="small"
+              sx={{ color: (theme) => theme.palette.primary.contrastText }} 
+            />
           </Paper>
         </Box>
       </SwipeableDrawer>
