@@ -91,6 +91,17 @@ export const createChip = ({
     label={label}
     onClick={onClick}
     sx={{
+      padding: "2px 4px",
+      "& .MuiChip-label": {
+        padding: "0 4px",
+        ...(icon && { marginLeft: "1px" }), // Add space between icon and text
+      },
+      "& .MuiChip-icon": {
+        marginRight: 0, // Remove default right margin from icon
+      },
+      "& .MuiChip-avatar": {
+        marginRight: 0, // Remove default right margin from avatar
+      },
       ...(pointerEvents && { pointerEvents: "auto" }),
       ...(borderColor && { borderColor }),
       ...(bgColor && { bgcolor: bgColor }),
@@ -216,7 +227,18 @@ export const renderStatusChips = ({
         <Chip
           size={chipSize}
           variant={chipVariant}
-          sx={{ pointerEvents: "auto", ...defaultChipStyles.sx }}
+          sx={{
+            pointerEvents: "auto",
+            padding: "2px 4px",
+            "& .MuiChip-label": {
+              padding: "0 4px",
+              marginLeft: "1px", // Add more space between avatar and text
+            },
+            "& .MuiChip-avatar": {
+              marginRight: 0, // Remove default right margin from avatar
+            },
+            ...defaultChipStyles.sx,
+          }}
           avatar={
             <Avatar
               alt={author.name ?? "Local User"}
@@ -262,6 +284,12 @@ export const renderSkeletonChips = (
           label={
             <Skeleton variant="text" width={sizes[index % sizes.length]} />
           }
+          sx={{
+            padding: "2px 4px",
+            "& .MuiChip-label": {
+              padding: "0 4px",
+            },
+          }}
           {...chipProps}
         />
       ))}
