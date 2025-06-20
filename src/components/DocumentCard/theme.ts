@@ -6,7 +6,7 @@ import { alpha } from "@mui/material/styles";
  */
 export const cardTheme = {
   // Layout
-  borderRadius: 12,
+  borderRadius: 5.5,
   minHeight: {
     document: "300px",
     directory: "300px", // Updated to match document height
