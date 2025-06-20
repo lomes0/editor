@@ -214,26 +214,22 @@ export default function ViewDocumentInfo(
           ))}
         </Grid>
       </AppDrawer>
-      {showFork && (
-        <Fab
-          variant="extended"
-          size="medium"
-          component={RouterLink}
-          prefetch={false}
-          href={href}
-          sx={{
-            position: "fixed",
-            right: slideTrigger ? 64 : 24,
-            bottom: 16,
-            px: 2,
-            displayPrint: "none",
-            transition: `right 225ms ease-in-out`,
-          }}
-        >
-          {isEditable ? <Edit sx={{ mr: 1 }} /> : <FileCopy sx={{ mr: 1 }} />}
-          {isEditable ? "Edit" : "Fork"}
-        </Fab>
-      )}
+      <Fab
+        size="medium"
+        component={RouterLink}
+        prefetch={false}
+        href={`/edit/${handle}`}
+        sx={{
+          position: "fixed",
+          right: slideTrigger ? 64 : 24,
+          bottom: 16,
+          displayPrint: "none",
+          transition: `right 225ms ease-in-out`,
+        }}
+        aria-label="Edit"
+      >
+        <Edit />
+      </Fab>
     </>
   );
 }
