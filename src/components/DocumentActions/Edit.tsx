@@ -65,16 +65,6 @@ const EditDocument: React.FC<
   // Make sure we properly check if it's a directory
   const isDirectory = document?.type === DocumentType.DIRECTORY;
 
-  console.log("Document types:", {
-    cloudType: cloudDocument?.type,
-    localType: localDocument?.type,
-    isDirectory,
-    documentType: document?.type,
-    rawDocumentType: typeof document?.type === "string"
-      ? document?.type
-      : "not a string",
-  });
-
   const [input, setInput] = useState<Partial<DocumentUpdateInput>>({
     name,
     handle,
