@@ -96,7 +96,7 @@ const AppDrawer: React.FC<React.PropsWithChildren<{ title: string }>> = (
         onClose={toggleDrawer}
         sx={{ displayPrint: "none" }}
       >
-        <Box sx={{ p: 2, width: 300, position: "relative" }}>
+        <Box sx={{ p: 2, width: 300, position: "relative", height: "100%" }}>
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Article sx={{ mr: 1 }} />
             <Typography variant="h6">{title}</Typography>
@@ -111,9 +111,10 @@ const AppDrawer: React.FC<React.PropsWithChildren<{ title: string }>> = (
             ref={dragHandleRef}
             onMouseDown={handleMouseDown}
             onTouchStart={handleTouchStart}
+            onClick={toggleDrawer} // Added onClick handler to close the drawer when clicked
             elevation={0}
             sx={{
-              position: "absolute",
+              position: "absolute", // Changed back to absolute
               top: "50%",
               left: 0,
               transform: "translate(-50%, -50%)",
@@ -133,7 +134,7 @@ const AppDrawer: React.FC<React.PropsWithChildren<{ title: string }>> = (
               transition: (theme) =>
                 theme.transitions.create(
                   ["background-color", "width"],
-                  { duration: theme.transitions.duration.shorter },
+                  { duration: theme.transitions.duration.shortest }, // Changed from shorter to shortest
                 ),
               "&:active": {
                 cursor: "grabbing",
@@ -143,6 +144,9 @@ const AppDrawer: React.FC<React.PropsWithChildren<{ title: string }>> = (
                 backgroundColor: (theme) =>
                   alpha(theme.palette.primary.dark, 0.9),
               },
+              // Added to ensure the element doesn't disappear
+              visibility: "visible",
+              pointerEvents: "auto",
             }}
             aria-label="drag to close document info"
           >
