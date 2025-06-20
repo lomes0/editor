@@ -288,7 +288,7 @@ const SideBar: React.FC = () => {
               >
                 <ListItemButton
                   component={SafeNavigationLink}
-                  href={user ? "/browse" : "/api/auth/signin"}
+                  href={user ? "/dashboard" : "/api/auth/signin"}
                   sx={{
                     minHeight: 48,
                     justifyContent: open ? "initial" : "center",
