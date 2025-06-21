@@ -13,6 +13,8 @@ const CardSelector: React.FC<
   // Apply default size to all cards
   const defaultSx = {
     width: "400px", // Make cards wider (increased from 360px)
+    height: "100%", // Make sure card takes full height
+    margin: 0, // Reset margin to allow Grid spacing to work
     ...sx,
   };
 

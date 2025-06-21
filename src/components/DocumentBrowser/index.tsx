@@ -186,8 +186,13 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
   if (loading) {
     return (
       <Container
-        maxWidth="xl"
-        sx={{ py: 4, px: { xs: 2, sm: 3, md: 4, lg: 5 } }}
+        maxWidth={false}
+        sx={{
+          py: 4,
+          px: { xs: 2, sm: 3, md: 4, lg: 5 },
+          maxWidth: { xs: "100%", sm: "100%", md: "2000px", lg: "2200px" },
+          mx: "auto",
+        }}
       >
         <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
           <Typography>Loading directory contents...</Typography>
@@ -200,8 +205,13 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
   if (directoryId && !currentDirectory) {
     return (
       <Container
-        maxWidth="xl"
-        sx={{ py: 4, px: { xs: 2, sm: 3, md: 4, lg: 5 } }}
+        maxWidth={false}
+        sx={{
+          py: 4,
+          px: { xs: 2, sm: 3, md: 4, lg: 5 },
+          maxWidth: { xs: "100%", sm: "100%", md: "2000px", lg: "2200px" },
+          mx: "auto",
+        }}
       >
         <Box
           sx={{
@@ -244,8 +254,13 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
   return (
     <DragProvider>
       <Container
-        maxWidth="xl"
-        sx={{ py: 4, px: { xs: 2, sm: 3, md: 4, lg: 5 } }}
+        maxWidth={false}
+        sx={{
+          py: 4,
+          px: { xs: 2, sm: 3, md: 4, lg: 1 },
+          maxWidth: { xs: "100%", sm: "100%", md: "2000px", lg: "2200px" },
+          mx: "auto",
+        }}
       >
         <Fade in={true} timeout={600}>
           <Box
@@ -256,7 +271,12 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
               gap: 4,
               width: "100%",
               maxWidth: "100%",
-              px: { xs: 1, sm: 2, md: 3 },
+              px: {
+                xs: 1,
+                sm: 2,
+                md: 3,
+                lg: 3,
+              }, /* Increased padding for larger screens */
             }}
           >
             {/* Page title and controls */}
@@ -478,7 +498,15 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
                           Folders
                         </Typography>
                       </Box>
-                      <Grid container spacing={3}>
+                      <Grid
+                        container
+                        spacing={3}
+                        sx={{
+                          mt: 1,
+                          ml: 0,
+                          width: "100%",
+                        }}
+                      >
                         {sortedDirectories.map(
                           (directory) => (
                             <Grid
@@ -488,6 +516,7 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
                                 sm: 6,
                                 md: 4,
                                 lg: 3,
+                                xl: 2.6,
                               }}
                             >
                               <DraggableDocumentCard
@@ -531,7 +560,15 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
                           Documents
                         </Typography>
                       </Box>
-                      <Grid container spacing={3}>
+                      <Grid
+                        container
+                        spacing={3}
+                        sx={{
+                          mt: 1,
+                          ml: 0,
+                          width: "100%",
+                        }}
+                      >
                         {sortedDocuments.map((document) => (
                           <Grid
                             key={document.id}
@@ -540,6 +577,7 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
                               sm: 6,
                               md: 4,
                               lg: 3,
+                              xl: 2.6,
                             }}
                           >
                             <DraggableDocumentCard

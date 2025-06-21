@@ -65,12 +65,17 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
                   maxWidth: {
                     xs: "100% !important",
                     sm: "100% !important",
-                    md: "1800px !important",
+                    md:
+                      "2000px !important", /* Increased from 1800px to 2000px */
+                    lg:
+                      "2000px !important", /* Added larger size for large screens */
                   },
                   px: {
                     xs: 1,
                     sm: 1,
-                  }, /* Reduced horizontal padding */
+                    md:
+                      1, /* Added more horizontal padding for medium screens */
+                  }, /* Adjusted horizontal padding */
                 }}
               >
                 {children}
