@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { CloudDocument, DocumentType, EditorDocument } from "@/types";
 import { validate } from "uuid";
@@ -80,6 +80,7 @@ const findPublishedDocuments = async (limit?: number) => {
     const cloudDocument = {
       ...document,
       coauthors: document.coauthors.map((coauthor) => coauthor.user),
+      parentId: (document as any).parentId,
       revisions: revisions as any,
       type: (document as any).type || DocumentType.DOCUMENT,
       head: document.head || "",
@@ -165,6 +166,7 @@ const findUserDocument = async (
     // Use the document's type or default to DOCUMENT if not specified
     type: (document as any).type || DocumentType.DOCUMENT,
     head: document.head || "",
+    parentId: (document as any).parentId, // Explicitly include parentId
     revisions: document.revisions as any,
   };
 
@@ -254,6 +256,7 @@ const findDocumentsByAuthorId = async (authorId: string) => {
       head: true,
       type: true,
       background_image: true,
+      parentId: true, // Ensure parentId is explicitly selected
       revisions: {
         select: {
           id: true,
@@ -312,6 +315,7 @@ const findDocumentsByAuthorId = async (authorId: string) => {
     // Cast to CloudDocument to avoid type errors
     const cloudDocument = {
       ...document,
+      parentId: (document as any).parentId,
       coauthors: document.coauthors.map((coauthor) => coauthor.user),
       revisions: revisions as any,
       type: (document as any).type || DocumentType.DOCUMENT,
@@ -335,6 +339,7 @@ const findPublishedDocumentsByAuthorId = async (authorId: string) => {
       createdAt: true,
       updatedAt: true,
       published: true,
+      parentId: true,
       collab: true,
       private: true,
       baseId: true,
@@ -398,6 +403,7 @@ const findPublishedDocumentsByAuthorId = async (authorId: string) => {
     const cloudDocument: CloudDocument = {
       ...document,
       coauthors: document.coauthors.map((coauthor) => coauthor.user),
+      parentId: (document as any).parentId,
       revisions: revisions as any,
       type: (document as any).type || DocumentType.DOCUMENT,
       head: document.head || "",

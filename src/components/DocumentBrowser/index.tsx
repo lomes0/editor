@@ -80,6 +80,21 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
       const children = documents.filter((doc) => {
         const localParentId = doc.local?.parentId;
         const cloudParentId = doc.cloud?.parentId;
+
+        console.log(`Child doc check ${doc.id}:`, {
+          docId: doc.id,
+          localParent: localParentId,
+          cloudParent: cloudParentId,
+          directoryId,
+          isChild: localParentId === directoryId ||
+            cloudParentId === directoryId,
+        });
+
+        // For cloud documents with undefined parentId, they can't be children of any directory
+        if (doc.cloud && cloudParentId === undefined) {
+          return false;
+        }
+
         return localParentId === directoryId ||
           cloudParentId === directoryId;
       });
@@ -90,6 +105,25 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
       const rootItems = documents.filter((doc) => {
         const localParentId = doc.local?.parentId;
         const cloudParentId = doc.cloud?.parentId;
+
+        console.log(`Root doc check ${doc.id}:`, {
+          docId: doc.id,
+          hasLocal: !!doc.local,
+          hasCloud: !!doc.cloud,
+          localParent: localParentId,
+          cloudParent: cloudParentId,
+          isRoot: !localParentId && !cloudParentId,
+        });
+
+        // Special handling for cloud documents:
+        // If it's a cloud document but parentId is undefined (not null),
+        // we need to treat it differently since the field might be missing in the API response
+        if (doc.cloud && cloudParentId === undefined) {
+          // Consider it a root document if parentId is undefined (not explicitly set to a value)
+          // This is a workaround for cloud documents that don't have parentId in the API response
+          return true;
+        }
+
         return !localParentId && !cloudParentId;
       });
 

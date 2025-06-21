@@ -76,6 +76,8 @@ export type Document = Omit<EditorDocument, "data"> & {
   collab?: boolean;
   private?: boolean;
   children?: Document[]; // Child documents (for directories)
+  // Ensure parentId is explicitly included since it's in the database schema
+  parentId?: string | null;
   // Legacy field kept for backward compatibility
   directory?: { id: string; documentId: string; sort_order?: number | null };
 };
@@ -95,6 +97,7 @@ export type UserDocument = {
 }; // Document can be local, cloud, or both
 export type BackupDocument = EditorDocument & {
   revisions: EditorDocumentRevision[];
+  parentId?: string | null; // Explicitly include parentId for consistency
 };
 
 export type DocumentCreateInput = EditorDocument & {
@@ -112,6 +115,7 @@ export type DocumentUpdateInput = Partial<EditorDocument> & {
   collab?: boolean;
   private?: boolean;
   baseId?: string | null;
+  parentId?: string | null; // Explicitly include parentId for updates
   revisions?: EditorDocumentRevision[];
   background_image?: string | null;
   sort_order?: number | null;
