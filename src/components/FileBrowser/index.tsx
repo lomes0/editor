@@ -516,8 +516,23 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
   };
 
   return (
-    <>
-      <Box sx={{ display: "flex", alignItems: "center", px: 2, pt: 1 }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        overflow: "hidden",
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          px: 2,
+          pt: 1,
+          flexShrink: 0,
+        }}
+      >
         {open && (
           <Typography variant="caption" color="text.secondary">
             Files
@@ -528,7 +543,11 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
       <List
         dense
         disablePadding
-        sx={{ overflow: "auto", maxHeight: "40vh" }}
+        sx={{
+          overflow: "auto",
+          flex: 1,
+          minHeight: 0, /* Allow shrinking below content size */
+        }}
       >
         {/* Directory tree */}
         {treeData.length > 0
@@ -565,7 +584,7 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
           : null}
         onStartEditing={startEditing}
       />
-    </>
+    </Box>
   );
 };
 

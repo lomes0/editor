@@ -135,9 +135,10 @@ const SideBar: React.FC = () => {
             duration: theme.transitions.duration.enteringScreen,
           }),
           overflowX: "hidden",
+          overflowY: "hidden", // Changed from default
           display: "flex",
           flexDirection: "column",
-          height: "100%",
+          height: "100vh", /* Full viewport height */
         },
       }}
     >
@@ -147,6 +148,7 @@ const SideBar: React.FC = () => {
           alignItems: "center",
           padding: theme.spacing(1, 1),
           justifyContent: open ? "space-between" : "center",
+          flexShrink: 0, // Prevent shrinking
         }}
       >
         {open && (
@@ -201,7 +203,13 @@ const SideBar: React.FC = () => {
       <Divider sx={styles.divider} />
 
       {/* Top section - Main navigation */}
-      <Box sx={styles.sectionBox}>
+      <Box
+        sx={{
+          ...styles.sectionBox,
+          flexShrink: 0, // Prevent this section from shrinking
+          pb: 0,
+        }}
+      >
         <List>
           {navigationItems.map((item) => (
             <ListItem
@@ -263,22 +271,26 @@ const SideBar: React.FC = () => {
       {/* Middle section - File browser */}
       <Box
         sx={{
-          ...styles.sectionBox,
-          flex: 1,
-          flexGrow: 1,
-          overflow: "auto", /* Allow scrolling but scrollbar is hidden by CSS */
+          flex: "1 1 auto",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "auto",
+          minHeight: 0, /* Critical for flexbox to allow child to shrink */
         }}
         className="file-browser-scroll"
       >
         <FileBrowser open={open} />
       </Box>
 
-      {/* Document actions section - Removed */}
-
       <Divider sx={styles.dividerBottom} />
 
       {/* Bottom section - User */}
-      <Box sx={styles.userBox}>
+      <Box
+        sx={{
+          ...styles.userBox,
+          flexShrink: 0,
+        }}
+      >
         <Box sx={{ mt: "auto" }}>
           <List>
             <ListItem disablePadding sx={{ display: "block" }}>

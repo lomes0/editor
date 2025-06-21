@@ -2,6 +2,10 @@
 .file-browser-scroll {
   scrollbar-width: none;
   overflow-y: auto;
+  flex-grow: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Completely hide scrollbar for FileBrowser */

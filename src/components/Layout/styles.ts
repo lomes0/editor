@@ -11,22 +11,22 @@ import { SxProps, Theme } from "@mui/material/styles";
 export const styles = {
   divider: {
     mt: 0,
-    mb: 1,
+    mb: 0.5,
   },
   dividerBottom: {
-    mt: "auto",
     mb: 0.25, // Reduced from 0.5 to 0.25
   },
   sectionBox: {
     display: "flex",
     flexDirection: "column",
-    overflow: "auto",
+    overflow: "hidden", // Changed from auto to hidden
     pb: 0.5, // Reduced from 1 to 0.5
+    position: "relative", // Added for proper positioning
   },
   userBox: {
     display: "flex",
     flexDirection: "column",
     pt: 0.25, // Reduced from 0.5 to 0.25
-    pb: 1,
+    pb: 0.5, // Reduced from 1 to 0.5
   },
 };
