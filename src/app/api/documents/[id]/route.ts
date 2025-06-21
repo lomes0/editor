@@ -137,6 +137,7 @@ export async function PATCH(
       private: body.private,
       parentId: body.parentId,
       background_image: body.background_image,
+      sort_order: body.sort_order,
     };
 
     if (body.handle && body.handle !== userDocument.handle) {

@@ -111,6 +111,8 @@ const findUserDocument = async (
       head: true,
       type: true,
       background_image: true,
+      sort_order: true,
+      parentId: true,
       revisions: {
         select: {
           id: true,
@@ -222,6 +224,9 @@ const findEditorDocument = async (handle: string) => {
       baseId: true,
       head: true,
       type: true,
+      sort_order: true,
+      background_image: true,
+      parentId: true,
     },
   });
 
@@ -257,6 +262,7 @@ const findDocumentsByAuthorId = async (authorId: string) => {
       type: true,
       background_image: true,
       parentId: true, // Ensure parentId is explicitly selected
+      sort_order: true, // Ensure sort_order is explicitly selected
       revisions: {
         select: {
           id: true,
