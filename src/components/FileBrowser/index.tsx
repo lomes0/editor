@@ -35,6 +35,7 @@ interface TreeItem {
   type: DocumentType;
   children: TreeItem[];
   parentId: string | null;
+  sort_order: number | null; // Add sort_order field
 }
 
 const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
@@ -153,6 +154,7 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
           : DocumentType.DOCUMENT;
         const parentId = doc.local?.parentId || doc.cloud?.parentId ||
           null;
+        const sort_order = doc.local?.sort_order || doc.cloud?.sort_order || null;
 
         const item: TreeItem = {
           id: doc.id,
@@ -160,6 +162,7 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
           type,
           children: [],
           parentId,
+          sort_order,
         };
 
         map.set(doc.id, item);
@@ -181,7 +184,7 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
         }
       });
 
-      // Sort items: directories first, then by name
+      // Sort items: directories first, then by sort_order, then by name
       const sortItems = (items: TreeItem[]) => {
         items.sort((a, b) => {
           // Directories first
@@ -194,7 +197,21 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
             b.type === DocumentType.DIRECTORY
           ) return 1;
 
-          // Then by name alphabetically
+          // If both are the same type (both directories or both documents)
+          // Check if both have valid sort_order (> 0)
+          const aHasValidSortOrder = a.sort_order !== null && a.sort_order > 0;
+          const bHasValidSortOrder = b.sort_order !== null && b.sort_order > 0;
+
+          // Items with valid sort_order come first
+          if (aHasValidSortOrder && !bHasValidSortOrder) return -1;
+          if (!aHasValidSortOrder && bHasValidSortOrder) return 1;
+
+          // If both have valid sort_order, sort by sort_order value
+          if (aHasValidSortOrder && bHasValidSortOrder) {
+            return (a.sort_order as number) - (b.sort_order as number);
+          }
+
+          // If neither has a valid sort_order, sort by name alphabetically
           return a.name.localeCompare(b.name);
         });
 
