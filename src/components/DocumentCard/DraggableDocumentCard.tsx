@@ -12,6 +12,7 @@ interface DraggableDocumentCardProps {
   user?: User;
   sx?: SxProps<Theme> | undefined;
   currentDirectoryId?: string;
+  onMoveComplete?: () => void;
 }
 
 const DraggableDocumentCard: React.FC<DraggableDocumentCardProps> = ({
@@ -19,6 +20,7 @@ const DraggableDocumentCard: React.FC<DraggableDocumentCardProps> = ({
   user,
   sx,
   currentDirectoryId,
+  onMoveComplete,
 }) => {
   const dispatch = useDispatch();
   const theme = useTheme();
@@ -137,6 +139,17 @@ const DraggableDocumentCard: React.FC<DraggableDocumentCardProps> = ({
         },
         timeout: 3000,
       }));
+
+      // Dispatch custom event so other components can react
+      const movedEvent = new CustomEvent("document-moved", {
+        detail: { documentId: draggedItem.id },
+      });
+      window.dispatchEvent(movedEvent);
+
+      // Call onMoveComplete callback if provided
+      if (onMoveComplete) {
+        onMoveComplete();
+      }
     } catch (error) {
       console.error("Error during drop:", error);
       dispatch(actions.announce({
