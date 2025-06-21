@@ -69,12 +69,13 @@ const DocumentEditor: React.FC<React.PropsWithChildren> = ({ children }) => {
         data,
       };
 
-      // Update the document with the new head
+      // Update the document with the new head, preserving parentId
       const documentUpdate = {
         id: document.id,
         partial: {
           head: revisionId,
           updatedAt: now,
+          parentId: document.parentId, // Preserve parentId when saving to cloud
         },
       };
 
@@ -202,6 +203,7 @@ const DocumentEditor: React.FC<React.PropsWithChildren> = ({ children }) => {
       data,
       updatedAt: new Date().toISOString(),
       head: uuidv4(),
+      parentId: document.parentId, // Preserve parentId when saving locally
     };
     try {
       const payload = JSON.parse(tags.values().next().value as string);

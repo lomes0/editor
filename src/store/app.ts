@@ -913,7 +913,25 @@ export const appSlice = createSlice({
               id: document.id,
               cloud: document,
             });
-          } else userDocument.cloud = document;
+          } else {
+            // Preserve parentId if it's not in the new document but exists in the local document
+            if (
+              userDocument.local &&
+              userDocument.local.parentId !== undefined &&
+              document.parentId === undefined
+            ) {
+              document.parentId = userDocument.local.parentId;
+            }
+            // Also preserve parentId from previous cloud document if available
+            if (
+              userDocument.cloud &&
+              userDocument.cloud.parentId !== undefined &&
+              document.parentId === undefined
+            ) {
+              document.parentId = userDocument.cloud.parentId;
+            }
+            userDocument.cloud = document;
+          }
         });
       })
       .addCase(getCloudDocument.fulfilled, (state, action) => {
@@ -926,7 +944,25 @@ export const appSlice = createSlice({
             id: cloudDocument.id,
             cloud: cloudDocument,
           });
-        } else userDocument.cloud = cloudDocument;
+        } else {
+          // Preserve parentId if it's not in the new document but exists in the local document
+          if (
+            userDocument.local &&
+            userDocument.local.parentId !== undefined &&
+            cloudDocument.parentId === undefined
+          ) {
+            cloudDocument.parentId = userDocument.local.parentId;
+          }
+          // Also preserve parentId from previous cloud document if available
+          if (
+            userDocument.cloud &&
+            userDocument.cloud.parentId !== undefined &&
+            cloudDocument.parentId === undefined
+          ) {
+            cloudDocument.parentId = userDocument.cloud.parentId;
+          }
+          userDocument.cloud = cloudDocument;
+        }
       })
       .addCase(getCloudRevision.rejected, (state, action) => {
         const message = action.payload as {
@@ -978,7 +1014,17 @@ export const appSlice = createSlice({
             id: document.id,
             cloud: document,
           });
-        } else userDocument.cloud = document;
+        } else {
+          // Preserve parentId if it's not in the new document but exists in the local document
+          if (
+            userDocument.local &&
+            userDocument.local.parentId !== undefined &&
+            document.parentId === undefined
+          ) {
+            document.parentId = userDocument.local.parentId;
+          }
+          userDocument.cloud = document;
+        }
       })
       .addCase(createCloudDocument.rejected, (state, action) => {
         const message = action.payload as {
@@ -1020,7 +1066,20 @@ export const appSlice = createSlice({
             id: document.id,
             cloud: document,
           });
-        } else userDocument.cloud = document;
+        } else {
+          // Preserve parentId if it's not in the new document but exists in the old document
+          if (
+            userDocument.cloud &&
+            userDocument.cloud.parentId !== undefined &&
+            document.parentId === undefined
+          ) {
+            document.parentId = userDocument.cloud.parentId;
+            console.log(
+              `[Redux] Preserved parentId ${document.parentId} from existing cloud document ${document.id}`,
+            );
+          }
+          userDocument.cloud = document;
+        }
       })
       .addCase(updateCloudDocument.rejected, (state, action) => {
         const message = action.payload as {

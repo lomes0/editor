@@ -333,6 +333,7 @@ export default function EditDocumentInfo(
                               partial: {
                                 head: localDocument.head,
                                 updatedAt: localDocument.updatedAt,
+                                parentId: localDocument.parentId, // Preserve parentId when updating
                               },
                             }));
                             console.log(
@@ -411,6 +412,7 @@ export default function EditDocumentInfo(
                             partial: {
                               head: localDocument.head,
                               updatedAt: localDocument.updatedAt,
+                              parentId: localDocument.parentId, // Preserve parentId when updating
                             },
                           }));
                           console.log(

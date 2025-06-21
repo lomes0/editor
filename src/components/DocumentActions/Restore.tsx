@@ -78,6 +78,7 @@ const RestoreDocument: React.FC<
             head: cloudDocument.head,
             updatedAt: cloudDocument.updatedAt,
             data: localRevision.data,
+            parentId: localDocument.parentId, // Preserve parentId when restoring
           },
         }),
       );

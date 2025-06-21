@@ -94,6 +94,7 @@ const UploadDocument: React.FC<
           partial: {
             head: localDocument.head,
             updatedAt: localDocument.updatedAt,
+            parentId: localDocument.parentId, // Preserve parentId when updating
           },
         }),
       );

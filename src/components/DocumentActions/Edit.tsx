@@ -204,6 +204,13 @@ const EditDocument: React.FC<
     if (input.sort_order !== document?.sort_order) {
       partial.sort_order = input.sort_order;
     }
+    // Preserve parentId when updating document
+    if (document?.parentId) {
+      partial.parentId = document.parentId;
+      console.log(
+        `Preserving parentId ${document.parentId} when updating document ${id}`,
+      );
+    }
     if (Object.keys(partial).length === 0) return;
     if (isLocal) {
       try {
