@@ -136,15 +136,6 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
         const localParentId = doc.local?.parentId;
         const cloudParentId = doc.cloud?.parentId;
 
-        console.log(`Root doc check ${doc.id}:`, {
-          docId: doc.id,
-          hasLocal: !!doc.local,
-          hasCloud: !!doc.cloud,
-          localParent: localParentId,
-          cloudParent: cloudParentId,
-          isRoot: !localParentId && !cloudParentId,
-        });
-
         // Special handling for cloud documents:
         // If it's a cloud document but parentId is undefined (not null),
         // we need to treat it differently since the field might be missing in the API response
