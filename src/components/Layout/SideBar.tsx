@@ -70,8 +70,6 @@ const SideBar: React.FC = () => {
     { text: "Home", icon: <Home />, path: "/" },
     { text: "Browse", icon: <Folder />, path: "/browse" },
     { text: "New Document", icon: <Create />, path: "/new" },
-    { text: "Playground", icon: <LibraryBooks />, path: "/playground" },
-    { text: "Tutorial", icon: <Help />, path: "/tutorial" },
   ];
 
   // Custom Link component that handles auto-saving before navigation
