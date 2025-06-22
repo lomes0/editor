@@ -49,6 +49,56 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
     null,
   );
 
+  // Determine if we're in edit mode to trigger autosave
+  const isEditMode = pathname.startsWith("/edit/");
+
+  // Custom Link component that handles auto-saving before navigation
+  const SafeNavigationLink = ({
+    href,
+    children,
+    onClick,
+    ...props
+  }: {
+    href: string;
+    children: React.ReactNode;
+    onClick?: () => void;
+    [key: string]: any;
+  }) => {
+    const handleClick = (e: React.MouseEvent) => {
+      // Only perform autosave if we're in edit mode
+      if (isEditMode) {
+        e.preventDefault();
+
+        // Dispatch a special action to trigger autosave
+        dispatch({
+          type: "TRIGGER_AUTOSAVE_BEFORE_NAVIGATION",
+          payload: { targetUrl: href },
+        });
+
+        // After a short delay to allow autosave to start, navigate to the target URL
+        setTimeout(() => {
+          router.push(href);
+          if (onClick) onClick();
+        }, 100);
+      } else {
+        // If not in edit mode, just navigate normally
+        router.push(href);
+        if (onClick) onClick();
+      }
+    };
+
+    return (
+      <Box
+        component="a"
+        href={href}
+        onClick={handleClick}
+        {...props}
+      >
+        {children}
+      </Box>
+    );
+  };
+
   // Context menu state
   const [contextMenu, setContextMenu] = useState<
     {
@@ -552,9 +602,17 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
         }}
       >
         {open && (
-          <Typography variant="caption" color="text.secondary">
-            Files
-          </Typography>
+          <SafeNavigationLink
+            href="/browse"
+            sx={{
+              textDecoration: "none",
+              cursor: "pointer",
+            }}
+          >
+            <Typography variant="caption" color="text.secondary">
+              Files
+            </Typography>
+          </SafeNavigationLink>
         )}
       </Box>
 
