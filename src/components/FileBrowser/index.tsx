@@ -154,7 +154,8 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
           : DocumentType.DOCUMENT;
         const parentId = doc.local?.parentId || doc.cloud?.parentId ||
           null;
-        const sort_order = doc.local?.sort_order || doc.cloud?.sort_order || null;
+        const sort_order = doc.local?.sort_order || doc.cloud?.sort_order ||
+          null;
 
         const item: TreeItem = {
           id: doc.id,

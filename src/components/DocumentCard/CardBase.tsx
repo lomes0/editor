@@ -218,7 +218,7 @@ const CardBase: React.FC<CardBaseProps> = ({
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 fontSize: cardTheme.typography.titleSize,
-                mb: showSubheaderSpace ? 1 : 0, // Add margin only if subheader space is shown
+                mb: showSubheaderSpace ? 1 : 0,
               }}
             >
               {title}
@@ -259,7 +259,9 @@ const CardBase: React.FC<CardBaseProps> = ({
             {chipContent}
           </Box>
 
-          <Box sx={{ display: "flex", ml: "auto" }}>{actionContent}</Box>
+          <Box sx={{ display: "flex", ml: "auto" }}>
+            {actionContent}
+          </Box>
         </Box>
       </Box>
     </Card>

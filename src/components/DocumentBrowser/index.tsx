@@ -9,6 +9,7 @@ import {
   Divider,
   Fade,
   Paper,
+  Skeleton,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -29,6 +30,7 @@ import { DocumentType, UserDocument } from "@/types";
 import DocumentSortControl from "../DocumentControls/SortControl";
 import { sortDocuments } from "../DocumentControls/sortDocuments";
 import { useRouter } from "next/navigation";
+import DocumentGrid from "../DocumentGrid";
 import { DragProvider } from "../DragContext";
 import TrashBin from "../TrashBin";
 
@@ -215,8 +217,56 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
           mx: "auto",
         }}
       >
-        <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-          <Typography>Loading directory contents...</Typography>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
+            width: "100%",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: { xs: "wrap", md: "nowrap" },
+              gap: 2,
+              pb: 2,
+              borderBottom: "1px solid",
+              borderColor: "divider",
+            }}
+          >
+            <Skeleton variant="text" width={200} height={40} />
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                flexWrap: { xs: "wrap", sm: "nowrap" },
+                width: { xs: "100%", md: "auto" },
+              }}
+            >
+              <Skeleton variant="rounded" width={140} height={40} />
+              <Skeleton variant="rounded" width={140} height={40} />
+              <Skeleton variant="rounded" width={180} height={40} />
+            </Box>
+          </Box>
+
+          <DocumentGrid
+            items={[]}
+            title="Folders"
+            titleIcon={<FolderOpen />}
+            isLoading={true}
+            skeletonCount={3}
+          />
+
+          <DocumentGrid
+            items={[]}
+            title="Documents"
+            titleIcon={<Article />}
+            isLoading={true}
+            skeletonCount={6}
+          />
         </Box>
       </Container>
     );
@@ -536,88 +586,29 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
                     display: "flex",
                     flexDirection: "column",
                     gap: 4,
+                    opacity: 1,
+                    transition: "opacity 0.5s ease-in-out",
                   }}
                 >
                   {/* Display directories section */}
-                  {sortedDirectories.length > 0 && (
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 2,
-                      }}
-                    >
-                      <Grid
-                        container
-                        spacing={3}
-                        sx={{
-                          width: "100%",
-                        }}
-                      >
-                        {sortedDirectories.map(
-                          (directory) => (
-                            <Grid
-                              key={directory.id}
-                              size={{
-                                xs: 12,
-                                sm: 6,
-                                md: 4,
-                                lg: 3,
-                                xl: 2.6,
-                              }}
-                            >
-                              <DraggableDocumentCard
-                                userDocument={directory}
-                                user={user}
-                                currentDirectoryId={directoryId}
-                              />
-                            </Grid>
-                          ),
-                        )}
-                      </Grid>
-                    </Box>
-                  )}
+                  <DocumentGrid
+                    items={sortedDirectories}
+                    user={user}
+                    currentDirectoryId={directoryId}
+                    title="Folders"
+                    titleIcon={<FolderOpen />}
+                  />
 
                   {/* Display documents section */}
-                  {sortedDocuments.length > 0 && (
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 2,
-                      }}
-                    >
-                      {sortedDirectories.length > 0 && (
-                        <Divider sx={{ my: 1 }} />
-                      )}
-                      <Grid
-                        container
-                        spacing={3}
-                        sx={{
-                          width: "100%",
-                        }}
-                      >
-                        {sortedDocuments.map((document) => (
-                          <Grid
-                            key={document.id}
-                            size={{
-                              xs: 12,
-                              sm: 6,
-                              md: 4,
-                              lg: 3,
-                              xl: 2.6,
-                            }}
-                          >
-                            <DraggableDocumentCard
-                              userDocument={document}
-                              user={user}
-                              currentDirectoryId={directoryId}
-                            />
-                          </Grid>
-                        ))}
-                      </Grid>
-                    </Box>
-                  )}
+                  {sortedDirectories.length > 0 && sortedDocuments.length > 0 &&
+                    <Divider sx={{ my: 2 }} />}
+                  <DocumentGrid
+                    items={sortedDocuments}
+                    user={user}
+                    currentDirectoryId={directoryId}
+                    title="Documents"
+                    titleIcon={<Article />}
+                  />
                 </Box>
               )}
           </Box>
