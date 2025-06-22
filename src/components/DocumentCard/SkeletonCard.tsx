@@ -18,6 +18,16 @@ const pulse = keyframes`
   }
 `;
 
+// Shimmer animation for skeleton loading effect
+const shimmer = keyframes`
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+`;
+
 interface SkeletonCardProps {
   /** Additional styles to apply */
   sx?: SxProps<Theme>;
@@ -40,6 +50,22 @@ const SkeletonCard: React.FC<SkeletonCardProps> = ({ sx }) => {
         borderColor: "divider",
         transition: "all 0.3s ease",
         animation: `${pulse} 1.5s ease-in-out infinite`,
+        position: "relative",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: `linear-gradient(90deg, 
+            rgba(255, 255, 255, 0) 0%, 
+            rgba(255, 255, 255, 0.15) 50%, 
+            rgba(255, 255, 255, 0) 100%)`,
+          backgroundSize: "200% 100%",
+          animation: `${shimmer} 1.5s ease-in-out infinite`,
+          zIndex: 1,
+        },
         ...sx,
       }}
     >
@@ -54,6 +80,8 @@ const SkeletonCard: React.FC<SkeletonCardProps> = ({ sx }) => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          position: "relative",
+          zIndex: 2,
         }}
       >
         <Skeleton
@@ -71,6 +99,8 @@ const SkeletonCard: React.FC<SkeletonCardProps> = ({ sx }) => {
           flexGrow: 1,
           display: "flex",
           flexDirection: "column",
+          position: "relative",
+          zIndex: 2,
         }}
       >
         <Skeleton variant="text" width="70%" height={28} animation="wave" />
@@ -86,6 +116,8 @@ const SkeletonCard: React.FC<SkeletonCardProps> = ({ sx }) => {
           justifyContent: "space-between",
           borderTop: "1px solid",
           borderColor: "divider",
+          position: "relative",
+          zIndex: 2,
         }}
       >
         <Box sx={{ display: "flex", gap: 1 }}>

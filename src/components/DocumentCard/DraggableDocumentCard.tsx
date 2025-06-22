@@ -177,7 +177,12 @@ const DraggableDocumentCard: React.FC<DraggableDocumentCardProps> = ({
           "transform",
           "box-shadow",
           "border",
-        ]),
+          "opacity",
+          "background-color",
+        ], {
+          duration: theme.transitions.duration.standard,
+          easing: theme.transitions.easing.easeInOut,
+        }),
         transform: isDragging ? "scale(0.95)" : "scale(1)",
         opacity: isDragging ? 0.7 : 1,
         position: "relative",
@@ -198,6 +203,13 @@ const DraggableDocumentCard: React.FC<DraggableDocumentCardProps> = ({
               ? `${theme.palette.primary.main}20` // 20% opacity
               : "transparent",
             pointerEvents: "none",
+            transition: theme.transitions.create([
+              "border",
+              "background-color",
+            ], {
+              duration: theme.transitions.duration.short,
+              easing: theme.transitions.easing.easeInOut,
+            }),
           }
           : {},
       }}

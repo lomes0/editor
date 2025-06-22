@@ -8,14 +8,25 @@ import DirectoryCard from "./DirectoryCard";
 
 // Main component that decides whether to render a document or directory card
 const CardSelector: React.FC<
-  { userDocument?: UserDocument; user?: User; sx?: SxProps<Theme> }
-> = memo(({ userDocument, user, sx = {} }) => {
+  {
+    userDocument?: UserDocument;
+    user?: User;
+    sx?: SxProps<Theme>;
+    cardConfig?: {
+      minHeight?: string;
+      showAuthor?: boolean;
+      maxStatusChips?: number;
+      showSortOrder?: boolean;
+      showPermissionChips?: boolean;
+    };
+  }
+> = memo(({ userDocument, user, sx = {}, cardConfig = {} }) => {
   // Apply default size to all cards
   const defaultSx: SxProps<Theme> = {
     width: "100%", // Make cards take full width of their grid cell
     height: "100%", // Make sure card takes full height
     margin: 0, // Reset margin to allow Grid spacing to work
-    display: "flex", 
+    display: "flex",
     flexDirection: "column",
   };
 
@@ -24,7 +35,14 @@ const CardSelector: React.FC<
 
   // Early return for loading state
   if (!userDocument) {
-    return <DocumentCard userDocument={undefined} user={user} sx={combinedSx} />;
+    return (
+      <DocumentCard
+        userDocument={undefined}
+        user={user}
+        sx={combinedSx}
+        cardConfig={cardConfig}
+      />
+    );
   }
 
   const document = userDocument.local || userDocument.cloud;
@@ -32,11 +50,21 @@ const CardSelector: React.FC<
 
   if (isDirectory) {
     return (
-      <DirectoryCard userDocument={userDocument} user={user} sx={combinedSx} />
+      <DirectoryCard
+        userDocument={userDocument}
+        user={user}
+        sx={combinedSx}
+        cardConfig={cardConfig}
+      />
     );
   } else {
     return (
-      <DocumentCard userDocument={userDocument} user={user} sx={combinedSx} />
+      <DocumentCard
+        userDocument={userDocument}
+        user={user}
+        sx={combinedSx}
+        cardConfig={cardConfig}
+      />
     );
   }
 });

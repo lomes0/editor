@@ -17,6 +17,8 @@ publication-quality documents easy and accessible.
   functions and shapes.
 - Sketch: Integrates with [Excalidraw](https://excalidraw.com/) for hand-drawn
   like sketches.
+- Document Organization: Hierarchical folder structure with intuitive drag-and-drop interface.
+- Responsive UI: Optimized for all device sizes with high-performance virtualized rendering.
 
 ## Getting Started
 
@@ -30,3 +32,8 @@ npm run dev
 ## Troubleshooting
 
 If you encounter hydration errors or other rendering issues, see [Hydration Error Troubleshooting](docs/HYDRATION.md) for detailed instructions.
+
+## Documentation
+
+- [Components Documentation](docs/COMPONENTS.md) - Detailed information about key UI components
+- [Hydration Troubleshooting](docs/HYDRATION.md) - Fixing common rendering issues

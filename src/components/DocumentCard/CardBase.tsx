@@ -1,13 +1,15 @@
 "use client";
 import * as React from "react";
 import { ReactNode } from "react";
-import { SxProps, Theme } from "@mui/material/styles";
+import { SxProps, Theme, useTheme } from "@mui/material/styles";
 import {
   Box,
   Card,
   CardActionArea,
   CardContent,
+  Fade,
   Skeleton,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import Link from "next/link";
@@ -69,6 +71,9 @@ interface CardBaseProps {
       y?: number;
     };
   };
+
+  /** Optional subtitle or description */
+  subtitle?: string | ReactNode;
 }
 
 /**
@@ -88,7 +93,9 @@ const CardBase: React.FC<CardBaseProps> = ({
   ariaLabel = "Open item",
   contentProps = {},
   actionBarProps = {},
+  subtitle,
 }) => {
+  const theme = useTheme();
   // Default values for content area
   const {
       titlePadding = {
@@ -116,155 +123,229 @@ const CardBase: React.FC<CardBaseProps> = ({
       parseFloat(topSectionHeight) / 100
     })`;
 
+  // Create a formatted title that's safe for tooltips
+  const formattedTitle = typeof title === "string" ? title : "Document";
+
   return (
-    <Card
-      variant="outlined"
-      className={className}
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        height: "100%",
-        minHeight,
-        width: "100%",
-        position: "relative",
-        borderRadius: `${cardTheme.borderRadius}px`,
-        borderColor: cardTheme.colors.border,
-        transition: cardTheme.animation.transition,
-        boxShadow: cardTheme.colors.shadow.default,
-        "&:hover": {
-          boxShadow: cardTheme.colors.shadow.hover,
-          transform: cardTheme.animation.hoverTransform,
-        },
-        borderWidth: 1,
-        ...sx,
-      }}
-    >
-      {/* Top section */}
-      <Box
+    <Fade in={true} timeout={300}>
+      <Card
+        variant="outlined"
+        className={className}
         sx={{
-          height: topSectionHeight,
-          minHeight: topSectionMinHeight,
-          width: "100%",
-          position: "relative",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          bgcolor: "background.paper",
-          borderBottom: "1px solid",
-          borderColor: cardTheme.colors.border,
-        }}
-      >
-        {topContent}
-      </Box>
-
-      {/* Clickable area */}
-      <CardActionArea
-        component={Link}
-        href={href}
-        prefetch={false}
-        aria-label={ariaLabel}
-        sx={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: height,
-          zIndex: 1,
-          borderRadius:
-            `${cardTheme.borderRadius}px ${cardTheme.borderRadius}px 0 0`,
-          "&:hover": {
-            backgroundColor: "transparent",
-          },
-        }}
-      />
-
-      {/* Bottom section */}
-      <Box
-        sx={{
-          height: bottomSectionHeight,
           display: "flex",
           flexDirection: "column",
+          justifyContent: "space-between",
+          height: "100%",
+          minHeight,
+          width: "100%",
           position: "relative",
-          zIndex: 2,
+          borderRadius: `${cardTheme.borderRadius}px`,
+          borderColor: cardTheme.colors.border,
+          transition: cardTheme.animation.transition,
+          boxShadow: cardTheme.colors.shadow.default,
+          "&:hover": {
+            boxShadow: cardTheme.colors.shadow.hover,
+            transform: cardTheme.animation.hoverTransform,
+          },
+          "&:focus-within": {
+            boxShadow: cardTheme.colors.shadow.focus,
+            outline:
+              `${cardTheme.accessibility.focusRingWidth}px solid ${theme.palette.primary.main}`,
+            outlineOffset: cardTheme.accessibility.focusRingOffset,
+          },
+          borderWidth: 1,
+          ...sx,
         }}
       >
-        <CardContent
-          sx={{
-            pt: titlePadding.top,
-            pb: titlePadding.bottom,
-            pl: titlePadding.left,
-            pr: titlePadding.right,
-            flexGrow: 1,
-            display: "flex",
-            alignItems: "center", // Vertically center all content
-            position: "relative",
-            padding: "0 16px", // Reset padding for better control
-            overflow: "hidden", // Prevent overflow issues
-          }}
-        >
-          <Box
-            sx={{
-              width: "100%",
-              textAlign: "left", // Keep text left-aligned within the centered box
-            }}
-          >
-            <Typography
-              variant="h6"
-              component="div"
-              sx={{
-                fontWeight: cardTheme.typography.titleWeight,
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                fontSize: cardTheme.typography.titleSize,
-                mb: showSubheaderSpace ? 1 : 0,
-              }}
-            >
-              {title}
-            </Typography>
-            {showSubheaderSpace &&
-              (isLoading
-                ? <Skeleton variant="text" width={150} />
-                : <Box sx={{ height: subheaderSpaceHeight }} />)}
-          </Box>
-        </CardContent>
-
+        {/* Top section */}
         <Box
           sx={{
-            px: padding.x,
-            py: padding.y,
+            height: topSectionHeight,
+            minHeight: topSectionMinHeight,
+            width: "100%",
+            position: "relative",
             display: "flex",
-            justifyContent: "space-between",
             alignItems: "center",
-            borderTop: "1px solid",
+            justifyContent: "center",
+            bgcolor: "background.paper",
+            borderBottom: "1px solid",
             borderColor: cardTheme.colors.border,
-            backgroundColor: "transparent",
-            zIndex: 3,
-            height,
-            mt: "auto",
-            "& button:first-of-type": { ml: "auto !important" },
-            "& .MuiChip-root:last-of-type": { mr: 1 },
-            pointerEvents: "auto",
           }}
         >
-          <Box
+          {topContent}
+        </Box>
+
+        {/* Clickable area */}
+        <Tooltip
+          title={formattedTitle}
+          enterDelay={700}
+          placement="top"
+          aria-hidden={true} // Hide from screen readers to avoid redundancy
+        >
+          <CardActionArea
+            component={Link}
+            href={href}
+            prefetch={false}
+            aria-label={ariaLabel}
             sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: height,
+              zIndex: 1,
+              borderRadius:
+                `${cardTheme.borderRadius}px ${cardTheme.borderRadius}px 0 0`,
+              "&:hover": {
+                backgroundColor: "transparent",
+              },
+              "&:focus-visible": {
+                boxShadow: `0 0 0 2px ${theme.palette.primary.main}`,
+              },
+            }}
+          />
+        </Tooltip>
+
+        {/* Bottom section */}
+        <Box
+          sx={{
+            height: bottomSectionHeight,
+            display: "flex",
+            flexDirection: "column",
+            position: "relative",
+            zIndex: 2,
+          }}
+        >
+          <CardContent
+            sx={{
+              pt: titlePadding.top,
+              pb: titlePadding.bottom,
+              pl: titlePadding.left,
+              pr: titlePadding.right,
+              flexGrow: 1,
               display: "flex",
-              gap: cardTheme.spacing.chipGap,
-              flexWrap: "nowrap",
-              overflow: "hidden",
+              alignItems: "center", // Vertically center all content
+              position: "relative",
+              padding: "0 16px", // Reset padding for better control
+              overflow: "hidden", // Prevent overflow issues
             }}
           >
-            {chipContent}
-          </Box>
+            <Box
+              sx={{
+                width: "100%",
+                textAlign: "left", // Keep text left-aligned within the centered box
+              }}
+            >
+              {typeof title === "string"
+                ? (
+                  <Tooltip
+                    title={title}
+                    enterDelay={1000}
+                    placement="top"
+                    aria-hidden={true} // Hide from screen readers to avoid redundancy
+                  >
+                    <Typography
+                      variant="h6"
+                      component="div"
+                      sx={{
+                        fontWeight: cardTheme.typography.titleWeight,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        fontSize: cardTheme.typography.titleSize,
+                        mb: subtitle || showSubheaderSpace ? 1 : 0,
+                      }}
+                    >
+                      {title}
+                    </Typography>
+                  </Tooltip>
+                )
+                : (
+                  <Typography
+                    variant="h6"
+                    component="div"
+                    sx={{
+                      fontWeight: cardTheme.typography.titleWeight,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      fontSize: cardTheme.typography.titleSize,
+                      mb: subtitle || showSubheaderSpace ? 1 : 0,
+                    }}
+                  >
+                    {title}
+                  </Typography>
+                )}
 
-          <Box sx={{ display: "flex", ml: "auto" }}>
-            {actionContent}
+              {subtitle && (
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    mb: 1,
+                  }}
+                >
+                  {subtitle}
+                </Typography>
+              )}
+
+              {!subtitle && showSubheaderSpace &&
+                (isLoading
+                  ? <Skeleton variant="text" width={150} />
+                  : <Box sx={{ height: subheaderSpaceHeight }} />)}
+            </Box>
+          </CardContent>
+
+          <Box
+            sx={{
+              px: padding.x,
+              py: padding.y,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              borderTop: "1px solid",
+              borderColor: cardTheme.colors.border,
+              backgroundColor: "transparent",
+              zIndex: 3,
+              height,
+              mt: "auto",
+              "& button:first-of-type": { ml: "auto !important" },
+              "& .MuiChip-root:last-of-type": { mr: 1 },
+              pointerEvents: "auto",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                gap: cardTheme.spacing.chipGap,
+                flexWrap: "nowrap",
+                overflow: "hidden",
+              }}
+            >
+              {chipContent}
+            </Box>
+
+            <Box
+              sx={{
+                display: "flex",
+                ml: "auto",
+                "& button": {
+                  transition: "transform 0.2s ease-in-out",
+                  "&:hover": {
+                    transform: "scale(1.1)",
+                  },
+                },
+              }}
+            >
+              {actionContent}
+            </Box>
           </Box>
         </Box>
-      </Box>
-    </Card>
+      </Card>
+    </Fade>
   );
 };
 
