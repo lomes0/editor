@@ -32,9 +32,11 @@ import {
 } from "@/types";
 import { validate } from "uuid";
 import { duplicateDocument } from "./app/duplicateDocument";
+import { fetchUserDomains } from "./app/domains";
 
 const initialState: AppState = {
   documents: [],
+  domains: [],
   ui: {
     announcements: [],
     alerts: [],
@@ -52,6 +54,7 @@ export const load = createAsyncThunk("app/load", async (_, thunkAPI) => {
     thunkAPI.dispatch(loadSession()),
     thunkAPI.dispatch(loadLocalDocuments()),
     thunkAPI.dispatch(loadCloudDocuments()),
+    thunkAPI.dispatch(fetchUserDomains()),
   ]);
 });
 
@@ -1188,6 +1191,16 @@ export const appSlice = createSlice({
       })
       .addCase(alert.rejected, (state, action) => {
         state.ui.alerts.shift();
+        const message = action.payload as {
+          title: string;
+          subtitle: string;
+        };
+        state.ui.announcements.push({ message });
+      })
+      .addCase(fetchUserDomains.fulfilled, (state, action) => {
+        state.domains = action.payload;
+      })
+      .addCase(fetchUserDomains.rejected, (state, action) => {
         const message = action.payload as {
           title: string;
           subtitle: string;

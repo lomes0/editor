@@ -36,6 +36,7 @@ import UploadDocument from "./Upload";
 import UsersAutocomplete from "../User/UsersAutocomplete";
 import useOnlineStatus from "@/hooks/useOnlineStatus";
 import BackgroundImageUploader from "../BackgroundImageUploader";
+import FetchDomains from "../Domain/FetchDomains";
 
 const EditDocument: React.FC<
   {
@@ -64,6 +65,7 @@ const EditDocument: React.FC<
   const document = isCloudOnly ? cloudDocument : localDocument;
   // Make sure we properly check if it's a directory
   const isDirectory = document?.type === DocumentType.DIRECTORY;
+  const currentDomainId = document?.domainId || null;
 
   const [input, setInput] = useState<Partial<DocumentUpdateInput>>({
     name,
@@ -74,6 +76,7 @@ const EditDocument: React.FC<
     collab: isCollab,
     background_image: document?.background_image || null,
     sort_order: document?.sort_order || null,
+    domainId: currentDomainId,
   });
 
   const [validating, setValidating] = useState(false);
@@ -93,6 +96,7 @@ const EditDocument: React.FC<
       collab: isCollab,
       background_image: document?.background_image || null,
       sort_order: document?.sort_order || null,
+      domainId: currentDomainId,
     });
     setValidating(false);
     setValidationErrors({});
@@ -204,6 +208,13 @@ const EditDocument: React.FC<
     if (input.sort_order !== document?.sort_order) {
       partial.sort_order = input.sort_order;
     }
+    // Add domainId to the update if it has changed
+    if (input.domainId !== document?.domainId) {
+      partial.domainId = input.domainId;
+      console.log(
+        `Setting domainId to ${input.domainId} for document ${id} (current: ${document?.domainId})`,
+      );
+    }
     // Preserve parentId when updating document
     if (document?.parentId) {
       partial.parentId = document.parentId;
@@ -211,6 +222,9 @@ const EditDocument: React.FC<
         `Preserving parentId ${document.parentId} when updating document ${id}`,
       );
     }
+
+    console.log("Edit dialog form submission - partial update:", partial);
+
     if (Object.keys(partial).length === 0) return;
     if (isLocal) {
       try {
@@ -358,6 +372,26 @@ const EditDocument: React.FC<
                     updateInput({ sort_order: value });
                   }}
                   helperText="Items with sort order > 0 will appear first, sorted by this value. Leave empty for default sorting."
+                />
+              </>
+            )}
+
+            {/* Domain selection for both documents and directories */}
+            {isAuthor && (
+              <>
+                <Divider sx={{ my: 2 }} />
+                <Typography
+                  variant="subtitle2"
+                  color="text.secondary"
+                  gutterBottom
+                >
+                  Domain Options
+                </Typography>
+                <FetchDomains
+                  userId={user?.id || ""}
+                  value={input.domainId || ""}
+                  onChange={(domainId) =>
+                    updateInput({ domainId: domainId || null })}
                 />
               </>
             )}

@@ -19,8 +19,12 @@ import {
   Button,
   Checkbox,
   Container,
+  FormControl,
   FormControlLabel,
   FormHelperText,
+  InputLabel,
+  MenuItem,
+  Select,
   Switch,
   TextField,
   Typography,
@@ -29,6 +33,7 @@ import { Add, Article } from "@mui/icons-material";
 import useOnlineStatus from "@/hooks/useOnlineStatus";
 import UsersAutocomplete from "./User/UsersAutocomplete";
 import { debounce } from "@mui/material/utils";
+import FetchDomains from "./Domain/FetchDomains";
 import type {
   SerializedParagraphNode,
   SerializedRootNode,
@@ -96,6 +101,14 @@ const NewDocument: React.FC<{ cloudDocument?: CloudDocument }> = (
   const searchParams = useSearchParams();
   const revisionId = searchParams.get("v");
   const parentId = searchParams.get("parentId");
+  const domainId = searchParams.get("domain");
+  // Initialize with domainId from URL if available
+  useEffect(() => {
+    if (domainId) {
+      updateInput({ domainId });
+    }
+  }, [domainId]);
+
   const [base, setBase] = useState<UserDocument | undefined>(
     cloudDocument ? { id: cloudDocument.id, cloud: cloudDocument } : undefined,
   );
@@ -164,6 +177,7 @@ const NewDocument: React.FC<{ cloudDocument?: CloudDocument }> = (
       data,
       type: DocumentType.DOCUMENT,
       parentId: parentId || null,
+      domainId: input.domainId || null,
       createdAt,
       updatedAt: createdAt,
     };
@@ -303,6 +317,15 @@ const NewDocument: React.FC<{ cloudDocument?: CloudDocument }> = (
               ? `https://matheditor.me/view/${input.handle}`
               : "This will be used in the URL of your document"}
           />
+
+          {saveToCloud && user && (
+            <FetchDomains
+              userId={user.id}
+              value={input.domainId || ""}
+              onChange={(value) => updateInput({ domainId: value })}
+            />
+          )}
+
           <FormControlLabel
             control={
               <Switch

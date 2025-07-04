@@ -133,24 +133,45 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
 
       setChildItems(children);
     } else {
-      // Get root level documents (items without a parentId)
+      // Get root level documents (items without a parentId AND without a domainId)
       const rootItems = documents.filter((doc) => {
         const localParentId = doc.local?.parentId;
         const cloudParentId = doc.cloud?.parentId;
+        const localDomainId = doc.local?.domainId;
+        const cloudDomainId = doc.cloud?.domainId;
+
+        // Check if document belongs to a domain
+        const hasDomain = localDomainId || cloudDomainId;
+        if (hasDomain) {
+          return false; // Filter out documents that belong to a domain
+        }
 
         // Special handling for cloud documents:
         // If it's a cloud document but parentId is undefined (not null),
         // we need to treat it differently since the field might be missing in the API response
         if (doc.cloud && cloudParentId === undefined) {
-          // Consider it a root document if parentId is undefined (not explicitly set to a value)
-          // This is a workaround for cloud documents that don't have parentId in the API response
-          return true;
+          // For root browsing, we only include documents without a domain
+          return !cloudDomainId;
         }
 
-        return !localParentId && !cloudParentId;
+        return (!localParentId && !cloudParentId);
       });
 
       setChildItems(rootItems);
+
+      // Debug logging for root document filtering
+      console.log("Root documents filtering:", {
+        totalDocuments: documents.length,
+        filteredRootDocuments: rootItems.length,
+        rootDocuments: rootItems.map((doc) => ({
+          id: doc.id,
+          name: doc.local?.name || doc.cloud?.name,
+          localParentId: doc.local?.parentId,
+          cloudParentId: doc.cloud?.parentId,
+          localDomainId: doc.local?.domainId,
+          cloudDomainId: doc.cloud?.domainId,
+        })),
+      });
     }
   }, [directoryId, documents]);
 
@@ -320,7 +341,7 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
   const pageTitle = directoryId
     ? (currentDirectory?.local?.name || currentDirectory?.cloud?.name ||
       "Directory")
-    : "Root";
+    : "Personal Documents";
 
   return (
     <DragProvider>
@@ -382,7 +403,7 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
                     }}
                   >
                     <Storage sx={{ mr: 0.5 }} fontSize="inherit" />
-                    Root
+                    Personal Documents
                   </Link>
 
                   {directoryId && breadcrumbs.map((crumb, index) => {
@@ -551,7 +572,9 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
                       />
                     )}
                   <Typography variant="h6">
-                    {directoryId ? "This folder is empty" : "No content found"}
+                    {directoryId
+                      ? "This folder is empty"
+                      : "No personal documents found"}
                   </Typography>
                   <Typography
                     variant="body2"
@@ -559,6 +582,11 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
                     align="center"
                   >
                     Create a new document or folder to get started
+                    {!directoryId && (
+                      <span>
+                        <br />(Items in domains are not shown here)
+                      </span>
+                    )}
                   </Typography>
                   <Box sx={{ mt: 2 }}>
                     <Button

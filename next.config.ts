@@ -142,6 +142,14 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   reactStrictMode: false,
   distDir: process.env.BUILD_DIR || ".next",
+  experimental: {
+    turbo: { loaders: {} },
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+    // Use webpack for consistency
+    webpackBuildWorker: true,
+  },
   // Add modularizeImports for deterministic MUI component imports
   modularizeImports: {
     "@mui/material": {

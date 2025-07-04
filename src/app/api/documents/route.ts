@@ -95,6 +95,7 @@ export async function POST(request: Request) {
       collab: body.collab,
       private: body.private,
       parentId: body.parentId, // Include parentId when creating document
+      domainId: body.domainId, // Include domainId when creating document
       type: body.type || "DOCUMENT",
       revisions: {
         create: {

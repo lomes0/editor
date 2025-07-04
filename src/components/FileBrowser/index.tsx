@@ -27,6 +27,7 @@ import "./styles.css";
 
 interface FileBrowserProps {
   open: boolean; // Whether sidebar is expanded
+  domainId?: string | null; // Optional domain ID to filter by
 }
 
 interface TreeItem {
@@ -38,16 +39,40 @@ interface TreeItem {
   sort_order: number | null; // Add sort_order field
 }
 
-const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
+const FileBrowser: React.FC<FileBrowserProps> = ({ open, domainId }) => {
   const documents = useSelector((state) => state.documents);
+  const domains = useSelector((state) => state.domains);
+  const initialized = useSelector((state) => state.ui.initialized);
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useDispatch();
+
   const [treeData, setTreeData] = useState<TreeItem[]>([]);
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const [currentDirectory, setCurrentDirectory] = useState<string | null>(
     null,
   );
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Trigger data loading if it hasn't been initialized yet
+  useEffect(() => {
+    if (!initialized) {
+      setIsLoading(true);
+      dispatch(actions.load()).then(() => {
+        setIsLoading(false);
+      });
+    }
+  }, [initialized, dispatch]);
+
+  // Ensure domain data is loaded when accessing a domain-specific view
+  useEffect(() => {
+    if (domainId && domains.length === 0) {
+      setIsLoading(true);
+      dispatch(actions.fetchUserDomains()).then(() => {
+        setIsLoading(false);
+      });
+    }
+  }, [domainId, domains.length, dispatch]);
 
   // Determine if we're in edit mode to trigger autosave
   const isEditMode = pathname.startsWith("/edit/");
@@ -114,7 +139,86 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
 
   // Extract directory ID from pathname
   useEffect(() => {
-    if (pathname.startsWith("/browse/")) {
+    // Handle domain-specific routes first
+    if (pathname.startsWith("/domains/")) {
+      const pathParts = pathname.split("/").filter(Boolean);
+
+      // Check if path has enough parts and follows domain route pattern
+      if (pathParts.length >= 3) {
+        // pathParts[0] should be "domains", pathParts[1] is the domain slug
+
+        // Handle domain-specific browse routes
+        if (pathParts[2] === "browse" && pathParts.length >= 4) {
+          const dirId = pathParts[3];
+          setCurrentDirectory(dirId);
+
+          // Auto-expand parents of current directory
+          if (dirId) {
+            const expandParents = (id: string) => {
+              const doc = documents.find(
+                (d) => (d.local?.id === id || d.cloud?.id === id),
+              );
+
+              if (doc) {
+                const parentId = doc.local?.parentId ||
+                  doc.cloud?.parentId;
+                if (parentId) {
+                  setExpandedNodes((prev) => {
+                    const newSet = new Set(prev);
+                    newSet.add(parentId);
+                    return newSet;
+                  });
+                  expandParents(parentId);
+                }
+              }
+            };
+
+            expandParents(dirId);
+          }
+
+          // Handle domain-specific view/edit routes
+        } else if (
+          (pathParts[2] === "view" || pathParts[2] === "edit") &&
+          pathParts.length >= 4
+        ) {
+          const docId = pathParts[3];
+
+          if (docId) {
+            // Find the document and its parent
+            const doc = documents.find((d) => d.id === docId);
+            if (doc) {
+              const parentId = doc.local?.parentId || doc.cloud?.parentId;
+              if (parentId) {
+                setCurrentDirectory(parentId);
+
+                // Auto-expand parent directories
+                const expandParents = (id: string) => {
+                  setExpandedNodes((prev) => {
+                    const newSet = new Set(prev);
+                    newSet.add(id);
+                    return newSet;
+                  });
+
+                  const parent = documents.find((d) => d.id === id);
+                  if (parent) {
+                    const grandParentId = parent.local?.parentId ||
+                      parent.cloud?.parentId;
+                    if (grandParentId) {
+                      expandParents(grandParentId);
+                    }
+                  }
+                };
+
+                expandParents(parentId);
+              } else {
+                setCurrentDirectory(null); // Root directory
+              }
+            }
+          }
+        }
+      }
+    } // Handle standard routes
+    else if (pathname.startsWith("/browse/")) {
       const dirId = pathname.replace("/browse/", "");
       setCurrentDirectory(dirId);
 
@@ -186,18 +290,29 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
 
   // Build tree data structure from flat documents list
   useEffect(() => {
-    // Function to determine if a document is a directory
     const isDirectory = (doc: UserDocument) =>
       (doc.local?.type === DocumentType.DIRECTORY) ||
       (doc.cloud?.type === DocumentType.DIRECTORY);
+
+    // Function to determine if a document belongs to the selected domain
+    const belongsToDomain = (doc: UserDocument) => {
+      if (!domainId) return true; // If no domain filter, include all documents
+
+      // Check if document has a matching domainId in either local or cloud version
+      const docDomainId = doc.local?.domainId || doc.cloud?.domainId;
+
+      return docDomainId === domainId;
+    };
 
     // Create tree structure
     const buildTree = () => {
       const items: TreeItem[] = [];
       const map = new Map<string, TreeItem>();
 
-      // First pass: create all tree items without children
+      // First pass: create all tree items without children, filtered by domain if needed
       documents.forEach((doc) => {
+        // Skip documents that don't belong to the current domain if domain filtering is active
+        if (!belongsToDomain(doc)) return;
         const name = doc.local?.name || doc.cloud?.name || "Untitled";
         const type = isDirectory(doc)
           ? DocumentType.DIRECTORY
@@ -280,9 +395,30 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
     };
 
     setTreeData(buildTree());
-  }, [documents]);
+  }, [documents, domainId]);
 
   const handleItemClick = (item: TreeItem) => {
+    // Check if we're in a domain context by looking at the current pathname
+    const isDomainRoute = pathname.startsWith("/domains/");
+
+    if (isDomainRoute) {
+      // Extract the domain slug from the pathname
+      const parts = pathname.split("/").filter(Boolean);
+      if (parts.length >= 2 && parts[0] === "domains") {
+        const domainSlug = parts[1];
+
+        if (item.type === DocumentType.DIRECTORY) {
+          // Navigate to directory while preserving domain context
+          router.push(`/domains/${domainSlug}/browse/${item.id}`);
+        } else {
+          // Navigate to document view while preserving domain context
+          router.push(`/domains/${domainSlug}/view/${item.id}`);
+        }
+        return;
+      }
+    }
+
+    // Default behavior (outside domain context)
     if (item.type === DocumentType.DIRECTORY) {
       // Navigate to directory
       router.push(`/browse/${item.id}`);
@@ -464,9 +600,15 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
       const isCurrentDirectory = item.id === currentDirectory;
 
       // Check if this is the current document (when in view/edit mode)
-      const isCurrentDocument = !isDirectory &&
-        (pathname === `/view/${item.id}` ||
-          pathname === `/edit/${item.id}`);
+      const isCurrentDocument = !isDirectory && (
+        pathname === `/view/${item.id}` ||
+        pathname === `/edit/${item.id}` ||
+        // Also check for domain-specific routes
+        Boolean(
+          pathname.match(new RegExp(`/domains/[^/]+/view/${item.id}$`)),
+        ) ||
+        Boolean(pathname.match(new RegExp(`/domains/[^/]+/edit/${item.id}$`)))
+      );
 
       return (
         <Box key={item.id}>
@@ -662,18 +804,30 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
           minHeight: 0, /* Allow shrinking below content size */
         }}
       >
-        {/* Directory tree */}
-        {treeData.length > 0
+        {isLoading
           ? (
-            renderTreeItems(treeData, 0) // Start with level 0 because the base indentation is now included in the formula
+            <Box sx={{ p: 2, textAlign: "center" }}>
+              <Typography variant="body2" color="text.secondary">
+                Loading...
+              </Typography>
+            </Box>
+          )
+          : treeData.length === 0 && domainId
+          ? (
+            <Box sx={{ p: 2, textAlign: "center" }}>
+              <Typography variant="body2" color="text.secondary">
+                No files in this domain
+              </Typography>
+            </Box>
+          )
+          : treeData.length > 0
+          ? (
+            renderTreeItems(treeData, 0)
           )
           : (
             <Box sx={{ p: 1, textAlign: "center" }}>
               {open && (
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                >
+                <Typography variant="caption" color="text.secondary">
                   No folders found
                 </Typography>
               )}

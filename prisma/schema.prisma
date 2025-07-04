@@ -7,6 +7,27 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Simple Domain model for grouping documents by subject
+model Domain {
+  id          String   @id @default(uuid()) @db.Uuid
+  slug        String   @unique // For URL friendly identifiers
+  name        String
+  description String?
+  createdAt   DateTime @default(now()) @db.Timestamptz
+  updatedAt   DateTime @updatedAt @db.Timestamptz
+  userId      String   @db.Uuid // Associated user who created this domain
+  color       String? // Optional color for UI representation
+  icon        String? // Optional icon for UI representation
+
+  // Relations
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documents Document[]
+
+  @@index([userId])
+  @@index([slug])
+  @@index([name]) // Add index for name searches
+}
+
 // Main content model with hierarchical structure
 model Document {
   id        String   @id @default(uuid()) @db.Uuid
@@ -17,13 +38,14 @@ model Document {
   authorId  String   @db.Uuid
   published Boolean  @default(false)
   private   Boolean  @default(false)
+  domainId  String?  @db.Uuid // Optional domain association
 
   // Document-specific fields
   head   String? @db.Uuid
   collab Boolean @default(false)
-  
+
   // Directory-specific fields (used when type is DIRECTORY)
-  sort_order Float?  @db.DoublePrecision
+  sort_order       Float?  @db.DoublePrecision
   background_image String?
 
   // Fork relationship
@@ -43,6 +65,10 @@ model Document {
   author    User                @relation(fields: [authorId], references: [id], onDelete: Cascade)
   coauthors DocumentCoauthers[]
   revisions Revision[]
+  domain    Domain?             @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@index([domainId])
+  @@index([authorId, domainId]) // Compound index for queries filtering by both author and domain
 }
 
 enum DocumentType {
@@ -77,6 +103,7 @@ model User {
   revisions     Revision[]
   documents     Document[]
   coauthored    DocumentCoauthers[]
+  domains       Domain[] // User's domains for organizing documents
 }
 
 model DocumentCoauthers {

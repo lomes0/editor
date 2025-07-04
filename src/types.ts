@@ -18,6 +18,7 @@ export interface Announcement {
 export interface AppState {
   user?: User;
   documents: UserDocument[];
+  domains: Domain[];
   ui: {
     announcements: Announcement[];
     alerts: Alert[];
@@ -44,6 +45,7 @@ export type EditorDocument = {
   handle?: string | null;
   baseId?: string | null;
   parentId?: string | null;
+  domainId?: string | null;
   type: DocumentType;
   revisions?: EditorDocumentRevision[];
   sort_order?: number | null;
@@ -89,6 +91,18 @@ export interface Directory {
   sort_order?: number | null;
 }
 
+export interface Domain {
+  id: string;
+  slug: string;
+  name: string;
+  description?: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+  userId: string;
+  color?: string;
+  icon?: string;
+}
+
 export type CloudDocument = Document; // Cloud documents are the same as regular documents
 export type UserDocument = {
   id: string;
@@ -106,6 +120,7 @@ export type DocumentCreateInput = EditorDocument & {
   collab?: boolean;
   private?: boolean;
   baseId?: string | null;
+  domainId?: string | null;
   revisions?: EditorDocumentRevision[];
 };
 

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import ThemeProvider from "@/components/Layout/ThemeProvider";
+import AuthProvider from "@/components/Auth/AuthProvider";
 import "mathlive/static.css";
 import "@/editor/theme.css";
 import "./globals.css";
@@ -72,9 +73,11 @@ export default function RootLayout(
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            {children}
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -23,15 +23,16 @@ export async function generateMetadata(
     searchParams: { v?: string };
   },
 ): Promise<Metadata> {
-  const { searchParams, params } = props;
-  if (!(params.id && params.id[0])) {
+  const { searchParams } = props;
+  const { id } = await props.params;
+  if (!(id && id[0])) {
     return {
       title: "New Document",
       description: "Create a new document on Math Editor",
     };
   }
-  const metadata: OgMetadata = { id: params.id[0], title: "Math Editor" };
-  const document = await getCachedUserDocument(params.id[0], searchParams.v);
+  const metadata: OgMetadata = { id: id[0], title: "Math Editor" };
+  const document = await getCachedUserDocument(id[0], searchParams.v);
   if (document) {
     if (document.collab || document.published) {
       metadata.title = `Fork ${document.name}`;
@@ -72,8 +73,9 @@ export default async function Page(
     searchParams: { v?: string };
   },
 ) {
-  const { params, searchParams } = props;
-  const documentId = params.id?.[0];
+  const { searchParams } = props;
+  const { id } = await props.params;
+  const documentId = id?.[0];
   if (!documentId) return <NewDocument />;
   const document = await getCachedUserDocument(documentId, searchParams.v);
   if (!document) return <NewDocument />;

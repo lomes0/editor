@@ -32,6 +32,7 @@ import {
   updateLocalDocument,
   updateUser,
 } from "./app";
+import { deleteDomain, fetchUserDomains } from "./app/domains";
 import { Action, configureStore, ThunkAction } from "@reduxjs/toolkit";
 
 export const actions = {
@@ -69,6 +70,9 @@ export const actions = {
   getCloudStorageUsage,
   getCloudDocumentThumbnail,
   getDocumentById,
+
+  fetchUserDomains,
+  deleteDomain,
 };
 
 export const store = configureStore({ reducer: appSlice.reducer });

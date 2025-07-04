@@ -113,6 +113,7 @@ const findUserDocument = async (
       background_image: true,
       sort_order: true,
       parentId: true,
+      domainId: true, // Select domainId field
       revisions: {
         select: {
           id: true,
@@ -169,6 +170,7 @@ const findUserDocument = async (
     type: (document as any).type || DocumentType.DOCUMENT,
     head: document.head || "",
     parentId: (document as any).parentId, // Explicitly include parentId
+    domainId: (document as any).domainId, // Explicitly include domainId
     revisions: document.revisions as any,
   };
 
@@ -263,6 +265,7 @@ const findDocumentsByAuthorId = async (authorId: string) => {
       background_image: true,
       parentId: true, // Ensure parentId is explicitly selected
       sort_order: true, // Ensure sort_order is explicitly selected
+      domainId: true, // Select the domainId field for domain filtering
       revisions: {
         select: {
           id: true,
@@ -322,6 +325,7 @@ const findDocumentsByAuthorId = async (authorId: string) => {
     const cloudDocument = {
       ...document,
       parentId: (document as any).parentId,
+      domainId: (document as any).domainId, // Include domainId in the cloudDocument
       coauthors: document.coauthors.map((coauthor) => coauthor.user),
       revisions: revisions as any,
       type: (document as any).type || DocumentType.DOCUMENT,
