@@ -284,7 +284,23 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
 
   const handleItemClick = (item: TreeItem) => {
     if (item.type === DocumentType.DIRECTORY) {
-      // Toggle expansion state
+      // Navigate to directory
+      router.push(`/browse/${item.id}`);
+    } else {
+      // Navigate to document view
+      router.push(`/view/${item.id}`);
+    }
+  };
+
+  const handleExpandClick = (
+    item: TreeItem,
+    event: React.MouseEvent,
+  ) => {
+    // Prevent the click from triggering the parent ListItemButton click
+    event.stopPropagation();
+
+    // Only toggle expansion state without navigating
+    if (item.type === DocumentType.DIRECTORY) {
       setExpandedNodes((prev) => {
         const newSet = new Set(prev);
         if (newSet.has(item.id)) {
@@ -294,12 +310,6 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
         }
         return newSet;
       });
-
-      // Navigate to directory
-      router.push(`/browse/${item.id}`);
-    } else {
-      // Navigate to document view
-      router.push(`/view/${item.id}`);
     }
   };
 
@@ -562,7 +572,34 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open }) => {
                   )}
 
                 {isDirectory && (
-                  <Box sx={{ color: "text.secondary" }}>
+                  <Box
+                    sx={{
+                      color: "text.secondary",
+                      cursor: "pointer",
+                      p: 0.5, // Add padding for better click target
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderRadius: "50%",
+                      "&:hover": {
+                        backgroundColor: "rgba(0, 0, 0, 0.08)", // Light background on hover
+                      },
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent the parent ListItemButton click
+
+                      // Only toggle expansion state without navigating
+                      setExpandedNodes((prev) => {
+                        const newSet = new Set(prev);
+                        if (newSet.has(item.id)) {
+                          newSet.delete(item.id);
+                        } else {
+                          newSet.add(item.id);
+                        }
+                        return newSet;
+                      });
+                    }}
+                  >
                     {isExpanded
                       ? <ExpandMore fontSize="small" />
                       : <ChevronRight fontSize="small" />}
