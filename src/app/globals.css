@@ -153,10 +153,10 @@ body:has(#app-toolbar) .editor-container :is([id], [target="_self"]) {
 }
 
 .document-thumbnail {
-  width: 192px;
+  width: 650px;
   height: 192px;
   overflow: hidden;
-  zoom: 0.5;
+  zoom: 0.70;
   user-select: none;
   white-space: pre-wrap;
   word-break: break-word;
