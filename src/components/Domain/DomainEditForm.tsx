@@ -122,7 +122,7 @@ export default function DomainEditForm({ domain }: DomainEditFormProps) {
       setShowSuccess(true);
 
       // Navigate to dashboard where domains are listed
-      router.push('/dashboard');
+      router.push("/dashboard");
     } catch (err: any) {
       setError(err.message || "An error occurred while updating the domain");
     } finally {
