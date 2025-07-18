@@ -11,6 +11,7 @@ import ThumbnailSkeleton from "./ThumbnailSkeleton";
 import CardBase from "./CardBase";
 import { renderSkeletonChips, renderStatusChips } from "./CardChips";
 import { cardTheme } from "./theme";
+import { useDocumentURL } from "../DocumentURLContext";
 
 // Define proper interface for component props
 interface DocumentCardProps {
@@ -80,7 +81,9 @@ const DocumentCard: React.FC<DocumentCardProps> = memo(({
 
   // Navigation and metadata
   const handle = cloudDocument?.handle ?? localDocument?.handle ?? document?.id;
-  const href = document ? `/view/${handle}` : "/";
+  const { getDocumentUrl } = useDocumentURL();
+  // Get the URL from context if document exists, or fallback to root
+  const href = document && userDocument ? getDocumentUrl(userDocument) : "/";
   const author = cloudDocument?.author ?? user;
 
   // Sort order for display

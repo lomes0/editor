@@ -9,6 +9,7 @@ import DocumentActionMenu from "./DocumentActionMenu";
 import CardBase from "./CardBase";
 import { renderSkeletonChips, renderStatusChips } from "./CardChips";
 import { cardTheme } from "./theme";
+import { useDocumentURL } from "../DocumentURLContext";
 
 // Define proper interface for component props
 interface DirectoryCardProps {
@@ -78,7 +79,9 @@ const DirectoryCard: React.FC<DirectoryCardProps> = memo(({
 
   // Navigation and metadata
   const handle = cloudDocument?.handle ?? localDocument?.handle ?? document?.id;
-  const href = document ? `/browse/${handle}` : "/";
+  const { getDocumentUrl } = useDocumentURL();
+  // Get the URL from context if document exists, or fallback to root
+  const href = document && userDocument ? getDocumentUrl(userDocument) : "/";
   const author = cloudDocument?.author ?? user;
   const backgroundImage = document?.background_image;
 

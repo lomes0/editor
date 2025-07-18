@@ -22,7 +22,9 @@ import {
   FilterList,
   Folder,
   FolderOpen,
+  LibraryBooks,
   PostAdd,
+  Settings,
   Storage,
 } from "@mui/icons-material";
 import DraggableDocumentCard from "../DocumentCard/DraggableDocumentCard";
@@ -33,12 +35,19 @@ import { useRouter } from "next/navigation";
 import DocumentGrid from "../DocumentGrid";
 import { DragProvider } from "../DragContext";
 import TrashBin from "../TrashBin";
+import { DocumentURLProvider } from "../DocumentURLContext";
 
 interface DocumentBrowserProps {
   directoryId?: string;
+  domainId?: string;
+  domainInfo?: any; // Domain information with user details
 }
 
-const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
+const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ 
+  directoryId, 
+  domainId, 
+  domainInfo 
+}) => {
   const dispatch = useDispatch();
   const router = useRouter();
   const documents = useSelector((state) => state.documents);
@@ -55,6 +64,11 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
     key: "updatedAt",
     direction: "desc",
   });
+
+  // Helper function to check if a document is a directory
+  const isDirectory = (doc: UserDocument) => {
+    return (doc.local?.type === DocumentType.DIRECTORY) || (doc.cloud?.type === DocumentType.DIRECTORY);
+  };
 
   // Load directory and its contents if directoryId is provided
   useEffect(() => {
@@ -133,34 +147,43 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
 
       setChildItems(children);
     } else {
-      // Get root level documents (items without a parentId AND without a domainId)
+      // Get root level documents - with or without domain filtering
       const rootItems = documents.filter((doc) => {
         const localParentId = doc.local?.parentId;
         const cloudParentId = doc.cloud?.parentId;
         const localDomainId = doc.local?.domainId;
         const cloudDomainId = doc.cloud?.domainId;
 
-        // Check if document belongs to a domain
-        const hasDomain = localDomainId || cloudDomainId;
-        if (hasDomain) {
-          return false; // Filter out documents that belong to a domain
-        }
+        // If we're browsing a specific domain, only include documents from that domain
+        if (domainId) {
+          // Check if the document belongs to this domain
+          const belongsToDomain = localDomainId === domainId || cloudDomainId === domainId;
+          
+          // Document must belong to this domain and be at the root level (no parent)
+          return belongsToDomain && (!localParentId && !cloudParentId);
+        } else {
+          // In the normal browse view, filter out documents that belong to a domain
+          const hasDomain = localDomainId || cloudDomainId;
+          if (hasDomain) {
+            return false; // Filter out documents that belong to a domain
+          }
 
-        // Special handling for cloud documents:
-        // If it's a cloud document but parentId is undefined (not null),
-        // we need to treat it differently since the field might be missing in the API response
-        if (doc.cloud && cloudParentId === undefined) {
-          // For root browsing, we only include documents without a domain
-          return !cloudDomainId;
-        }
+          // Special handling for cloud documents:
+          // If it's a cloud document but parentId is undefined (not null),
+          // we need to treat it differently since the field might be missing in the API response
+          if (doc.cloud && cloudParentId === undefined) {
+            // For root browsing, we only include documents without a domain
+            return !cloudDomainId;
+          }
 
-        return (!localParentId && !cloudParentId);
+          return (!localParentId && !cloudParentId);
+        }
       });
 
       setChildItems(rootItems);
 
       // Debug logging for root document filtering
-      console.log("Root documents filtering:", {
+      console.log(domainId ? "Domain root documents filtering:" : "Root documents filtering:", {
         totalDocuments: documents.length,
         filteredRootDocuments: rootItems.length,
         rootDocuments: rootItems.map((doc) => ({
@@ -173,18 +196,35 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
         })),
       });
     }
-  }, [directoryId, documents]);
+  }, [directoryId, documents, domainId]);
 
-  // Function to determine if a document is a directory
-  const isDirectory = (doc: UserDocument) =>
-    (doc.local?.type === DocumentType.DIRECTORY) ||
-    (doc.cloud?.type === DocumentType.DIRECTORY);
+  // Function to get the correct URL for a document or directory
+  const getDocumentUrl = (doc: UserDocument) => {
+    const docId = doc.id;
+    const isDir = isDirectory(doc);
+    
+    // If we're in a domain context
+    if (domainInfo) {
+      if (isDir) {
+        return `/domains/${domainInfo.slug}/${docId}`;
+      } else {
+        return `/domains/${domainInfo.slug}/view/${docId}`;
+      }
+    }
+    
+    // Default personal documents URL
+    if (isDir) {
+      return `/browse/${docId}`;
+    } else {
+      return `/view/${docId}`;
+    }
+  };
 
-  // Process and categorize items
+  // Process items for display
   const processedIds = new Set<string>();
   const directories: UserDocument[] = [];
   const regularDocuments: UserDocument[] = [];
-
+  
   childItems.forEach((doc) => {
     if (processedIds.has(doc.id)) return;
     processedIds.add(doc.id);
@@ -210,20 +250,42 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
 
   // Handle creating a new document
   const handleCreateDocument = () => {
+    let url = "/new";
+    const params = new URLSearchParams();
+    
     if (directoryId) {
-      router.push(`/new?parentId=${directoryId}`);
-    } else {
-      router.push("/new");
+      params.append("parentId", directoryId);
     }
+    
+    if (domainId) {
+      params.append("domain", domainId);
+    }
+    
+    if (params.toString()) {
+      url += `?${params.toString()}`;
+    }
+    
+    router.push(url);
   };
 
   // Handle creating a new directory
   const handleCreateDirectory = () => {
+    let url = "/new-directory";
+    const params = new URLSearchParams();
+    
     if (directoryId) {
-      router.push(`/new-directory/${directoryId}`);
-    } else {
-      router.push("/new-directory");
+      url += `/${directoryId}`;
     }
+    
+    if (domainId) {
+      params.append("domain", domainId);
+    }
+    
+    if (params.toString()) {
+      url += `?${params.toString()}`;
+    }
+    
+    router.push(url);
   };
 
   // Render loading state for directory browsing
@@ -325,12 +387,12 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
           <Typography variant="h6">Directory not found</Typography>
           <Button
             component={Link}
-            href="/browse"
+            href={domainInfo ? `/domains/${domainInfo.slug}` : "/browse"}
             startIcon={<ArrowBack />}
             variant="contained"
             sx={{ borderRadius: 1.5, mt: 2 }}
           >
-            Back to Document Browser
+            Back to {domainInfo ? `${domainInfo.name}` : "Document Browser"}
           </Button>
         </Box>
       </Container>
@@ -341,19 +403,22 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
   const pageTitle = directoryId
     ? (currentDirectory?.local?.name || currentDirectory?.cloud?.name ||
       "Directory")
-    : "Personal Documents";
+    : domainInfo 
+      ? domainInfo.name
+      : "Personal Documents";
 
   return (
     <DragProvider>
-      <Container
-        maxWidth={false}
-        sx={{
-          py: 4,
-          px: { xs: 2, sm: 3, md: 4, lg: 1 },
-          maxWidth: { xs: "100%", sm: "100%", md: "2000px", lg: "2200px" },
-          mx: "auto",
-        }}
-      >
+      <DocumentURLProvider getDocumentUrl={getDocumentUrl}>
+        <Container
+          maxWidth={false}
+          sx={{
+            py: 4,
+            px: { xs: 2, sm: 3, md: 4, lg: 1 },
+            maxWidth: { xs: "100%", sm: "100%", md: "2000px", lg: "2200px" },
+            mx: "auto",
+          }}
+        >
         <Fade in={true} timeout={600}>
           <Box
             className="document-browser-container"
@@ -371,6 +436,66 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
               }, /* Increased padding for larger screens */
             }}
           >
+            {/* Domain info section - only shown when viewing a domain */}
+            {domainInfo && (
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  borderRadius: 2,
+                  bgcolor: "background.paper",
+                  borderBottom: "1px solid",
+                  borderColor: "divider",
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: domainInfo.color || "primary.main",
+                      color: "#fff",
+                      width: 40,
+                      height: 40,
+                      borderRadius: "50%",
+                    }}
+                  >
+                    {domainInfo.icon ? (
+                      <Box component="span" sx={{ fontSize: "1.2rem" }}>
+                        {domainInfo.icon}
+                      </Box>
+                    ) : (
+                      <LibraryBooks sx={{ fontSize: "1.2rem" }} />
+                    )}
+                  </Box>
+                  <Box>
+                    <Typography variant="h6" component="h1">
+                      {domainInfo.name}
+                    </Typography>
+                    {domainInfo.description && (
+                      <Typography variant="body2" color="text.secondary">
+                        {domainInfo.description}
+                      </Typography>
+                    )}
+                  </Box>
+                </Box>
+
+                <Button
+                  variant="outlined"
+                  size="small"
+                  component={Link}
+                  href={`/domains/edit/${domainInfo.id}`}
+                  startIcon={<Settings fontSize="small" />}
+                >
+                  Settings
+                </Button>
+              </Paper>
+            )}
+
             {/* Page title and controls */}
             <Box
               sx={{
@@ -392,22 +517,41 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
                 }}
               >
                 <Breadcrumbs aria-label="breadcrumb">
-                  <Link
-                    href="/browse"
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      color: directoryId ? "inherit" : "text.primary",
-                      textDecoration: "none",
-                      fontWeight: directoryId ? "normal" : "medium",
-                    }}
-                  >
-                    <Storage sx={{ mr: 0.5 }} fontSize="inherit" />
-                    Personal Documents
-                  </Link>
+                  {domainInfo ? (
+                    <Link
+                      href={`/domains/${domainInfo.slug}`}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        color: directoryId ? "inherit" : "text.primary",
+                        textDecoration: "none",
+                        fontWeight: directoryId ? "normal" : "medium",
+                      }}
+                    >
+                      <LibraryBooks sx={{ mr: 0.5 }} fontSize="inherit" />
+                      {domainInfo.name}
+                    </Link>
+                  ) : (
+                    <Link
+                      href="/browse"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        color: directoryId ? "inherit" : "text.primary",
+                        textDecoration: "none",
+                        fontWeight: directoryId ? "normal" : "medium",
+                      }}
+                    >
+                      <Storage sx={{ mr: 0.5 }} fontSize="inherit" />
+                      Personal Documents
+                    </Link>
+                  )}
 
                   {directoryId && breadcrumbs.map((crumb, index) => {
                     const isLast = index === breadcrumbs.length - 1;
+                    const hrefPrefix = domainInfo 
+                      ? `/domains/${domainInfo.slug}` 
+                      : `/browse`;
 
                     if (isLast) {
                       return (
@@ -432,7 +576,7 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
                     return (
                       <Link
                         key={crumb.id}
-                        href={`/browse/${crumb.id}`}
+                        href={`${hrefPrefix}/${crumb.id}`}
                         style={{
                           display: "flex",
                           alignItems: "center",
@@ -574,19 +718,21 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
                   <Typography variant="h6">
                     {directoryId
                       ? "This folder is empty"
-                      : "No personal documents found"}
+                      : domainInfo
+                        ? `No documents in ${domainInfo.name} yet`
+                        : "No personal documents found"}
                   </Typography>
                   <Typography
                     variant="body2"
                     color="text.secondary"
                     align="center"
                   >
-                    Create a new document or folder to get started
-                    {!directoryId && (
-                      <span>
-                        <br />(Items in domains are not shown here)
-                      </span>
-                    )}
+                    {directoryId
+                      ? "Create a new document or folder to get started"
+                      : domainInfo
+                        ? "Create a document or folder in this domain to get started"
+                        : "Create a new document or folder to get started (Items in domains are not shown here)"
+                    }
                   </Typography>
                   <Box sx={{ mt: 2 }}>
                     <Button
@@ -642,6 +788,7 @@ const DocumentBrowser: React.FC<DocumentBrowserProps> = ({ directoryId }) => {
           </Box>
         </Fade>
       </Container>
+      </DocumentURLProvider>
       <TrashBin />
     </DragProvider>
   );

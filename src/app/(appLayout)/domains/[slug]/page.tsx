@@ -3,7 +3,7 @@ import { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import DomainView from "@/components/Domain/DomainView";
+import DocumentBrowser from "@/components/DocumentBrowser";
 
 // Generate dynamic metadata for the domain page
 export async function generateMetadata({
@@ -60,10 +60,6 @@ export default async function DomainPage({
       "Session status:",
       session ? "authenticated" : "unauthenticated",
     );
-
-    // Note: We're intentionally NOT returning early if there's no session
-    // Instead, we'll pass the domain data to the client component
-    // which will handle auth and redirects appropriately
 
     // Fetch domain information regardless of session status
     console.log("Fetching domain with slug:", slug);
@@ -131,61 +127,12 @@ export default async function DomainPage({
       }
     } else {
       console.log("No session, letting client handle authentication");
-      // We'll still render the domain view - client will handle auth
+      // We'll still render the document browser - client will handle auth
     }
 
-    // Fetch documents in this domain
-    console.log("Fetching documents for domain:", domain.id);
-
-    let documents: any[] = [];
-    try {
-      documents = await prisma.document.findMany({
-        where: {
-          domainId: domain.id,
-          // Only include top-level documents (no parent)
-          parentId: null,
-        },
-        orderBy: [
-          // Sort directories first, then documents
-          { type: "asc" },
-          // Use sort_order if available, otherwise sort by name
-          { sort_order: { sort: "asc", nulls: "last" } },
-          { name: "asc" },
-        ],
-        include: {
-          author: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              image: true,
-              handle: true,
-            },
-          },
-          // Include children count for directories
-          _count: {
-            select: {
-              children: true,
-            },
-          },
-        },
-      });
-
-      console.log(`Found ${documents.length} documents in domain`);
-    } catch (docError) {
-      console.error("Error fetching documents:", docError);
-      // Continue with empty documents list
-    }
-
-    // Always render the DomainView, even without a session
-    // This allows hydration to work properly and client-side auth to take over
-    return (
-      <DomainView
-        domain={domain}
-        documents={documents}
-        currentUser={session?.user || domain.user}
-      />
-    );
+    // Use the DocumentBrowser component, passing domainId and domainInfo
+    // This reuses the same browsing UI we have in the /browse route
+    return <DocumentBrowser domainId={domain.id} domainInfo={domain} />;
   } catch (error) {
     console.error("Error loading domain page:", error);
     // Return a more user-friendly error page instead of notFound()
