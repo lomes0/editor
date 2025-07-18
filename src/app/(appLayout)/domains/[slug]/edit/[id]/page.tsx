@@ -5,6 +5,37 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import EditDocument from "@/components/EditDocument";
 
+// Helper function to check if a document belongs to a domain
+async function belongsToDomain(
+  documentId: string,
+  domainId: string,
+): Promise<boolean> {
+  // Get the document with its parent chain
+  let currentDocumentId: string | null = documentId;
+
+  while (currentDocumentId) {
+    const doc: { domainId: string | null; parentId: string | null } | null =
+      await prisma.document.findUnique({
+        where: { id: currentDocumentId },
+        select: { domainId: true, parentId: true },
+      });
+
+    if (!doc) {
+      return false;
+    }
+
+    // If this document has the domainId, it belongs to the domain
+    if (doc.domainId === domainId) {
+      return true;
+    }
+
+    // Move to parent document
+    currentDocumentId = doc.parentId;
+  }
+
+  return false;
+}
+
 // Generate dynamic metadata for the domain document edit page
 export async function generateMetadata({
   params,
@@ -14,8 +45,6 @@ export async function generateMetadata({
   const { slug, id } = await params; // Must await params in Next.js dynamic routes
 
   try {
-    console.log("Generating metadata for domain document edit:", slug, id);
-
     // Get domain data for metadata
     const domain = await prisma.domain.findUnique({
       where: { slug },
@@ -79,13 +108,26 @@ export default async function DomainDocumentEditPage({
       return notFound();
     }
 
-    // Check if document exists and belongs to this domain
-    const document = await prisma.document.findFirst({
-      where: {
-        id,
-        domainId: domain.id,
-        type: "DOCUMENT",
-      },
+    // First check if document exists
+    const documentExists = await prisma.document.findUnique({
+      where: { id },
+      select: { id: true, type: true },
+    });
+
+    if (!documentExists || documentExists.type !== "DOCUMENT") {
+      return notFound();
+    }
+
+    // Check if document belongs to this domain by checking its ancestry
+    const documentBelongsToDomain = await belongsToDomain(id, domain.id);
+
+    if (!documentBelongsToDomain) {
+      return notFound();
+    }
+
+    // Get the full document data now that we know it belongs to the domain
+    const document = await prisma.document.findUnique({
+      where: { id },
       include: {
         coauthors: true,
       },

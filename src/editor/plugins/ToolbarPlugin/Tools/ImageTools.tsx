@@ -18,6 +18,7 @@ import {
   ViewHeadline,
 } from "@mui/icons-material";
 import { $isIFrameNode, IFrameNode } from "@/editor/nodes/IFrameNode";
+import { FloatingActionButton } from "@/components/Layout/FloatingActionsContainer";
 
 const FormatImageRight = () => (
   <SvgIcon viewBox="0 -960 960 960" fontSize="small">
@@ -132,9 +133,8 @@ export default function ImageTools(
           display: "flex",
           flexWrap: "wrap",
           gap: 0.5,
-          position: ["fixed", "static"],
+          position: ["static", "static"],
           justifyContent: ["center", "start"],
-          inset: "auto auto 4px",
           zIndex: 1000,
         }}
       >

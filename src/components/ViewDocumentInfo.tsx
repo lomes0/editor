@@ -20,6 +20,8 @@ import ForkDocument from "./DocumentActions/Fork";
 import AppDrawer from "./AppDrawer";
 import ViewRevisionCard from "./ViewRevisionCard";
 import { useSearchParams } from "next/navigation";
+import { FloatingActionButton } from "./Layout/FloatingActionsContainer";
+import EditDocumentButton from "./Layout/EditDocumentButton";
 
 export default function ViewDocumentInfo(
   { cloudDocument, user }: { cloudDocument: CloudDocument; user?: User },
@@ -214,22 +216,7 @@ export default function ViewDocumentInfo(
           ))}
         </Grid>
       </AppDrawer>
-      <Fab
-        size="medium"
-        component={RouterLink}
-        prefetch={false}
-        href={`/edit/${handle}`}
-        sx={{
-          position: "fixed",
-          right: slideTrigger ? 64 : 24,
-          bottom: 16,
-          displayPrint: "none",
-          transition: `right 225ms ease-in-out`,
-        }}
-        aria-label="Edit"
-      >
-        <Edit />
-      </Fab>
+      <EditDocumentButton handle={handle} />
     </>
   );
 }

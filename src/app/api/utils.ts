@@ -2,19 +2,15 @@ import { getCachedRevision } from "@/repositories/revision";
 import { unstable_cache } from "next/cache";
 
 const PUBLIC_URL = process.env.PUBLIC_URL || "http://localhost:3000";
-console.log("PUBLIC_URL:", PUBLIC_URL);
 
 const getRevisionHtml = async (id: string) => {
   try {
-    console.log("Getting HTML for revision:", id);
     const revision = await getCachedRevision(id);
     if (!revision) {
-      console.log("Revision not found for HTML generation:", id);
       return null;
     }
 
     const data = revision.data;
-    console.log("Sending data to embed API for HTML generation");
 
     try {
       const response = await fetch(`${PUBLIC_URL}/api/embed`, {
@@ -34,7 +30,6 @@ const getRevisionHtml = async (id: string) => {
       }
 
       const html = await response.text();
-      console.log("HTML generation successful, length:", html.length);
       return html;
     } catch (error: any) {
       // During build, the API might not be available
@@ -57,7 +52,6 @@ const findRevisionHtml = unstable_cache(getRevisionHtml, [], {
 
 const getRevisionThumbnail = async (id: string) => {
   try {
-    console.log("Generating thumbnail for revision:", id);
     const revision = await getCachedRevision(id);
     if (!revision) {
       console.log("Revision not found for thumbnail:", id);
@@ -83,7 +77,6 @@ const getRevisionThumbnail = async (id: string) => {
       },
     };
 
-    console.log("Sending thumbnail data to embed API");
     try {
       const response = await fetch(`${PUBLIC_URL}/api/embed`, {
         method: "POST",
@@ -102,10 +95,6 @@ const getRevisionThumbnail = async (id: string) => {
       }
 
       const html = await response.text();
-      console.log(
-        "Thumbnail HTML generated successfully, length:",
-        html.length,
-      );
       return html;
     } catch (error: any) {
       // During build, the API might not be available

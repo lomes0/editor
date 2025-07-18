@@ -34,6 +34,7 @@ import { Delete, Draw, Edit, Menu, Save } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import { ANNOUNCE_COMMAND } from "@/editor/commands";
 import { Announcement } from "@/types";
+import { FloatingActionButton } from "@/components/Layout/FloatingActionsContainer";
 
 import dynamic from "next/dynamic";
 import type {
@@ -428,11 +429,9 @@ export default function MathTools(
           ...sx,
           display: "flex",
           gap: 0.5,
-          position: ["fixed", "static"],
+          position: ["static", "static"],
           justifyContent: ["center", "start"],
-          inset: "auto auto calc(var(--keyboard-inset-height) + 4px)",
           zIndex: 1000,
-          transition: "bottom 0.3s",
         }}
       >
         <ToggleButtonGroup

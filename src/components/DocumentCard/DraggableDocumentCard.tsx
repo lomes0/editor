@@ -1,7 +1,7 @@
 "use client";
-import React, { useContext, useRef, useState } from "react";
+import React, { useCallback, useContext, useRef, useState } from "react";
 import { DocumentType, User, UserDocument } from "@/types";
-import { Box, SxProps } from "@mui/material";
+import { Box, SxProps, useMediaQuery } from "@mui/material";
 import { Theme, useTheme } from "@mui/material/styles";
 import DocumentCard from "./index";
 import { actions, useDispatch, useSelector } from "@/store";
@@ -24,8 +24,12 @@ const DraggableDocumentCard: React.FC<DraggableDocumentCardProps> = ({
 }) => {
   const dispatch = useDispatch();
   const theme = useTheme();
+  const prefersReducedMotion = useMediaQuery(
+    "(prefers-reduced-motion: reduce)",
+  );
   const [isDragging, setIsDragging] = useState(false);
   const [isDropTarget, setIsDropTarget] = useState(false);
+  const [dragEnterCount, setDragEnterCount] = useState(0); // Fix drag leave issues
   const cardRef = useRef<HTMLDivElement>(null);
   const documents = useSelector((state) => state.documents);
   const { setIsDragging: setGlobalDragging } = useContext(DragContext);
@@ -38,7 +42,8 @@ const DraggableDocumentCard: React.FC<DraggableDocumentCardProps> = ({
   // Only directories can be drop targets
   const canBeDropTarget = isDirectory && !isCurrentDirectory;
 
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+  // Improved drag start with better accessibility
+  const handleDragStart = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     // Set the drag data (document id and type)
     e.dataTransfer.setData(
       "application/matheditor-document",
@@ -62,25 +67,64 @@ const DraggableDocumentCard: React.FC<DraggableDocumentCardProps> = ({
     e.dataTransfer.effectAllowed = "move";
     setIsDragging(true);
     setGlobalDragging(true);
-  };
 
-  const handleDragEnd = () => {
+    // Announce drag start for screen readers
+    const announcement = document?.name
+      ? `Started dragging ${document.name}`
+      : "Started dragging document";
+
+    // Create a temporary live region for announcements
+    const liveRegion = globalThis.document?.createElement("div");
+    if (liveRegion) {
+      liveRegion.setAttribute("aria-live", "assertive");
+      liveRegion.setAttribute("aria-atomic", "true");
+      liveRegion.style.position = "absolute";
+      liveRegion.style.left = "-10000px";
+      liveRegion.textContent = announcement;
+      globalThis.document?.body.appendChild(liveRegion);
+
+      setTimeout(() => {
+        if (globalThis.document?.body.contains(liveRegion)) {
+          globalThis.document.body.removeChild(liveRegion);
+        }
+      }, 1000);
+    }
+  }, [userDocument.id, document?.name, document?.type, setGlobalDragging]);
+
+  const handleDragEnd = useCallback(() => {
     setIsDragging(false);
     setGlobalDragging(false);
-  };
+    setIsDropTarget(false);
+    setDragEnterCount(0);
+  }, [setGlobalDragging]);
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     // Only allow dropping into directories
     if (canBeDropTarget) {
       e.preventDefault();
       e.dataTransfer.dropEffect = "move";
+    }
+  }, [canBeDropTarget]);
+
+  const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    if (canBeDropTarget) {
+      e.preventDefault();
+      setDragEnterCount((prev) => prev + 1);
       setIsDropTarget(true);
     }
-  };
+  }, [canBeDropTarget]);
 
-  const handleDragLeave = () => {
-    setIsDropTarget(false);
-  };
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    if (canBeDropTarget) {
+      setDragEnterCount((prev) => {
+        const newCount = prev - 1;
+        if (newCount === 0) {
+          setIsDropTarget(false);
+        }
+        return newCount;
+      });
+    }
+  }, [canBeDropTarget]);
 
   const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -169,11 +213,20 @@ const DraggableDocumentCard: React.FC<DraggableDocumentCardProps> = ({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDragOver={handleDragOver}
+      onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
+      role={!isCurrentDirectory ? "button" : undefined}
+      tabIndex={!isCurrentDirectory ? 0 : undefined}
+      aria-label={!isCurrentDirectory && document?.name
+        ? `Draggable ${document.name}. Press space to start dragging.`
+        : undefined}
       sx={{
         cursor: isCurrentDirectory ? "default" : "grab",
-        transition: theme.transitions.create([
+        "&:active": {
+          cursor: isCurrentDirectory ? "default" : "grabbing",
+        },
+        transition: prefersReducedMotion ? "none" : theme.transitions.create([
           "transform",
           "box-shadow",
           "border",
@@ -183,35 +236,45 @@ const DraggableDocumentCard: React.FC<DraggableDocumentCardProps> = ({
           duration: theme.transitions.duration.standard,
           easing: theme.transitions.easing.easeInOut,
         }),
-        transform: isDragging ? "scale(0.95)" : "scale(1)",
-        opacity: isDragging ? 0.7 : 1,
+        transform: isDragging ? "scale(0.98)" : "scale(1)", // Subtle scale instead of aggressive
+        opacity: isDragging ? 0.8 : 1, // Less dramatic opacity change
         position: "relative",
-        "&::before": canBeDropTarget
+        // Improved drop target indication
+        "&::before": canBeDropTarget && isDropTarget
           ? {
             content: '""',
             position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
+            top: -2,
+            left: -2,
+            right: -2,
+            bottom: -2,
             zIndex: 1,
-            borderRadius: theme.shape.borderRadius,
-            border: isDropTarget
-              ? `2px solid ${theme.palette.primary.main}`
-              : "none",
-            backgroundColor: isDropTarget
-              ? `${theme.palette.primary.main}20` // 20% opacity
-              : "transparent",
+            borderRadius: theme.shape.borderRadius + 2,
+            border: `3px solid ${theme.palette.primary.main}`,
+            backgroundColor: `${theme.palette.primary.main}15`, // More subtle background
             pointerEvents: "none",
-            transition: theme.transitions.create([
-              "border",
-              "background-color",
-            ], {
-              duration: theme.transitions.duration.short,
-              easing: theme.transitions.easing.easeInOut,
-            }),
+            transition: prefersReducedMotion
+              ? "none"
+              : theme.transitions.create([
+                "border",
+                "background-color",
+              ], {
+                duration: theme.transitions.duration.short,
+                easing: theme.transitions.easing.easeInOut,
+              }),
           }
           : {},
+        // Focus styles for keyboard navigation
+        "&:focus-visible": {
+          outline: `2px solid ${theme.palette.primary.main}`,
+          outlineOffset: 2,
+        },
+        // High contrast mode support
+        "@media (prefers-contrast: high)": {
+          border: isDragging
+            ? `2px solid ${theme.palette.primary.main}`
+            : "none",
+        },
       }}
     >
       <DocumentCard
@@ -219,21 +282,41 @@ const DraggableDocumentCard: React.FC<DraggableDocumentCardProps> = ({
         user={user}
         sx={{
           ...sx,
-          // Add consistent hover effect for all cards
-          "&:hover": {
-            boxShadow: 3,
-          },
-          // Add visual indicator only for drop targets
+          // Improved hover states with reduced motion support
+          "&:hover": !prefersReducedMotion
+            ? {
+              boxShadow: theme.shadows[4],
+              transform: "translateY(-2px)",
+            }
+            : {
+              boxShadow: theme.shadows[2],
+            },
+          // Enhanced drop target visual feedback
           ...(canBeDropTarget && {
-            "&:hover": isDropTarget
+            "&:hover": isDropTarget && !prefersReducedMotion
               ? {
-                borderStyle: "solid",
                 borderColor: theme.palette.primary.main,
-                backgroundColor: `${theme.palette.primary.main}20`, // 20% opacity for active drop targets
+                backgroundColor: `${theme.palette.primary.main}08`,
+                transform: "scale(1.02)",
+              }
+              : !prefersReducedMotion
+              ? {
+                boxShadow: theme.shadows[4],
+                transform: "translateY(-2px)",
               }
               : {
-                boxShadow: 3,
+                boxShadow: theme.shadows[2],
               },
+          }),
+          // Ensure consistent transition timing
+          transition: prefersReducedMotion ? "none" : theme.transitions.create([
+            "transform",
+            "box-shadow",
+            "border-color",
+            "background-color",
+          ], {
+            duration: theme.transitions.duration.short,
+            easing: theme.transitions.easing.easeInOut,
           }),
         }}
       />

@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { memo, Suspense } from "react";
+import { memo, Suspense, useMemo } from "react";
 import { SxProps, Theme } from "@mui/material/styles";
 import { Badge, IconButton, Skeleton } from "@mui/material";
 import { MoreVert, Share } from "@mui/icons-material";
@@ -38,6 +38,7 @@ interface DocumentCardProps {
 
 /**
  * Document card component representing a document in the system
+ * Optimized for performance and accessibility
  */
 const DocumentCard: React.FC<DocumentCardProps> = memo(({
   userDocument,
@@ -46,49 +47,73 @@ const DocumentCard: React.FC<DocumentCardProps> = memo(({
   cardConfig = {},
 }) => {
   // Apply default configuration with overrides
-  const config = {
+  const config = useMemo(() => ({
     minHeight: cardConfig.minHeight || cardTheme.minHeight.document,
     showAuthor: cardConfig.showAuthor !== false,
     maxStatusChips: cardConfig.maxStatusChips,
     showSortOrder: cardConfig.showSortOrder !== false,
     showPermissionChips: cardConfig.showPermissionChips !== false,
-  };
+  }), [cardConfig]);
 
-  // Document state calculations
-  const localDocument = userDocument?.local;
-  const cloudDocument = userDocument?.cloud;
-  const isLocal = Boolean(localDocument);
-  const isCloud = Boolean(cloudDocument);
-  const isLocalOnly = isLocal && !isCloud;
-  const isCloudOnly = !isLocal && isCloud;
-  const isUploaded = isLocal && isCloud;
-  const isUpToDate = isUploaded && localDocument?.head === cloudDocument?.head;
+  // Memoize document state calculations for performance
+  const documentState = useMemo(() => {
+    const localDocument = userDocument?.local;
+    const cloudDocument = userDocument?.cloud;
+    const isLocal = Boolean(localDocument);
+    const isCloud = Boolean(cloudDocument);
+    const isLocalOnly = isLocal && !isCloud;
+    const isCloudOnly = !isLocal && isCloud;
+    const isUploaded = isLocal && isCloud;
+    const isUpToDate = isUploaded &&
+      localDocument?.head === cloudDocument?.head;
 
-  // Document permissions and status
-  const isPublished = isCloud && cloudDocument?.published &&
-    config.showPermissionChips;
-  const isCollab = isCloud && cloudDocument?.collab &&
-    config.showPermissionChips;
-  const isPrivate = isCloud && cloudDocument?.private &&
-    config.showPermissionChips;
-  const isAuthor = isCloud ? cloudDocument?.author?.id === user?.id : true;
-  const isCoauthor = isCloud
-    ? cloudDocument?.coauthors?.some((u) => u.id === user?.id)
-    : false;
+    return {
+      localDocument,
+      cloudDocument,
+      isLocal,
+      isCloud,
+      isLocalOnly,
+      isCloudOnly,
+      isUploaded,
+      isUpToDate,
+    };
+  }, [userDocument]);
+
+  // Memoize permission and status calculations
+  const permissionState = useMemo(() => {
+    const { cloudDocument, isCloud } = documentState;
+
+    return {
+      isPublished: isCloud && cloudDocument?.published &&
+        config.showPermissionChips,
+      isCollab: isCloud && cloudDocument?.collab && config.showPermissionChips,
+      isPrivate: isCloud && cloudDocument?.private &&
+        config.showPermissionChips,
+      isAuthor: isCloud ? cloudDocument?.author?.id === user?.id : true,
+      isCoauthor: isCloud
+        ? cloudDocument?.coauthors?.some((u) => u.id === user?.id)
+        : false,
+    };
+  }, [documentState, user?.id, config.showPermissionChips]);
 
   // Get the document to display (prefer local if available)
-  const document = isCloudOnly ? cloudDocument : localDocument;
+  const document = documentState.isCloudOnly
+    ? documentState.cloudDocument
+    : documentState.localDocument;
 
   // Navigation and metadata
-  const handle = cloudDocument?.handle ?? localDocument?.handle ?? document?.id;
   const { getDocumentUrl } = useDocumentURL();
+  const handle = documentState.cloudDocument?.handle ??
+    documentState.localDocument?.handle ??
+    document?.id;
+
   // Get the URL from context if document exists, or fallback to root
   const href = document && userDocument ? getDocumentUrl(userDocument) : "/";
-  const author = cloudDocument?.author ?? user;
+  const author = documentState.cloudDocument?.author ?? user;
 
   // Sort order for display
-  const sortOrderValue = localDocument?.sort_order ??
-    cloudDocument?.sort_order ?? 0;
+  const sortOrderValue = documentState.localDocument?.sort_order ??
+    documentState.cloudDocument?.sort_order ?? 0;
   const hasSortOrder = sortOrderValue > 0 && config.showSortOrder;
 
   // Determine the badge content (if any)
@@ -97,66 +122,92 @@ const DocumentCard: React.FC<DocumentCardProps> = memo(({
   // Rendering helpers
   const isLoading = !userDocument;
 
-  // Top content with document thumbnail
-  const topContent = (
-    <Badge badgeContent={revisionsBadgeContent} color="secondary">
-      <Suspense fallback={<ThumbnailSkeleton />}>
-        <DocumentThumbnail userDocument={userDocument} />
-      </Suspense>
-    </Badge>
+  // Memoize top content to prevent unnecessary re-renders
+  const topContent = useMemo(
+    () => (
+      <Badge badgeContent={revisionsBadgeContent} color="secondary">
+        <Suspense fallback={<ThumbnailSkeleton />}>
+          <DocumentThumbnail userDocument={userDocument} />
+        </Suspense>
+      </Badge>
+    ),
+    [revisionsBadgeContent, userDocument],
   );
 
-  // Chip content based on document status
-  const chipContent = isLoading ? renderSkeletonChips() : renderStatusChips({
-    isLocalOnly,
-    isUploaded,
-    isUpToDate,
-    isCloudOnly: isCloudOnly && (isAuthor || isCoauthor),
-    isPublished,
-    isCollab,
-    isPrivate,
+  // Memoize chip content based on document status
+  const chipContent = useMemo(() => {
+    if (isLoading) return renderSkeletonChips({});
+
+    return renderStatusChips({
+      isLocalOnly: documentState.isLocalOnly,
+      isUploaded: documentState.isUploaded,
+      isUpToDate: documentState.isUpToDate,
+      isCloudOnly: documentState.isCloudOnly &&
+        (permissionState.isAuthor || permissionState.isCoauthor),
+      isPublished: permissionState.isPublished,
+      isCollab: permissionState.isCollab,
+      isPrivate: permissionState.isPrivate,
+      hasSortOrder,
+      sortOrderValue,
+      author,
+      showAuthor: config.showAuthor,
+      statusChipCount: config.maxStatusChips,
+    });
+  }, [
+    isLoading,
+    documentState,
+    permissionState,
     hasSortOrder,
     sortOrderValue,
     author,
-    showAuthor: config.showAuthor,
-    statusChipCount: config.maxStatusChips,
-  });
+    config.showAuthor,
+    config.maxStatusChips,
+  ]);
 
-  // Action buttons
-  const actionContent = isLoading
-    ? (
-      <>
-        <IconButton
-          aria-label="Share Document"
-          size="small"
-          disabled
-        >
-          <Share />
-        </IconButton>
-        <IconButton
-          aria-label="Document Actions"
-          size="small"
-          disabled
-        >
-          <MoreVert />
-        </IconButton>
-      </>
-    )
-    : (
+  // Memoize action content for better performance
+  const actionContent = useMemo(() => {
+    if (isLoading) {
+      return (
+        <>
+          <IconButton
+            aria-label="Share Document"
+            size="small"
+            disabled
+          >
+            <Share />
+          </IconButton>
+          <IconButton
+            aria-label="Document Actions"
+            size="small"
+            disabled
+          >
+            <MoreVert />
+          </IconButton>
+        </>
+      );
+    }
+
+    return (
       <DocumentActionMenu
         userDocument={userDocument}
         user={user}
       />
     );
+  }, [isLoading, userDocument, user]);
 
-  // Title content
-  const titleContent = document
-    ? document.name
-    : <Skeleton variant="text" width={190} />;
+  // Memoize title content
+  const titleContent = useMemo(() => {
+    return document?.name || <Skeleton variant="text" width={190} />;
+  }, [document?.name]);
+
+  // Memoize aria label for better accessibility
+  const ariaLabel = useMemo(() => {
+    return document ? `Open ${document.name} document` : "Loading document";
+  }, [document]);
 
   return (
     <CardBase
-      title={titleContent}
+      title=""
       href={href}
       isLoading={isLoading}
       topContent={topContent}
@@ -164,16 +215,10 @@ const DocumentCard: React.FC<DocumentCardProps> = memo(({
       actionContent={actionContent}
       minHeight={config.minHeight}
       className="document-card"
-      ariaLabel={document
-        ? `Open ${document.name} document`
-        : "Loading document"}
+      ariaLabel={ariaLabel}
       sx={sx}
       contentProps={{
-        titlePadding: {
-          top: cardTheme.spacing.titleMargin,
-          bottom: cardTheme.spacing.titleMargin,
-        },
-        showSubheaderSpace: true,
+        showSubheaderSpace: false,
       }}
     />
   );

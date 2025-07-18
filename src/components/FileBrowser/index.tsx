@@ -296,12 +296,40 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ open, domainId }) => {
 
     // Function to determine if a document belongs to the selected domain
     const belongsToDomain = (doc: UserDocument) => {
-      if (!domainId) return true; // If no domain filter, include all documents
+      if (!domainId) return false; // If no domain filter, exclude all documents
 
       // Check if document has a matching domainId in either local or cloud version
       const docDomainId = doc.local?.domainId || doc.cloud?.domainId;
+      if (docDomainId === domainId) return true;
 
-      return docDomainId === domainId;
+      // If not directly in domain, check if it's a descendant of a directory in this domain
+      const checkAncestorDomain = (
+        docId: string,
+        visited = new Set<string>(),
+      ): boolean => {
+        // Prevent infinite loops
+        if (visited.has(docId)) return false;
+        visited.add(docId);
+
+        const currentDoc = documents.find((d) => d.id === docId);
+        if (!currentDoc) return false;
+
+        const parentId = currentDoc.local?.parentId ||
+          currentDoc.cloud?.parentId;
+        if (!parentId) return false;
+
+        const parent = documents.find((d) => d.id === parentId);
+        if (!parent) return false;
+
+        // Check if parent is in the domain
+        const parentDomainId = parent.local?.domainId || parent.cloud?.domainId;
+        if (parentDomainId === domainId) return true;
+
+        // Recursively check parent's ancestors
+        return checkAncestorDomain(parentId, visited);
+      };
+
+      return checkAncestorDomain(doc.id);
     };
 
     // Create tree structure

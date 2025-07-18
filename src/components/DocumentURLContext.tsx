@@ -1,6 +1,6 @@
 "use client";
-import React, { createContext, useContext } from 'react';
-import { UserDocument } from '@/types';
+import React, { createContext, useContext } from "react";
+import { UserDocument } from "@/types";
 
 interface DocumentURLContextProps {
   getDocumentUrl: (doc: UserDocument) => string;
@@ -10,8 +10,9 @@ interface DocumentURLContextProps {
 const DocumentURLContext = createContext<DocumentURLContextProps>({
   getDocumentUrl: (doc: UserDocument) => {
     const docId = doc.id;
-    const isDirectory = (doc.local?.type === 'DIRECTORY') || (doc.cloud?.type === 'DIRECTORY');
-    
+    const isDirectory = (doc.local?.type === "DIRECTORY") ||
+      (doc.cloud?.type === "DIRECTORY");
+
     return isDirectory ? `/browse/${docId}` : `/view/${docId}`;
   },
 });

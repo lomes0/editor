@@ -5,6 +5,37 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import DocumentBrowser from "@/components/DocumentBrowser";
 
+// Helper function to check if a document belongs to a domain
+async function belongsToDomain(
+  documentId: string,
+  domainId: string,
+): Promise<boolean> {
+  // Get the document with its parent chain
+  let currentDocumentId: string | null = documentId;
+
+  while (currentDocumentId) {
+    const doc: { domainId: string | null; parentId: string | null } | null =
+      await prisma.document.findUnique({
+        where: { id: currentDocumentId },
+        select: { domainId: true, parentId: true },
+      });
+
+    if (!doc) {
+      return false;
+    }
+
+    // If this document has the domainId, it belongs to the domain
+    if (doc.domainId === domainId) {
+      return true;
+    }
+
+    // Move to parent document
+    currentDocumentId = doc.parentId;
+  }
+
+  return false;
+}
+
 // Generate dynamic metadata for the domain directory page
 export async function generateMetadata({
   params,
@@ -14,15 +45,12 @@ export async function generateMetadata({
   const { slug, id } = await params; // Must await params in Next.js dynamic routes
 
   try {
-    console.log("Generating metadata for domain directory:", slug, id);
-
     // Get domain data for metadata
     const domain = await prisma.domain.findUnique({
       where: { slug },
     });
 
     if (!domain) {
-      console.log("Domain not found for metadata:", slug);
       return {
         title: "Domain Not Found",
       };
@@ -69,18 +97,40 @@ export default async function DomainDirectoryPage({
       return notFound();
     }
 
-    // Check if user is not the domain owner (domains don't have a private flag, only documents do)
-    if (domain.userId !== session?.user?.id) {
-      // In the future, you might want to add domain.private check if that field is added to the Domain model
+    // First check if directory exists at all
+    const directoryExists = await prisma.document.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        domainId: true,
+        type: true,
+        authorId: true,
+        name: true, // Get the name for display purposes
+      },
+    });
+
+    if (!directoryExists) {
       return notFound();
     }
 
-    // Check if directory exists and belongs to this domain
-    const directory = await prisma.document.findFirst({
-      where: {
-        id,
-        domainId: domain.id,
-        type: "DIRECTORY",
+    // Check if directory belongs to this domain by checking its ancestry
+    const directoryBelongsToDomain = await belongsToDomain(id, domain.id);
+
+    if (!directoryBelongsToDomain || directoryExists.type !== "DIRECTORY") {
+      return notFound();
+    }
+
+    // Get the full directory data now that we know it belongs to the domain
+    const directory = await prisma.document.findUnique({
+      where: { id },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
       },
     });
 
@@ -88,8 +138,24 @@ export default async function DomainDirectoryPage({
       return notFound();
     }
 
+    // Check permissions: If directory is private, only the domain owner or directory author can view it
+    if (directory.private) {
+      const isAuthor = session?.user?.id === directory.author.id;
+      const isDomainOwner = domain.userId === session?.user?.id;
+
+      if (!isAuthor && !isDomainOwner) {
+        return notFound();
+      }
+    }
+
     // Render the document browser with the directory id and domain info
-    return <DocumentBrowser directoryId={id} domainId={domain.id} domainInfo={domain} />;
+    return (
+      <DocumentBrowser
+        directoryId={id}
+        domainId={domain.id}
+        domainInfo={domain}
+      />
+    );
   } catch (error) {
     console.error("Error fetching domain directory:", error);
     return notFound();

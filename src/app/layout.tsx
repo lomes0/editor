@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import ThemeProvider from "@/components/Layout/ThemeProvider";
 import AuthProvider from "@/components/Auth/AuthProvider";
+import { FloatingActionsProvider } from "@/components/Layout/FloatingActions";
 import "mathlive/static.css";
 import "@/editor/theme.css";
 import "./globals.css";
@@ -75,7 +76,9 @@ export default function RootLayout(
       <body>
         <AuthProvider>
           <ThemeProvider>
-            {children}
+            <FloatingActionsProvider>
+              {children}
+            </FloatingActionsProvider>
           </ThemeProvider>
         </AuthProvider>
       </body>

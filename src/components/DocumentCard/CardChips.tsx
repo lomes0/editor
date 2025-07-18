@@ -16,6 +16,8 @@ import { cardTheme } from "./theme";
  * Props for a single status chip
  */
 interface ChipProps {
+  /** Unique key for React reconciliation */
+  key?: string;
   /** Icon to display in the chip */
   icon?: React.ReactElement;
   /** Text to display in the chip */
@@ -68,8 +70,10 @@ interface StatusChipProps {
 
 /**
  * Create a styled chip with consistent appearance
+ * Helper function for creating chips with consistent styling
  */
 export const createChip = ({
+  key,
   icon,
   label,
   avatar,
@@ -82,38 +86,45 @@ export const createChip = ({
   size = "small",
   variant = "outlined",
   onClick,
-}: ChipProps) => (
-  <Chip
-    size={size}
-    variant={variant}
-    icon={icon}
-    avatar={avatar}
-    label={label}
-    onClick={onClick}
-    sx={{
-      padding: "2px 4px",
-      "& .MuiChip-label": {
-        padding: "0 4px",
-        ...(icon && { marginLeft: "1px" }), // Add space between icon and text
-      },
-      "& .MuiChip-icon": {
-        marginRight: 0, // Remove default right margin from icon
-      },
-      "& .MuiChip-avatar": {
-        marginRight: 0, // Remove default right margin from avatar
-      },
-      ...(pointerEvents && { pointerEvents: "auto" }),
-      ...(borderColor && { borderColor }),
-      ...(bgColor && { bgcolor: bgColor }),
-      ...(textColor && { color: textColor }),
-      ...(fontWeight && { fontWeight }),
-      ...sx,
-    }}
-  />
-);
+}: ChipProps) => {
+  // Create chip styles object
+  const chipStyles: SxProps<Theme> = {
+    padding: "2px 4px",
+    "& .MuiChip-label": {
+      padding: "0 4px",
+      ...(icon && { marginLeft: "1px" }), // Add space between icon and text
+    },
+    "& .MuiChip-icon": {
+      marginRight: 0, // Remove default right margin from icon
+    },
+    "& .MuiChip-avatar": {
+      marginRight: 0, // Remove default right margin from avatar
+    },
+    ...(pointerEvents && { pointerEvents: "auto" }),
+    ...(borderColor && { borderColor }),
+    ...(bgColor && { bgcolor: bgColor }),
+    ...(textColor && { color: textColor }),
+    ...(fontWeight && { fontWeight }),
+    ...sx,
+  };
+
+  return (
+    <Chip
+      key={key}
+      size={size}
+      variant={variant}
+      icon={icon}
+      avatar={avatar}
+      label={label}
+      onClick={onClick}
+      sx={chipStyles}
+    />
+  );
+};
 
 /**
  * Generate status chips based on document/directory properties
+ * Regular function - memoization should be handled by the calling component
  */
 export const renderStatusChips = ({
   isLocalOnly = false,
@@ -133,13 +144,14 @@ export const renderStatusChips = ({
   defaultChipStyles = {},
   statusChipCount,
 }: StatusChipProps) => {
-  // Array to hold all status chips
-  const statusChips = [];
+  // Generate status chips based on state
+  const statusChips: React.ReactNode[] = [];
 
   // Add status chips based on state
   if (isLocalOnly) {
     statusChips.push(
       createChip({
+        key: "local-chip",
         icon: <MobileFriendly />,
         label: "Local",
         size: chipSize,
@@ -152,6 +164,7 @@ export const renderStatusChips = ({
   if (isUploaded) {
     statusChips.push(
       createChip({
+        key: "upload-chip",
         icon: isUpToDate ? <CloudDone /> : <CloudSync />,
         label: isUpToDate ? "Synced" : "Out of Sync",
         size: chipSize,
@@ -164,6 +177,7 @@ export const renderStatusChips = ({
   if (isCloudOnly) {
     statusChips.push(
       createChip({
+        key: "cloud-chip",
         icon: <Cloud />,
         label: "Cloud",
         size: chipSize,
@@ -176,6 +190,7 @@ export const renderStatusChips = ({
   if (isPublished) {
     statusChips.push(
       createChip({
+        key: "published-chip",
         icon: <Public />,
         label: "Published",
         size: chipSize,
@@ -188,6 +203,7 @@ export const renderStatusChips = ({
   if (isCollab) {
     statusChips.push(
       createChip({
+        key: "collab-chip",
         icon: <Workspaces />,
         label: "Collab",
         size: chipSize,
@@ -200,6 +216,7 @@ export const renderStatusChips = ({
   if (isPrivate) {
     statusChips.push(
       createChip({
+        key: "private-chip",
         icon: <Security />,
         label: "Private",
         size: chipSize,
@@ -209,90 +226,90 @@ export const renderStatusChips = ({
     );
   }
 
-  // Limit the number of status chips if specified
+  // Apply chip count limit
   const displayedStatusChips = statusChipCount
     ? statusChips.slice(0, statusChipCount)
     : statusChips;
 
+  // Generate author chip
+  const authorChip = (!showAuthor || !author) ? null : (
+    <Chip
+      key="author-chip"
+      size={chipSize}
+      variant={chipVariant}
+      sx={{
+        pointerEvents: "auto",
+        padding: "2px 4px",
+        "& .MuiChip-label": {
+          padding: "0 4px",
+          marginLeft: "1px", // Add more space between avatar and text
+        },
+        "& .MuiChip-avatar": {
+          marginRight: 0, // Remove default right margin from avatar
+        },
+        ...defaultChipStyles.sx,
+      }}
+      avatar={
+        <Avatar
+          alt={author.name ?? "Local User"}
+          src={author.image ?? undefined}
+        />
+      }
+      label={author.name ?? "Local User"}
+    />
+  );
+
+  // Generate sort order chip
+  const sortOrderChip = !hasSortOrder ? null : createChip({
+    key: "sort-order-chip",
+    label: `Sort: ${sortOrderValue}`,
+    size: chipSize,
+    variant: chipVariant,
+    bgColor: cardTheme.colors.sortChipBg,
+    borderColor: "gray",
+    textColor: "gray",
+    fontWeight: "bold",
+    ...sortChipStyles,
+  });
+
   return (
     <>
-      {displayedStatusChips.map((chip, index) => (
-        <React.Fragment key={`status-chip-${index}`}>
-          {chip}
-        </React.Fragment>
-      ))}
-
-      {/* Author chip */}
-      {showAuthor && author && (
-        <Chip
-          size={chipSize}
-          variant={chipVariant}
-          sx={{
-            pointerEvents: "auto",
-            padding: "2px 4px",
-            "& .MuiChip-label": {
-              padding: "0 4px",
-              marginLeft: "1px", // Add more space between avatar and text
-            },
-            "& .MuiChip-avatar": {
-              marginRight: 0, // Remove default right margin from avatar
-            },
-            ...defaultChipStyles.sx,
-          }}
-          avatar={
-            <Avatar
-              alt={author.name ?? "Local User"}
-              src={author.image ?? undefined}
-            />
-          }
-          label={author.name ?? "Local User"}
-        />
-      )}
-
-      {/* Sort order chip */}
-      {hasSortOrder && (
-        createChip({
-          label: `Sort: ${sortOrderValue}`,
-          size: chipSize,
-          variant: chipVariant,
-          bgColor: cardTheme.colors.sortChipBg,
-          borderColor: "gray",
-          textColor: "gray",
-          fontWeight: "bold",
-          ...sortChipStyles,
-        })
-      )}
+      {displayedStatusChips}
+      {authorChip}
+      {sortOrderChip}
     </>
   );
 };
 
 /**
  * Render loading skeleton chips for cards in loading state
+ * Regular function - memoization should be handled by the calling component
  */
-export const renderSkeletonChips = (
+export const renderSkeletonChips = ({
   count = 2,
   sizes = [50, 70],
   chipProps = {},
-) => {
-  return (
-    <>
-      {Array.from({ length: count }).map((_, index) => (
-        <Chip
-          key={`skeleton-chip-${index}`}
-          size="small"
-          variant="outlined"
-          label={
-            <Skeleton variant="text" width={sizes[index % sizes.length]} />
-          }
-          sx={{
-            padding: "2px 4px",
-            "& .MuiChip-label": {
-              padding: "0 4px",
-            },
-          }}
-          {...chipProps}
-        />
-      ))}
-    </>
-  );
+}: {
+  count?: number;
+  sizes?: number[];
+  chipProps?: object;
+}) => {
+  // Generate skeleton chips
+  const skeletonChips = Array.from({ length: count }).map((_, index) => (
+    <Chip
+      key={`skeleton-chip-${index}`}
+      size="small"
+      variant="outlined"
+      label={<Skeleton variant="text" width={sizes[index % sizes.length]} />}
+      sx={{
+        padding: "2px 4px",
+        "& .MuiChip-label": {
+          padding: "0 4px",
+        },
+      }}
+      {...chipProps}
+    />
+  ));
+
+  return <>{skeletonChips}</>;
 };

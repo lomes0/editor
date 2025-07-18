@@ -12,6 +12,7 @@ import { debounce } from "@mui/material/utils";
 import Editor from "../Editor";
 import { Fab } from "@mui/material";
 import { Save } from "@mui/icons-material";
+import SaveDocumentButton from "../Layout/SaveDocumentButton";
 
 const EditDocumentInfo = dynamic(
   () => import("@/components/EditDocument/EditDocumentInfo"),
@@ -264,6 +265,16 @@ const DocumentEditor: React.FC<React.PropsWithChildren> = ({ children }) => {
     };
   }, []);
 
+  const handleSaveAndNavigate = useCallback(async () => {
+    const success = await saveToCloud();
+    if (success && document) {
+      // Navigate to the view route after saving
+      const handle = document.handle || document.id;
+      router.push(`/view/${handle}`);
+    }
+    return success;
+  }, [saveToCloud, document, router]);
+
   if (error) {
     return <SplashScreen title={error.title} subtitle={error.subtitle} />;
   }
@@ -279,33 +290,7 @@ const DocumentEditor: React.FC<React.PropsWithChildren> = ({ children }) => {
         onChange={handleChange}
       />
       <EditDocumentInfo documentId={document.id} editorRef={editorRef} />
-
-      {/* Save button */}
-      <Fab
-        size="medium"
-        onClick={async () => {
-          const success = await saveToCloud();
-          if (success) {
-            // Navigate to the view route after saving
-            const handle = document.handle || document.id;
-            router.push(`/view/${handle}`);
-          }
-        }}
-        sx={{
-          position: "fixed",
-          right: 24,
-          bottom: 16,
-          displayPrint: "none",
-          bgcolor: "white",
-          color: "black",
-          "&:hover": {
-            bgcolor: "#f5f5f5",
-          },
-        }}
-        aria-label="Save"
-      >
-        <Save />
-      </Fab>
+      <SaveDocumentButton onSave={handleSaveAndNavigate} />
     </>
   );
 };

@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import { SxProps, Theme } from "@mui/material/styles";
 import { Avatar, Badge, Box, IconButton, Skeleton } from "@mui/material";
 import { Folder, MoreVert, Share } from "@mui/icons-material";
@@ -36,6 +36,7 @@ interface DirectoryCardProps {
 
 /**
  * Directory card component representing a folder of documents
+ * Optimized for performance and accessibility
  */
 const DirectoryCard: React.FC<DirectoryCardProps> = memo(({
   userDocument,
@@ -44,57 +45,101 @@ const DirectoryCard: React.FC<DirectoryCardProps> = memo(({
   cardConfig = {},
 }) => {
   // Apply default configuration with overrides
-  const config = {
+  const config = useMemo(() => ({
     minHeight: cardConfig.minHeight || cardTheme.minHeight.directory,
     showAuthor: cardConfig.showAuthor !== false,
     maxStatusChips: cardConfig.maxStatusChips,
     showSortOrder: cardConfig.showSortOrder !== false,
     showPermissionChips: cardConfig.showPermissionChips !== false,
-  };
+  }), [cardConfig]);
 
-  // Document state calculations
-  const localDocument = userDocument?.local;
-  const cloudDocument = userDocument?.cloud;
-  const isLocal = Boolean(localDocument);
-  const isCloud = Boolean(cloudDocument);
-  const isLocalOnly = isLocal && !isCloud;
-  const isCloudOnly = !isLocal && isCloud;
-  const isUploaded = isLocal && isCloud;
-  const isUpToDate = isUploaded && localDocument?.head === cloudDocument?.head;
+  // Memoize document state calculations for performance
+  const documentState = useMemo(() => {
+    const localDocument = userDocument?.local;
+    const cloudDocument = userDocument?.cloud;
+    const isLocal = Boolean(localDocument);
+    const isCloud = Boolean(cloudDocument);
+    const isLocalOnly = isLocal && !isCloud;
+    const isCloudOnly = !isLocal && isCloud;
+    const isUploaded = isLocal && isCloud;
+    const isUpToDate = isUploaded &&
+      localDocument?.head === cloudDocument?.head;
 
-  // Document permissions and status
-  const isPublished = isCloud && cloudDocument?.published &&
-    config.showPermissionChips;
-  const isCollab = isCloud && cloudDocument?.collab &&
-    config.showPermissionChips;
-  const isPrivate = isCloud && cloudDocument?.private &&
-    config.showPermissionChips;
-  const isAuthor = isCloud ? cloudDocument?.author?.id === user?.id : true;
-  const isCoauthor = isCloud
-    ? cloudDocument?.coauthors?.some((u) => u.id === user?.id)
-    : false;
+    return {
+      localDocument,
+      cloudDocument,
+      isLocal,
+      isCloud,
+      isLocalOnly,
+      isCloudOnly,
+      isUploaded,
+      isUpToDate,
+    };
+  }, [userDocument]);
 
-  // Get the document to display (prefer local if available)
-  const document = isCloudOnly ? cloudDocument : localDocument;
+  // Memoize permission state calculations
+  const permissionState = useMemo(() => {
+    const { cloudDocument } = documentState;
+    const isPublished = documentState.isCloud && cloudDocument?.published &&
+      config.showPermissionChips;
+    const isCollab = documentState.isCloud && cloudDocument?.collab &&
+      config.showPermissionChips;
+    const isPrivate = documentState.isCloud && cloudDocument?.private &&
+      config.showPermissionChips;
+    const isAuthor = documentState.isCloud
+      ? cloudDocument?.author?.id === user?.id
+      : true;
+    const isCoauthor = documentState.isCloud
+      ? cloudDocument?.coauthors?.some((u) => u.id === user?.id)
+      : false;
 
-  // Navigation and metadata
-  const handle = cloudDocument?.handle ?? localDocument?.handle ?? document?.id;
+    return {
+      isPublished,
+      isCollab,
+      isPrivate,
+      isAuthor,
+      isCoauthor,
+    };
+  }, [documentState, user?.id, config.showPermissionChips]);
+
+  // Memoize the document to display
+  const document = useMemo(() => {
+    return documentState.isCloudOnly
+      ? documentState.cloudDocument
+      : documentState.localDocument;
+  }, [documentState]);
+
+  // Memoize navigation and metadata
+  const navigationData = useMemo(() => {
+    const handle = documentState.cloudDocument?.handle ??
+      documentState.localDocument?.handle ??
+      document?.id;
+    const author = documentState.cloudDocument?.author ?? user;
+    const backgroundImage = document?.background_image;
+
+    return { handle, author, backgroundImage };
+  }, [documentState, document, user]);
+
+  // Get URL from context
   const { getDocumentUrl } = useDocumentURL();
-  // Get the URL from context if document exists, or fallback to root
-  const href = document && userDocument ? getDocumentUrl(userDocument) : "/";
-  const author = cloudDocument?.author ?? user;
-  const backgroundImage = document?.background_image;
+  const href = useMemo(() => {
+    return document && userDocument ? getDocumentUrl(userDocument) : "/";
+  }, [document, userDocument, getDocumentUrl]);
 
-  // Sort order for display
-  const sortOrderValue = localDocument?.sort_order ??
-    cloudDocument?.sort_order ?? 0;
-  const hasSortOrder = sortOrderValue > 0 && config.showSortOrder;
+  // Memoize sort order calculations
+  const sortOrderData = useMemo(() => {
+    const sortOrderValue = documentState.localDocument?.sort_order ??
+      documentState.cloudDocument?.sort_order ?? 0;
+    const hasSortOrder = sortOrderValue > 0 && config.showSortOrder;
+
+    return { sortOrderValue, hasSortOrder };
+  }, [documentState, config.showSortOrder]);
 
   // Rendering helpers
   const isLoading = !userDocument;
 
-  // Top content with background image or folder icon
-  const topContent = (
+  // Memoize top content with background image or folder icon
+  const topContent = useMemo(() => (
     <Box
       sx={{
         width: "100%",
@@ -102,7 +147,9 @@ const DirectoryCard: React.FC<DirectoryCardProps> = memo(({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: backgroundImage ? `url(${backgroundImage})` : undefined,
+        background: navigationData.backgroundImage
+          ? `url(${navigationData.backgroundImage})`
+          : undefined,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
@@ -115,7 +162,7 @@ const DirectoryCard: React.FC<DirectoryCardProps> = memo(({
         // Remove the fixed minHeight - let it fill the parent container
       }}
     >
-      {!backgroundImage && (
+      {!navigationData.backgroundImage && (
         <Box
           sx={{
             width: "100%",
@@ -143,55 +190,77 @@ const DirectoryCard: React.FC<DirectoryCardProps> = memo(({
         </Box>
       )}
     </Box>
-  );
+  ), [navigationData.backgroundImage]);
 
-  // Chip content based on document status
-  const chipContent = isLoading ? renderSkeletonChips() : renderStatusChips({
-    isLocalOnly,
-    isUploaded,
-    isUpToDate,
-    isCloudOnly: isCloudOnly && (isAuthor || isCoauthor),
-    isPublished,
-    isCollab,
-    isPrivate,
-    hasSortOrder,
-    sortOrderValue,
-    author,
-    showAuthor: config.showAuthor,
-    statusChipCount: config.maxStatusChips,
-  });
+  // Memoize chip content based on document status
+  const chipContent = useMemo(() => {
+    if (isLoading) return renderSkeletonChips({});
 
-  // Action buttons
-  const actionContent = isLoading
-    ? (
-      <>
-        <IconButton
-          aria-label="Share Directory"
-          size="small"
-          disabled
-        >
-          <Share />
-        </IconButton>
-        <IconButton
-          aria-label="Directory Actions"
-          size="small"
-          disabled
-        >
-          <MoreVert />
-        </IconButton>
-      </>
-    )
-    : (
+    return renderStatusChips({
+      isLocalOnly: documentState.isLocalOnly,
+      isUploaded: documentState.isUploaded,
+      isUpToDate: documentState.isUpToDate,
+      isCloudOnly: documentState.isCloudOnly &&
+        (permissionState.isAuthor || permissionState.isCoauthor),
+      isPublished: permissionState.isPublished,
+      isCollab: permissionState.isCollab,
+      isPrivate: permissionState.isPrivate,
+      hasSortOrder: sortOrderData.hasSortOrder,
+      sortOrderValue: sortOrderData.sortOrderValue,
+      author: navigationData.author,
+      showAuthor: config.showAuthor,
+      statusChipCount: config.maxStatusChips,
+    });
+  }, [
+    isLoading,
+    documentState,
+    permissionState,
+    sortOrderData,
+    navigationData.author,
+    config.showAuthor,
+    config.maxStatusChips,
+  ]);
+
+  // Memoize action content for better performance
+  const actionContent = useMemo(() => {
+    if (isLoading) {
+      return (
+        <>
+          <IconButton
+            aria-label="Share Directory"
+            size="small"
+            disabled
+          >
+            <Share />
+          </IconButton>
+          <IconButton
+            aria-label="Directory Actions"
+            size="small"
+            disabled
+          >
+            <MoreVert />
+          </IconButton>
+        </>
+      );
+    }
+
+    return (
       <DocumentActionMenu
         userDocument={userDocument}
         user={user}
       />
     );
+  }, [isLoading, userDocument, user]);
 
-  // Title content
-  const titleContent = document
-    ? document.name
-    : <Skeleton variant="text" width={190} />;
+  // Memoize title content
+  const titleContent = useMemo(() => {
+    return document?.name || <Skeleton variant="text" width={190} />;
+  }, [document?.name]);
+
+  // Memoize aria label for better accessibility
+  const ariaLabel = useMemo(() => {
+    return document ? `Open ${document.name} directory` : "Loading directory";
+  }, [document]);
 
   return (
     <CardBase
@@ -203,10 +272,16 @@ const DirectoryCard: React.FC<DirectoryCardProps> = memo(({
       actionContent={actionContent}
       minHeight={config.minHeight}
       className="directory-card"
-      ariaLabel={document
-        ? `Open ${document.name} directory`
-        : "Loading directory"}
-      sx={sx}
+      ariaLabel={ariaLabel}
+      sx={{
+        borderWidth: 2,
+        borderColor: "divider",
+        // Move title down visually without changing layout
+        "& .MuiTypography-h6": {
+          transform: "translateY(12px)",
+        },
+        ...sx,
+      }}
       contentProps={{
         titlePadding: {
           top: cardTheme.spacing.titleMargin,

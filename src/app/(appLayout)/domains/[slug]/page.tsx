@@ -14,8 +14,6 @@ export async function generateMetadata({
   const { slug } = await params; // Must await params in Next.js dynamic routes
 
   try {
-    console.log("Generating metadata for domain:", slug);
-
     // Don't check authentication here - just get domain data for metadata
     const domain = await prisma.domain.findUnique({
       where: { slug },
@@ -54,16 +52,6 @@ export default async function DomainPage({
     // Let the client-side handle auth redirects
     const session = await getServerSession(authOptions);
 
-    // Add some debug logging
-    console.log("Domain page rendering with slug:", slug);
-    console.log(
-      "Session status:",
-      session ? "authenticated" : "unauthenticated",
-    );
-
-    // Fetch domain information regardless of session status
-    console.log("Fetching domain with slug:", slug);
-
     const domain = await prisma.domain.findUnique({
       where: { slug },
       include: {
@@ -98,8 +86,6 @@ export default async function DomainPage({
       );
     }
 
-    console.log("Domain found:", domain.name);
-
     // If we have a session, we can check ownership server-side
     // Otherwise, we'll let the client-side component handle it
     if (session?.user) {
@@ -125,9 +111,6 @@ export default async function DomainPage({
           </div>
         );
       }
-    } else {
-      console.log("No session, letting client handle authentication");
-      // We'll still render the document browser - client will handle auth
     }
 
     // Use the DocumentBrowser component, passing domainId and domainInfo

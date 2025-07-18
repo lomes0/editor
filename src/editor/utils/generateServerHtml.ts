@@ -8,7 +8,6 @@ import { JSDOM } from "jsdom";
 export const generateServerHtml = (data: SerializedEditorState) =>
   new Promise<string>((resolve, reject) => {
     try {
-      console.log("Generating server HTML...");
 
       // Initialize JSDOM with more features enabled
       const dom = new JSDOM(
@@ -64,7 +63,6 @@ export const generateServerHtml = (data: SerializedEditorState) =>
 
         editorState.read(() => {
           let html = $generateHtmlFromNodes(editor);
-          console.log("HTML generated successfully");
           resolve(html);
         });
       } finally {

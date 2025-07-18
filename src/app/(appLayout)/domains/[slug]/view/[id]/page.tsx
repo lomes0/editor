@@ -14,15 +14,12 @@ export async function generateMetadata({
   const { slug, id } = await params; // Must await params in Next.js dynamic routes
 
   try {
-    console.log("Generating metadata for domain document view:", slug, id);
-
     // Get domain data for metadata
     const domain = await prisma.domain.findUnique({
       where: { slug },
     });
 
     if (!domain) {
-      console.log("Domain not found for metadata:", slug);
       return {
         title: "Domain Not Found",
       };
@@ -48,6 +45,37 @@ export async function generateMetadata({
   }
 }
 
+// Helper function to check if a document belongs to a domain
+async function belongsToDomain(
+  documentId: string,
+  domainId: string,
+): Promise<boolean> {
+  // Get the document with its parent chain
+  let currentDocumentId: string | null = documentId;
+
+  while (currentDocumentId) {
+    const doc: { domainId: string | null; parentId: string | null } | null =
+      await prisma.document.findUnique({
+        where: { id: currentDocumentId },
+        select: { domainId: true, parentId: true },
+      });
+
+    if (!doc) {
+      return false;
+    }
+
+    // If this document has the domainId, it belongs to the domain
+    if (doc.domainId === domainId) {
+      return true;
+    }
+
+    // Move to parent document
+    currentDocumentId = doc.parentId;
+  }
+
+  return false;
+}
+
 export default async function DomainDocumentViewPage({
   params,
 }: {
@@ -68,23 +96,55 @@ export default async function DomainDocumentViewPage({
       return notFound();
     }
 
-    // Check if user is not the domain owner (domains don't have a private flag, only documents do)
-    if (domain.userId !== session?.user?.id) {
-      // In the future, you might want to add domain.private check if that field is added to the Domain model
+    // First check if document exists at all
+    const documentExists = await prisma.document.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        domainId: true,
+        type: true,
+        authorId: true,
+        name: true, // Get the name for display purposes
+      },
+    });
+
+    if (!documentExists) {
       return notFound();
     }
 
-    // Check if document exists and belongs to this domain
-    const document = await prisma.document.findFirst({
-      where: {
-        id,
-        domainId: domain.id,
-        type: "DOCUMENT",
+    // Check if document belongs to this domain by checking its ancestry
+    const documentBelongsToDomain = await belongsToDomain(id, domain.id);
+
+    if (!documentBelongsToDomain || documentExists.type !== "DOCUMENT") {
+      return notFound();
+    }
+
+    // Get the full document data now that we know it belongs to the domain
+    const document = await prisma.document.findUnique({
+      where: { id },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
       },
     });
 
     if (!document) {
       return notFound();
+    }
+
+    // Check permissions: If document is private, only the domain owner or document author can view it
+    if (document.private) {
+      const isAuthor = session?.user?.id === document.author.id;
+      const isDomainOwner = domain.userId === session?.user?.id;
+
+      if (!isAuthor && !isDomainOwner) {
+        return notFound();
+      }
     }
 
     // Re-use the existing ViewPage component but in the domain context

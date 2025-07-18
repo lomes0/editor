@@ -63,7 +63,7 @@ export default function FetchDomains(
 
   return (
     <FormControl fullWidth margin="normal" size="small">
-      <InputLabel id="domain-select-label">Domain</InputLabel>
+      <InputLabel id="domain-select-label" shrink={true}>Domain</InputLabel>
       <Select
         labelId="domain-select-label"
         value={value}
@@ -71,6 +71,7 @@ export default function FetchDomains(
         onChange={handleChange}
         disabled={loading}
         displayEmpty
+        notched={true}
         renderValue={(selected) => {
           if (loading) return <CircularProgress size={20} />;
           if (!selected) return "Select a domain (optional)";

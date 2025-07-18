@@ -8,54 +8,12 @@ import {
   AppBar,
   Avatar,
   Box,
-  Fab,
   IconButton,
   Link,
   Toolbar,
   Typography,
-  useScrollTrigger,
-  Zoom,
 } from "@mui/material";
-import { Info, KeyboardArrowUp } from "@mui/icons-material";
-
-function ScrollTop() {
-  const trigger = useScrollTrigger({ disableHysteresis: true });
-
-  const handleClick = () => {
-    const anchor = document.querySelector("#back-to-top-anchor");
-    if (anchor) {
-      anchor.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }
-  };
-
-  return (
-    <Zoom in={trigger}>
-      <Fab
-        color="secondary"
-        size="small"
-        aria-label="scroll back to top"
-        onClick={handleClick}
-        sx={{
-          position: "fixed",
-          bottom: 16,
-          right: 16,
-          displayPrint: "none",
-          transition: "bottom 0.3s",
-          "@media (max-width: 496px)": {
-            "&:has(~.editor-container .editor-toolbar #text-format-toggles)": {
-              bottom: 48,
-            },
-          },
-        }}
-      >
-        <KeyboardArrowUp />
-      </Fab>
-    </Zoom>
-  );
-}
+import { Info } from "@mui/icons-material";
 
 const TopAppBar: React.FC = () => {
   const dispatch = useDispatch();
@@ -147,7 +105,6 @@ const TopAppBar: React.FC = () => {
         </Toolbar>
       </AppBar>
       <Toolbar id="back-to-top-anchor" sx={{ displayPrint: "none" }} />
-      <ScrollTop />
     </>
   );
 };
