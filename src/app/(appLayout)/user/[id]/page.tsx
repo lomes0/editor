@@ -109,7 +109,7 @@ export default async function Page(
         <UserDocumentsWrapper
           id={params.id}
           page={searchParams.page || "1"}
-          sortKey={searchParams.sortKey || "updatedAt"}
+          sortKey={searchParams.sortKey || "createdAt"}
           sortDirection={searchParams.sortDirection || "desc"}
         />
       </Suspense>
