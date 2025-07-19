@@ -100,6 +100,7 @@
   overflow-x: auto;
   position: relative;
   tab-size: 2;
+  white-space: pre;
 }
 
 .LexicalTheme__code:before {
@@ -131,6 +132,12 @@
   left: 0;
   min-width: 25px;
   text-align: end;
+}
+
+.LexicalTheme__code > br {
+  display: block;
+  content: "";
+  height: 20px;
 }
 
 .LexicalTheme__code > br + br {
@@ -757,6 +764,7 @@ iframe {
 [theme="light"] .LexicalTheme__code {
   background-color: rgb(240, 242, 245);
   color: inherit;
+  white-space: pre;
 }
 
 .LexicalTheme__code:before,
@@ -812,6 +820,7 @@ iframe {
 [theme="dark"] .LexicalTheme__code {
   background-color: rgb(30, 30, 30);
   color: #9cdcfe;
+  white-space: pre;
 }
 
 [theme="dark"] .LexicalTheme__code:before {
@@ -865,6 +874,7 @@ iframe {
   .LexicalTheme__code {
     background-color: rgb(30, 30, 30);
     color: #9cdcfe;
+    white-space: pre;
   }
 
   .LexicalTheme__code:before {

@@ -278,7 +278,7 @@ const DirectoryCard: React.FC<DirectoryCardProps> = memo(({
         borderColor: "divider",
         // Move title down visually without changing layout
         "& .MuiTypography-h6": {
-          transform: "translateY(12px)",
+          transform: "translateY(11px)",
         },
         ...sx,
       }}
